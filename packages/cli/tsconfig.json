@@ -2,7 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    // @polkadot/* typings are not compatible with exactOptionalPropertyTypes.
+    "exactOptionalPropertyTypes": false
   },
   "include": ["src"]
 }
