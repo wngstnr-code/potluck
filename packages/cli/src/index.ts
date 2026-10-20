@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
 import { runBuild } from "./build.js";
+import { reportsOk, runVerify } from "./verify.js";
 
 const USAGE = `potluck <command> [options]
 
@@ -13,6 +14,13 @@ Commands:
     --out <dir>         Output root (default: builds)
     --concurrency <n>   In-flight requests when scanning per block (default: 64)
     --segment <n>       Blocks per processing segment (default: 2000)
+
+  verify <build-dir>  Check a build's chunks: integrity (L1), optional re-index and reconciliation (L3)
+    --endpoint <wss>    Source chain RPC (default: known endpoint for the spec's chain)
+    --chunks <i,j,..>   Only these chunk indexes (default: all)
+    --rebuild           Re-index each chunk range from the source chain and compare raw hashes
+    --no-reconcile      Skip reconciliation against source-chain state
+    --concurrency <n>   In-flight requests (default: 32)
 `;
 
 async function main(argv: string[]): Promise<void> {
@@ -28,6 +36,9 @@ async function main(argv: string[]): Promise<void> {
       out: { type: "string" },
       concurrency: { type: "string" },
       segment: { type: "string" },
+      chunks: { type: "string" },
+      rebuild: { type: "boolean" },
+      "no-reconcile": { type: "boolean" },
     },
   });
   const int = (value: string | undefined) =>
@@ -49,6 +60,23 @@ async function main(argv: string[]): Promise<void> {
         segment: int(values.segment) ?? 2000,
         log,
       });
+      return;
+    }
+    case "verify": {
+      const dir = positionals[0];
+      if (!dir) throw new Error("verify: missing <build-dir>");
+      const reports = await runVerify({
+        dir,
+        endpoint: values.endpoint,
+        chunks: values.chunks?.split(",").map((n) => Number.parseInt(n, 10)),
+        rebuild: values.rebuild ?? false,
+        reconcile: !(values["no-reconcile"] ?? false),
+        concurrency: int(values.concurrency) ?? 32,
+        log,
+      });
+      const ok = reportsOk(reports);
+      log(ok ? "VERIFIED" : "VERIFICATION FAILED");
+      if (!ok) process.exitCode = 2;
       return;
     }
     default:
