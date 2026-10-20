@@ -16,7 +16,7 @@ _Last updated: 2026-10-20 (M0 done; no-tPOT spikes done)._
 | Product decision | ✅ Potluck + Wasiat-lite (option C) |
 | Concept & architecture | ✅ `POTLUCK.md`, `ARCHITECTURE.md` |
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
-| Git repository | ✅ Local repo on `main` with focused commits (M0). ❌ Public GitHub repo not created yet (user action) |
+| Git repository | ✅ Public: https://github.com/wngstnr-code/potluck (`main`); sole contributor `wngstnr-code` |
 | Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks S2, contract deploy, all testnet txs) |
 | Code | 🟡 Workspace + empty `spec`/`core`/`client`/`cli` packages build, typecheck, test and lint |
 | Spikes | ✅ S1, S4, S6, S7 done (results in `spikes/results/`). 🟡 S5 partial. ⏳ S2, S3, S8 need tPOT |
@@ -26,7 +26,7 @@ _Last updated: 2026-10-20 (M0 done; no-tPOT spikes done)._
 
 **Blockers (user actions):**
 1. **Create an SS58 dev account and request tPOT.** Steps in §3.2. Needed before Oct 24 check-in, which requires a contract address + tx hash.
-2. **Create a public GitHub repo** (e.g. `wngstnr-code/potluck`) when ready. Claude must not create or push it unless asked.
+2. ~~Create a public GitHub repo~~ Done 2026-10-20: https://github.com/wngstnr-code/potluck. Claude pushes only when the user asks.
 3. Confirm the DoraHacks registration for the Hacker House is complete. A screenshot is needed for the faucet ticket.
 
 **Decided:** publish scope = progressive backfill (newest ~1.5 M blocks first, older ranges later; `ARCHITECTURE.md` §15 decision 5).
