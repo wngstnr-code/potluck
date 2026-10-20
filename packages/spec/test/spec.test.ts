@@ -1,6 +1,13 @@
 import { blake2AsHex } from "@polkadot/util-crypto";
 import { describe, expect, it } from "vitest";
-import { canonicalJson, parseSpec, type Spec, specHash, validateSpec } from "../src/index.js";
+import {
+  canonicalJson,
+  parseLogSignature,
+  parseSpec,
+  type Spec,
+  specHash,
+  validateSpec,
+} from "../src/index.js";
 
 function baseSpec(): Spec {
   return {
@@ -143,5 +150,75 @@ describe("validateSpec", () => {
 
   it("parseSpec throws with every error", () => {
     expect(() => parseSpec({ ...baseSpec(), columns: ["block"] })).toThrow(/invalid spec/);
+  });
+});
+
+describe("revive log matches", () => {
+  const transfer = "Transfer(address indexed from, address indexed to, uint256 value)";
+  const withLog = (log: string, row: Record<string, string>, extra: object = {}): Spec => ({
+    ...baseSpec(),
+    columns: ["kind", "asset", "from", "to", "amount"],
+    match: [{ log, row, ...extra }],
+  });
+
+  it("accepts a named Solidity event with $contract and parameter references", () => {
+    const spec = withLog(transfer, {
+      kind: "Erc20Transfer",
+      asset: "$contract",
+      from: "$from",
+      to: "$to",
+      amount: "$value",
+    });
+    expect(validateSpec(spec).ok).toBe(true);
+    expect(
+      validateSpec(withLog(transfer, { kind: "x" }, { contracts: [`0x${"ab".repeat(20)}`] })).ok,
+    ).toBe(true);
+  });
+
+  it("parses selectors and indexed counts", () => {
+    const erc20 = parseLogSignature(transfer);
+    const erc721 = parseLogSignature(
+      "Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+    );
+    if (typeof erc20 === "string" || typeof erc721 === "string") throw new Error("parse failed");
+    expect(erc20.selector).toBe(
+      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+    );
+    expect(erc721.selector).toBe(erc20.selector);
+    expect([erc20.indexed, erc721.indexed]).toEqual([2, 3]);
+  });
+
+  it("rejects invalid signatures, unnamed or reserved parameters and unknown references", () => {
+    expect(errorsOf(withLog("Transfer(address", { kind: "x" }))[0]).toMatch(
+      /invalid event signature/,
+    );
+    expect(errorsOf(withLog("Transfer(address indexed, uint256)", { kind: "x" }))).toContain(
+      "match[0].log: every event parameter needs a name",
+    );
+    expect(errorsOf(withLog("Moved(address contract)", { kind: "x" }))).toContain(
+      'match[0].log: "contract" is reserved for the emitting contract',
+    );
+    expect(errorsOf(withLog(transfer, { amount: "$amount" }))).toContain(
+      `match[0].row: "$amount" is not a parameter of ${transfer}`,
+    );
+  });
+
+  it("rejects duplicate log matches but allows ERC-721 next to ERC-20", () => {
+    const dup = withLog(transfer, { kind: "a" });
+    dup.match.push({ log: transfer, row: { kind: "b" } });
+    expect(errorsOf(dup)).toContain(`match[1]: duplicate match for log ${transfer}`);
+    const both = withLog(transfer, { kind: "a" });
+    both.match.push({
+      log: "Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+      row: { kind: "b" },
+    });
+    expect(validateSpec(both).ok).toBe(true);
+  });
+
+  it("validates the reconcile `when` column", () => {
+    const spec = baseSpec();
+    if (spec.reconcile.type !== "balance-delta") throw new Error("unreachable");
+    spec.reconcile.when = { column: "asset", equals: "native" };
+    expect(errorsOf(spec)).toContain('reconcile.when: "asset" is not a declared column');
   });
 });

@@ -25,7 +25,9 @@ describe("eventsToRows with the reference balance-history spec on real data", ()
     const matched = events.filter(
       (e) =>
         e.pallet === "Balances" &&
-        balanceSpec.match.some((m) => m.event === e.event && m.pallet === e.pallet),
+        balanceSpec.match.some(
+          (m) => "pallet" in m && m.event === e.event && m.pallet === e.pallet,
+        ),
     );
     const rows = eventsToRows(compiled, events);
     expect(rows.length).toBe(matched.length);

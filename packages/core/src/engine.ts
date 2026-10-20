@@ -1,6 +1,6 @@
 import { Option } from "@polkadot/types";
 import type { Codec } from "@polkadot/types/types";
-import { canonicalJson, type Spec, type SubstrateEventMatch } from "@potluck/spec";
+import { canonicalJson, isLogMatch, type Spec, type SubstrateEventMatch } from "@potluck/spec";
 import type { DecodedEvent, EventField } from "./events.js";
 
 /** Cell values: implicit `block`/`eventIndex` are numbers; every spec column is a string or null. */
@@ -24,7 +24,8 @@ export interface CompiledSpec {
 const matchKey = (pallet: string, event: string) => `${pallet.toLowerCase()}.${event}`;
 
 export function compileSpec(spec: Spec): CompiledSpec {
-  return { spec, matches: new Map(spec.match.map((m) => [matchKey(m.pallet, m.event), m])) };
+  const substrate = spec.match.filter((m): m is SubstrateEventMatch => !isLogMatch(m));
+  return { spec, matches: new Map(substrate.map((m) => [matchKey(m.pallet, m.event), m])) };
 }
 
 /**

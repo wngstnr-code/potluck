@@ -6,12 +6,14 @@ export const IMPLICIT_COLUMNS = ["block", "eventIndex"] as const;
 const NAME = /^[a-z0-9]+(?:[.-][a-z0-9]+)*$/;
 const IDENT = /^[A-Za-z][A-Za-z0-9]*$/;
 const COLUMN = /^[a-z][A-Za-z0-9]*$/;
-const FIELD_REF = /^\$[a-z_][a-z0-9_]*$/;
+const FIELD_REF = /^\$[A-Za-z_][A-Za-z0-9_]*$/;
 const HEX32 = /^0x[0-9a-f]{64}$/;
+const H160 = /^0x[0-9a-f]{40}$/;
 
 /**
- * A row value is either a reference to a decoded event field (`"$field_name"`, metadata field
- * names are snake_case) or a literal string.
+ * A row value is either a reference (`"$name"`) or a literal string. For pallet events the name is
+ * a decoded event field (metadata field names are snake_case); for Revive logs it is an event
+ * parameter name or `contract` (the emitting contract's H160).
  */
 const rowValue = z.string().min(1);
 
@@ -31,6 +33,21 @@ const substrateEventMatch = z
   })
   .strict();
 
+/**
+ * An EVM log emitted by a pallet-revive contract. On chain it is a `Revive.ContractEmitted`
+ * event inside System.Events, so it is decoded by the same pipeline as pallet events.
+ */
+const reviveLogMatch = z
+  .object({
+    /** Solidity event signature with parameter names, e.g.
+     *  "Transfer(address indexed from, address indexed to, uint256 value)". */
+    log: z.string().min(3),
+    /** Restrict to these emitting contracts (lower-case H160); omit for any contract. */
+    contracts: z.array(z.string().regex(H160)).min(1).optional(),
+    row: z.record(z.string().regex(COLUMN), rowValue),
+  })
+  .strict();
+
 const balanceDelta = z
   .object({
     type: z.literal("balance-delta"),
@@ -44,6 +61,11 @@ const balanceDelta = z
     credit: z.string().regex(COLUMN),
     /** Column holding the amount (decimal string). */
     amount: z.string().regex(COLUMN),
+    /** Only rows whose `column` equals `equals` take part (e.g. asset == "native"). */
+    when: z
+      .object({ column: z.string().regex(COLUMN), equals: z.string() })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -66,7 +88,7 @@ export const specSchema = z
     columns: z.array(z.string().regex(COLUMN)).min(1),
     /** Columns holding account ids; used for per-account queries and chunk bloom filters. */
     accounts: z.array(z.string().regex(COLUMN)),
-    match: z.array(substrateEventMatch).min(1),
+    match: z.array(z.union([substrateEventMatch, reviveLogMatch])).min(1),
     reconcile: z.discriminatedUnion("type", [balanceDelta, noReconcile]),
     chunk: z
       .object({
@@ -84,6 +106,12 @@ export const specSchema = z
 
 export type Spec = z.infer<typeof specSchema>;
 export type SubstrateEventMatch = z.infer<typeof substrateEventMatch>;
+export type ReviveLogMatch = z.infer<typeof reviveLogMatch>;
+export type Match = SubstrateEventMatch | ReviveLogMatch;
+
+export function isLogMatch(match: Match): match is ReviveLogMatch {
+  return "log" in match;
+}
 export type ReconcileRule = Spec["reconcile"];
 
 export { FIELD_REF };
