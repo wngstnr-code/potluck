@@ -69,8 +69,9 @@ export interface BuildRuntimeMapOptions {
 }
 
 /**
- * Builds the post-state RuntimeMap for [fromBlock, toBlock] (fromBlock − 1 is included so the
- * executing version of `fromBlock` is known). Every boundary between samples with different
+ * Builds the post-state RuntimeMap for [fromBlock, toBlock]. It starts at fromBlock − 2 so the
+ * executing version is known for every block from fromBlock − 1 on: events need it from
+ * fromBlock, and window reconciliation reads storage at fromBlock − 1. Every boundary between samples with different
  * versions is located exactly by binary search; multiple upgrades between two samples are found
  * by re-scanning the right half.
  */
@@ -80,7 +81,7 @@ export async function buildRuntimeMap(
   toBlock: number,
   options: BuildRuntimeMapOptions,
 ): Promise<RuntimeMap> {
-  const start = Math.max(0, fromBlock - 1);
+  const start = Math.max(0, fromBlock - 2);
   const samples = Math.max(2, options.samples ?? 64);
   const versionAt = async (block: number) =>
     (await getRuntimeVersion(client, await options.hashOf(block))).specVersion;

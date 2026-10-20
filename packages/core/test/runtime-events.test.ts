@@ -123,7 +123,8 @@ describe("buildRuntimeMap", () => {
   it("returns a single segment when there is no upgrade", async () => {
     const client = upgradingChain([], 2005000);
     const map = await buildRuntimeMap(client, 22_000_000, 22_050_000, { hashOf });
-    expect(map.segments).toEqual([{ fromBlock: 21_999_999, specVersion: 2005000 }]);
+    expect(map.segments).toEqual([{ fromBlock: 21_999_998, specVersion: 2005000 }]);
+    expect(map.executingVersion(21_999_999)).toBe(2005000);
   });
 });
 
