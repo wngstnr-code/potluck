@@ -13,35 +13,64 @@ export function balanceRule(spec: Spec): BalanceDeltaRule {
   return spec.reconcile;
 }
 
-export interface Deltas {
-  /** Net change per account implied by the rows. */
-  deltas: Map<string, bigint>;
-  /** Accounts touched by an absolute row (e.g. BalanceSet): not reconcilable by deltas. */
-  absolute: Set<string>;
+/** What the rows imply about one account's value at the end of the window. */
+export interface Expectation {
+  /** Value at the end of `resetBlock` when the account was reset (e.g. reaped → 0). */
+  reset?: { block: number; value: bigint };
+  /** Sum of deltas after the reset block, or over the whole window without a reset. */
+  delta: bigint;
 }
 
-/** Sums the debit/credit/amount columns of the rows (those passing `when`) into per-account deltas. */
+export interface Deltas {
+  expectations: Map<string, Expectation>;
+  /** Accounts touched by an opaque row (e.g. BalanceSet): not reconcilable. */
+  opaque: Set<string>;
+}
+
+/**
+ * Folds the rows (those passing the rule's `when` filter) into per-account expectations:
+ * expected(end) = (last reset value, or the value before the window) + deltas after that reset.
+ * A reset applies at the end of its block, so the account's other rows in that block are part of
+ * it (System.KilledAccount is emitted before the Transfer that empties the account).
+ */
 export function balanceDeltas(spec: Spec, rows: readonly IndexedRow[]): Deltas {
   const rule = balanceRule(spec);
-  const deltas = new Map<string, bigint>();
-  const absolute = new Set<string>();
-  const bump = (account: string | null | undefined, value: bigint) => {
-    if (account) deltas.set(account, (deltas.get(account) ?? 0n) + value);
-  };
-  for (const row of rows) {
-    if (rule.when && row.cells[rule.when.column] !== rule.when.equals) continue;
-    if (row.absolute) {
+  const when = rule.when;
+  const relevant = when ? rows.filter((r) => r.cells[when.column] === when.equals) : rows;
+  const opaque = new Set<string>();
+  const lastReset = new Map<string, { block: number; value: bigint }>();
+  for (const row of relevant) {
+    if (row.effect === "opaque") {
       for (const column of spec.accounts) {
         const account = row.cells[column];
-        if (account) absolute.add(account);
+        if (account) opaque.add(account);
       }
-      continue;
+    } else if (row.effect === "reset") {
+      const account = row.cells[rule.credit];
+      if (account) {
+        lastReset.set(account, { block: row.block, value: BigInt(row.cells[rule.amount] ?? "0") });
+      }
     }
-    const amount = BigInt(row.cells[rule.amount] ?? "0");
-    bump(row.cells[rule.debit], -amount);
-    bump(row.cells[rule.credit], amount);
   }
-  return { deltas, absolute };
+  const expectations = new Map<string, Expectation>();
+  for (const [account, reset] of lastReset) expectations.set(account, { reset, delta: 0n });
+  const bump = (account: string | null | undefined, block: number, value: bigint) => {
+    if (!account) return;
+    let expectation = expectations.get(account);
+    if (!expectation) {
+      expectation = { delta: 0n };
+      expectations.set(account, expectation);
+    }
+    if (expectation.reset && block <= expectation.reset.block) return;
+    expectation.delta += value;
+  };
+  for (const row of relevant) {
+    if (row.effect !== "delta") continue;
+    const amount = BigInt(row.cells[rule.amount] ?? "0");
+    bump(row.cells[rule.debit], row.block, -amount);
+    bump(row.cells[rule.credit], row.block, amount);
+  }
+  return { expectations, opaque };
 }
 
 /** Storage key of a single-key map entry, using the hasher declared in the runtime metadata. */
@@ -140,14 +169,15 @@ export interface ReconcileOptions {
   hashOf: (block: number) => Promise<string>;
   /** Runtime that executed `block`. */
   runtimeFor: (block: number) => Promise<DecodingRuntime>;
-  /** Accounts to check; defaults to every non-absolute account touched by the rows. */
+  /** Accounts to check; defaults to every non-opaque account touched by the rows. */
   accounts?: readonly string[];
   concurrency?: number;
 }
 
 /**
- * Windowed reconciliation (verification level L3): for each account,
- * value(toBlock) − value(fromBlock − 1) must equal the sum of its row deltas in [fromBlock, toBlock].
+ * Windowed reconciliation (verification level L3): for each account, value(toBlock) must equal
+ * value(fromBlock − 1) plus its row deltas in [fromBlock, toBlock] — or, after a reset, the reset
+ * value plus the deltas of later blocks.
  * An omitted, altered or invented balance row makes the affected account fail.
  * Accounts not touched by any row must have an unchanged value (delta 0).
  */
@@ -156,8 +186,8 @@ export async function reconcileAccounts(
 ): Promise<AccountReconciliation[]> {
   const { client, spec, rows, fromBlock, toBlock } = options;
   const rule = balanceRule(spec);
-  const { deltas, absolute } = balanceDeltas(spec, rows);
-  const accounts = (options.accounts ?? [...deltas.keys()]).filter((a) => !absolute.has(a));
+  const { expectations, opaque } = balanceDeltas(spec, rows);
+  const accounts = (options.accounts ?? [...expectations.keys()]).filter((a) => !opaque.has(a));
   const [beforeHash, afterHash] = await Promise.all([
     options.hashOf(fromBlock - 1),
     options.hashOf(toBlock),
@@ -171,15 +201,15 @@ export async function reconcileAccounts(
       readSummedBalance(client, beforeRuntime, rule, account, beforeHash),
       readSummedBalance(client, afterRuntime, rule, account, afterHash),
     ]);
-    const expectedDelta = deltas.get(account) ?? 0n;
-    const actualDelta = after - before;
+    const expectation = expectations.get(account) ?? { delta: 0n };
+    const expectedAfter = (expectation.reset?.value ?? before) + expectation.delta;
     return {
       account,
       before,
       after,
-      expectedDelta,
-      actualDelta,
-      ok: expectedDelta === actualDelta,
+      expectedDelta: expectedAfter - before,
+      actualDelta: after - before,
+      ok: expectedAfter === after,
     };
   });
 }

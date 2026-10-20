@@ -26,6 +26,7 @@ export {
   eventsToRows,
   type IndexedRow,
   normalizeField,
+  type RowEffect,
 } from "./engine.js";
 export {
   type DecodedEvent,
@@ -40,6 +41,7 @@ export {
   balanceDeltas,
   balanceRule,
   type Deltas,
+  type Expectation,
   type ReconcileOptions,
   readSummedBalance,
   reconcileAccounts,

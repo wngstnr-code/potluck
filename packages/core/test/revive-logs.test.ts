@@ -87,15 +87,15 @@ describe("unified history on real Portaldot V3 blocks", () => {
   it("reconciliation deltas ignore ERC-20 rows (when asset == native)", () => {
     const block = portaldotV3.blocks[0] as (typeof portaldotV3.blocks)[number];
     const rows = rowsOf(spec, block);
-    const { deltas } = balanceDeltas(spec, rows);
+    const { expectations } = balanceDeltas(spec, rows);
     for (const row of rows.filter((r) => r.cells.kind === "Erc20Transfer")) {
-      if (row.cells.to) expect(deltas.has(row.cells.to)).toBe(false);
+      if (row.cells.to) expect(expectations.has(row.cells.to)).toBe(false);
     }
     const nativeOnly = balanceDeltas(
       spec,
       rows.filter((r) => r.cells.asset === "native"),
-    ).deltas;
-    expect(deltas).toEqual(nativeOnly);
+    ).expectations;
+    expect(expectations).toEqual(nativeOnly);
   });
 
   it("respects the contracts filter and the indexed-topic count", () => {

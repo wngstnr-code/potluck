@@ -96,16 +96,18 @@ describe("eventsToRows edge cases", () => {
     for (const row of rows) {
       expect(row.cells.kind).toBe("fee");
       expect(row.cells.note).toBeNull();
-      expect(row.absolute).toBe(false);
+      expect(row.effect).toBe("delta");
     }
   });
 
-  it("flags rows from absolute matches", () => {
+  it("carries the match effect onto rows", () => {
     const spec: Spec = {
       ...balanceSpec,
-      match: [{ pallet: "Balances", event: "Withdraw", row: { from: "$who" }, absolute: true }],
+      match: [{ pallet: "Balances", event: "Withdraw", row: { from: "$who" }, effect: "opaque" }],
     };
-    expect(eventsToRows(compileSpec(spec), recentEvents()).every((r) => r.absolute)).toBe(true);
+    expect(
+      eventsToRows(compileSpec(spec), recentEvents()).every((r) => r.effect === "opaque"),
+    ).toBe(true);
   });
 
   it("throws when a referenced field does not exist in the runtime", () => {

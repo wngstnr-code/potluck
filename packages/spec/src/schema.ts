@@ -26,10 +26,14 @@ const substrateEventMatch = z
     /** Column → value. Columns not set here are null for rows from this match. */
     row: z.record(z.string().regex(COLUMN), rowValue),
     /**
-     * Marks the row as setting an absolute value (e.g. Balances.BalanceSet) instead of a delta.
-     * Balance reconciliation treats such accounts as resynchronized at that block.
+     * How the row affects the reconciled value (default: a delta, debit/credit by `amount`).
+     * - "reset": the credit account's value is exactly `amount` at the END of the row's block
+     *   (e.g. System.KilledAccount → "0": a reaped account holds nothing, even if a hold vanished
+     *   without a Balances event). Same-block rows of that account are part of the reset.
+     * - "opaque": the change cannot be expressed (e.g. Balances.BalanceSet sets `free` but not
+     *   `reserved`); accounts touched by it are excluded from reconciliation.
      */
-    absolute: z.boolean().optional(),
+    effect: z.enum(["reset", "opaque"]).optional(),
   })
   .strict();
 

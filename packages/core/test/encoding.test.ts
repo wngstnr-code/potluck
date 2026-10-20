@@ -36,7 +36,7 @@ const row = (overrides: Partial<IndexedRow> = {}): IndexedRow => ({
   block: 10,
   eventIndex: 2,
   cells: { kind: "Transfer", from: `0x${"aa".repeat(32)}`, to: null, amount: "5" },
-  absolute: false,
+  effect: "delta",
   ...overrides,
 });
 
@@ -45,7 +45,8 @@ describe("canonical NDJSON", () => {
     expect(encodeRow(spec, row())).toBe(
       `{"block":10,"eventIndex":2,"kind":"Transfer","from":"0x${"aa".repeat(32)}","to":null,"amount":"5"}`,
     );
-    expect(encodeRow(spec, row({ absolute: true }))).toMatch(/,"absolute":true}$/);
+    expect(encodeRow(spec, row({ effect: "reset" }))).toMatch(/,"effect":"reset"}$/);
+    expect(encodeRow(spec, row({ effect: "opaque" }))).toMatch(/,"effect":"opaque"}$/);
   });
 
   it("round-trips real rows byte-for-byte", () => {

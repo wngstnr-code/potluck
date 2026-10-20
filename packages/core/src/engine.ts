@@ -13,13 +13,15 @@ import type { DecodedEvent, EventField } from "./events.js";
 /** Cell values: implicit `block`/`eventIndex` are numbers; every spec column is a string or null. */
 export type Cell = string | null;
 
+export type RowEffect = "delta" | "reset" | "opaque";
+
 export interface IndexedRow {
   block: number;
   eventIndex: number;
   /** Spec column → value; every declared column is present. */
   cells: Record<string, Cell>;
-  /** True for rows from an `absolute` match (e.g. Balances.BalanceSet). */
-  absolute: boolean;
+  /** Reconciliation effect: a delta (default), a reset at block end, or opaque. */
+  effect: RowEffect;
 }
 
 interface CompiledLogMatch {
@@ -166,7 +168,7 @@ export function eventsToRows(
         for (const [column, value] of Object.entries(log.match.row)) {
           cells[column] = value.startsWith("$") ? (log.values[value.slice(1)] ?? null) : value;
         }
-        rows.push({ block: event.block, eventIndex: event.eventIndex, cells, absolute: false });
+        rows.push({ block: event.block, eventIndex: event.eventIndex, cells, effect: "delta" });
         continue;
       }
     }
@@ -192,7 +194,7 @@ export function eventsToRows(
       block: event.block,
       eventIndex: event.eventIndex,
       cells,
-      absolute: match.absolute === true,
+      effect: match.effect ?? "delta",
     });
   }
   return rows.sort((a, b) => a.block - b.block || a.eventIndex - b.eventIndex);

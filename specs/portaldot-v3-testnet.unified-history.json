@@ -154,7 +154,18 @@
         "to": "$who",
         "amount": "$free"
       },
-      "absolute": true
+      "effect": "opaque"
+    },
+    {
+      "pallet": "System",
+      "event": "KilledAccount",
+      "row": {
+        "kind": "KilledAccount",
+        "asset": "native",
+        "to": "$account",
+        "amount": "0"
+      },
+      "effect": "reset"
     },
     {
       "log": "Transfer(address indexed from, address indexed to, uint256 value)",

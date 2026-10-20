@@ -140,7 +140,17 @@
         "to": "$who",
         "amount": "$free"
       },
-      "absolute": true
+      "effect": "opaque"
+    },
+    {
+      "pallet": "System",
+      "event": "KilledAccount",
+      "row": {
+        "kind": "KilledAccount",
+        "to": "$account",
+        "amount": "0"
+      },
+      "effect": "reset"
     }
   ],
   "reconcile": {

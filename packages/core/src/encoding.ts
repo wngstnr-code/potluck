@@ -9,8 +9,8 @@ const decoder = new TextDecoder("utf-8", { fatal: true });
 
 /**
  * Canonical row line: a JSON object with keys in this exact order —
- * `block`, `eventIndex`, the spec columns in declared order, then `"absolute":true` only for
- * absolute rows — no whitespace. Two honest publishers therefore produce identical bytes.
+ * `block`, `eventIndex`, the spec columns in declared order, then `"effect":"reset"|"opaque"` only
+ * for non-delta rows — no whitespace. Two honest publishers therefore produce identical bytes.
  */
 export function encodeRow(spec: Spec, row: IndexedRow): string {
   let line = `{"block":${row.block},"eventIndex":${row.eventIndex}`;
@@ -18,7 +18,7 @@ export function encodeRow(spec: Spec, row: IndexedRow): string {
     const cell = row.cells[column];
     line += `,${JSON.stringify(column)}:${cell === null || cell === undefined ? "null" : JSON.stringify(cell)}`;
   }
-  if (row.absolute) line += `,"absolute":true`;
+  if (row.effect !== "delta") line += `,"effect":${JSON.stringify(row.effect)}`;
   return `${line}}`;
 }
 
@@ -64,7 +64,7 @@ export function decodeNdjson(spec: Spec, bytes: Uint8Array): IndexedRow[] {
       block: parsed.block as number,
       eventIndex: parsed.eventIndex as number,
       cells,
-      absolute: parsed.absolute === true,
+      effect: parsed.effect === "reset" || parsed.effect === "opaque" ? parsed.effect : "delta",
     };
     if (encodeRow(spec, row) !== line) throw new Error(`line ${i + 1}: not canonical`);
     rows.push(row);
