@@ -41,6 +41,19 @@ export {
   scanRawEvents,
 } from "./events.js";
 export {
+  type BuildManifestInput,
+  buildManifest,
+  MANIFEST_ENCODING,
+  type Manifest,
+  type ManifestChunk,
+  manifestBytes,
+  manifestChunk,
+  manifestDigest,
+  manifestProblems,
+  manifestSchema,
+  parseManifest,
+} from "./manifest.js";
+export {
   type AccountReconciliation,
   type BalanceDeltaRule,
   balanceDeltas,
