@@ -15,7 +15,12 @@ export interface RetryOptions {
   timeoutMs: number;
 }
 
-export const DEFAULT_RETRY: RetryOptions = { attempts: 4, baseDelayMs: 250, timeoutMs: 30_000 };
+/**
+ * Default retry policy. The public Portaldot WSS endpoint drops every connection ~60 s after it
+ * opens (close code 1006) and reconnecting takes ~2 s, so retries must span well over that:
+ * 6 attempts with 0.5 → 8 s backoff wait ~15 s in total.
+ */
+export const DEFAULT_RETRY: RetryOptions = { attempts: 6, baseDelayMs: 500, timeoutMs: 30_000 };
 
 export async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -50,10 +55,17 @@ export function withRetry(client: RpcClient, options: RetryOptions = DEFAULT_RET
   };
 }
 
-/** Connects a WebSocket JSON-RPC client (works in Node ≥ 22 and browsers). */
-export async function connectWs(url: string, connectTimeoutMs = 20_000): Promise<RpcClient> {
-  const provider = new WsProvider(url, false);
-  await provider.connect();
+/**
+ * Connects a WebSocket JSON-RPC client (works in Node ≥ 22 and browsers). The provider reconnects
+ * automatically after a dropped connection; wrap the client with `withRetry` so calls made while
+ * reconnecting are retried instead of failing.
+ */
+export async function connectWs(
+  url: string,
+  connectTimeoutMs = 20_000,
+  reconnectDelayMs = 1_000,
+): Promise<RpcClient> {
+  const provider = new WsProvider(url, reconnectDelayMs);
   await withTimeout(provider.isReady, connectTimeoutMs, `connect ${url}`);
   return {
     send: <T>(method: string, params: unknown[]) => provider.send<T>(method, params),
