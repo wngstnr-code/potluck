@@ -10,6 +10,12 @@ const PATHS = {
   check: <path d="M3.5 8.5l3 3 6-6.5" />,
   bolt: <path d="M9 1.5L3.5 9H8l-1 5.5L12.5 7H8z" />,
   list: <path d="M3 4h10M3 8h10M3 12h10" />,
+  user: (
+    <>
+      <circle cx="8" cy="5" r="2.5" />
+      <path d="M3 14c0-3 2-4.5 5-4.5s5 1.5 5 4.5" />
+    </>
+  ),
   cross: <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" />,
   arrow: <path d="M4 12L12 4M6 4h6v6" />,
   collapse: (

@@ -1105,3 +1105,7 @@ tr.clickable {
 .tile.red .big small {
   color: oklch(0.95 0.03 25);
 }
+
+a.rb {
+  text-decoration: none;
+}

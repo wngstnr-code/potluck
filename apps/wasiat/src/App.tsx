@@ -16,6 +16,7 @@ export function App() {
   const [account, setAccount] = useState<string | null>(null);
   return (
     <Shell
+      links={[{ label: "Pantry", href: "../pantry/", icon: "home" }]}
       brand="wasiat"
       pages={PAGES}
       page={page}

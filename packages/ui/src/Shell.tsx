@@ -1,6 +1,13 @@
 import { type ReactNode, useState } from "react";
 import { Icon, type IconName } from "./Icon";
 
+/** A link to a sibling app, shown in the rail's "Apps" section. */
+export interface ShellLink {
+  label: string;
+  href: string;
+  icon: IconName;
+}
+
 export interface ShellPage {
   id: string;
   label: string;
@@ -28,9 +35,11 @@ export function Shell({
   page,
   onPage,
   top,
+  links = [],
   children,
 }: {
   brand: string;
+  links?: readonly ShellLink[];
   pages: readonly ShellPage[];
   page: string;
   onPage: (id: string) => void;
@@ -77,6 +86,17 @@ export function Shell({
               ))}
           </div>
         ))}
+        {links.length > 0 && (
+          <div className="navgroup">
+            <div className="section">Apps</div>
+            {links.map((l) => (
+              <a key={l.href} className="rb" href={l.href} title={l.label}>
+                <Icon name={l.icon} size={19} />
+                <span className="label">{l.label}</span>
+              </a>
+            ))}
+          </div>
+        )}
         <span className="grow" />
         <button
           type="button"

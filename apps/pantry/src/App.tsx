@@ -18,6 +18,7 @@ export function App() {
   const [page, setPage] = useState("overview");
   return (
     <Shell
+      links={[{ label: "Wasiat-lite", href: "../wasiat/", icon: "user" }]}
       brand="potluck"
       pages={PAGES}
       page={page}
