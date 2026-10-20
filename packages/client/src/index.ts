@@ -15,3 +15,4 @@ export {
   PortaldotSource,
   type PortaldotSourceOptions,
 } from "./source.js";
+export { type FollowOptions, followHistory } from "./tail.js";
