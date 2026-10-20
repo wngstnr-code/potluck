@@ -29,7 +29,7 @@ RPC nodes answer "what is the state now", but dApps need history: transfers, hol
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
   subgraph Source["Source chains (archive RPC)"]
     PAH["Polkadot Asset Hub"]
     KAH["Kusama Asset Hub"]
