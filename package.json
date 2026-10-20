@@ -1,0 +1,17 @@
+{
+  "name": "potluck",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Backendless, verifiable on-chain history for any dApp, stored and guaranteed by Portaldot.",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test"
+  }
+}
