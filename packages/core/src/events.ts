@@ -1,6 +1,6 @@
 import type { Codec } from "@polkadot/types/types";
 import { xxhashAsHex } from "@polkadot/util-crypto";
-import type { RpcClient } from "./rpc.js";
+import { getBlockHashes, mapPool, type RpcClient } from "./rpc.js";
 import { type DecodingRuntime, hexToBytes } from "./runtime.js";
 
 export const SYSTEM_EVENTS_KEY = `${xxhashAsHex("System", 128)}${xxhashAsHex("Events", 128).slice(2)}`;
@@ -76,4 +76,104 @@ export function decodeEvents(
 export async function fetchRawEvents(client: RpcClient, blockHash: string): Promise<Uint8Array> {
   const raw = await client.send<string | null>("state_getStorage", [SYSTEM_EVENTS_KEY, blockHash]);
   return raw ? hexToBytes(raw) : new Uint8Array();
+}
+
+export interface RawBlockEvents {
+  block: number;
+  hash: string;
+  /** SCALE `System.Events` value; empty when the block emitted no events. */
+  raw: Uint8Array;
+}
+
+export interface ScanOptions {
+  /** Blocks per `state_queryStorage` call (default 1000). */
+  window?: number;
+  /** Parallel calls (default 8). */
+  concurrency?: number;
+  /** "auto" (default): use `state_queryStorage`, fall back per block if the node refuses it. */
+  strategy?: "auto" | "per-block";
+  onProgress?: (done: number, total: number) => void;
+}
+
+export interface ScanResult {
+  blocks: RawBlockEvents[];
+  strategy: "query-storage" | "per-block";
+}
+
+/**
+ * Fetches `System.Events` for every block of [fromBlock, toBlock].
+ *
+ * Fast path: `state_queryStorage` (allowed on Portaldot, "unsafe" on Polkadot public nodes) returns
+ * only the blocks where the value CHANGED, so a block whose events are byte-identical to its
+ * parent's (or both empty) is omitted. The value of every block is therefore reconstructed as the
+ * latest change at or before it — exact, not sampled. Falls back to one `state_getStorage` per
+ * block when the method is refused.
+ */
+export async function scanRawEvents(
+  client: RpcClient,
+  fromBlock: number,
+  toBlock: number,
+  options: ScanOptions = {},
+): Promise<ScanResult> {
+  const numbers = Array.from({ length: toBlock - fromBlock + 1 }, (_, i) => fromBlock + i);
+  const hashes = await getBlockHashes(client, numbers);
+  const windowSize = options.window ?? 1000;
+  const concurrency = options.concurrency ?? 8;
+  let done = 0;
+  const report = (n: number) => {
+    done += n;
+    options.onProgress?.(done, numbers.length);
+  };
+
+  const perBlock = async (): Promise<ScanResult> => {
+    done = 0;
+    const blocks = await mapPool(numbers, concurrency, async (block, i) => {
+      const hash = hashes[i] as string;
+      const raw = await fetchRawEvents(client, hash);
+      report(1);
+      return { block, hash, raw };
+    });
+    return { blocks, strategy: "per-block" };
+  };
+  if (options.strategy === "per-block") return perBlock();
+
+  const windows: [number, number][] = [];
+  for (let start = 0; start < numbers.length; start += windowSize) {
+    windows.push([start, Math.min(start + windowSize, numbers.length) - 1]);
+  }
+  try {
+    const parts = await mapPool(windows, concurrency, async ([a, b]) => {
+      const changes = await client.send<{ block: string; changes: [string, string | null][] }[]>(
+        "state_queryStorage",
+        [[SYSTEM_EVENTS_KEY], hashes[a], hashes[b]],
+      );
+      const byHash = new Map<string, string | null>();
+      for (const set of changes) {
+        const change = set.changes.find(([key]) => key === SYSTEM_EVENTS_KEY);
+        if (change) byHash.set(set.block, change[1]);
+      }
+      let current: Uint8Array | undefined;
+      if (!byHash.has(hashes[a] as string)) {
+        current = await fetchRawEvents(client, hashes[a] as string);
+      }
+      const out: RawBlockEvents[] = [];
+      for (let i = a; i <= b; i++) {
+        const hash = hashes[i] as string;
+        if (byHash.has(hash)) {
+          const value = byHash.get(hash);
+          current = value ? hexToBytes(value) : new Uint8Array();
+        }
+        out.push({ block: numbers[i] as number, hash, raw: current ?? new Uint8Array() });
+      }
+      report(b - a + 1);
+      return out;
+    });
+    return { blocks: parts.flat(), strategy: "query-storage" };
+  } catch (error) {
+    if (options.strategy === "auto" || options.strategy === undefined) {
+      const message = String((error as Error).message ?? error);
+      if (/unsafe|not found|does not exist|-32601/i.test(message)) return perBlock();
+    }
+    throw error;
+  }
 }

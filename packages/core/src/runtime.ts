@@ -50,9 +50,12 @@ export class RuntimeMap {
     return version;
   }
 
-  /** Version whose metadata decodes the events of `block`. */
+  /**
+   * Version whose metadata decodes the events (and post-state storage) of `block`. The genesis
+   * block has no executing block; its state is decoded with its own runtime.
+   */
   executingVersion(block: number): number {
-    return this.postStateVersion(block - 1);
+    return this.postStateVersion(block === 0 ? 0 : block - 1);
   }
 
   /** Blocks whose post-state version differs from their parent's (runtime upgrade blocks). */
