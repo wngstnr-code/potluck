@@ -65,6 +65,18 @@ importers:
 
   packages/core:
     dependencies:
+      '@polkadot/rpc-provider':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@polkadot/types':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@polkadot/util':
+        specifier: 14.0.3
+        version: 14.0.3
+      '@polkadot/util-crypto':
+        specifier: 14.0.3
+        version: 14.0.3(@polkadot/util@14.0.3)
       '@potluck/spec':
         specifier: workspace:*
         version: link:../spec
