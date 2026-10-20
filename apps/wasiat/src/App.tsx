@@ -1,12 +1,14 @@
 import { Shell, type ShellPage } from "@potluck/ui/Shell";
 import { useState } from "react";
-import { KUSAMA_AH } from "./config";
+import { KUSAMA_AH, PORTALDOT } from "./config";
 import { Plans } from "./Plans";
+import { Setup } from "./Setup";
 import { Timeline } from "./Timeline";
 
 /** Pages are added to the rail as they are built; nothing here is a placeholder. */
 const PAGES: ShellPage[] = [
   { id: "plans", label: "Inheritance plans", icon: "home", section: "Wasiat" },
+  { id: "setup", label: "Set up on Portaldot", icon: "shield", section: "Wasiat" },
 ];
 
 export function App() {
@@ -26,8 +28,10 @@ export function App() {
           <div className="crumb mono">recovery · inheritance</div>
           <span className="grow" />
           <div className="net">
-            <b>{KUSAMA_AH.name}</b>
-            <span className="mono">{KUSAMA_AH.ws.replace("wss://", "")}</span>
+            <b>{page === "setup" ? PORTALDOT.name : KUSAMA_AH.name}</b>
+            <span className="mono">
+              {(page === "setup" ? PORTALDOT.ws : KUSAMA_AH.ws).replace("wss://", "")}
+            </span>
           </div>
         </>
       }
@@ -38,6 +42,7 @@ export function App() {
         ) : (
           <Plans onOpen={setAccount} />
         ))}
+      {page === "setup" && <Setup />}
     </Shell>
   );
 }

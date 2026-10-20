@@ -160,3 +160,72 @@ h1.serif {
   font-size: 13px;
   margin: 0;
 }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 18px;
+  padding: 4px 18px 18px;
+  align-content: start;
+}
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  align-content: start;
+}
+.field.wide {
+  grid-column: 1 / -1;
+}
+.field > span {
+  font-weight: 600;
+}
+.field small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.field input,
+.field textarea,
+.field select {
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  outline: none;
+  resize: vertical;
+  width: 100%;
+}
+.field input.mono,
+.field textarea.mono {
+  font-family: var(--font-mono);
+}
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 2px oklch(0.55 0.17 258 / 0.25);
+}
+.inline {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.tx {
+  display: grid;
+  gap: 14px;
+  padding: 0 18px 18px;
+  align-content: start;
+}
+.tx .friends {
+  padding: 0;
+}
+.tx-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

@@ -1102,3 +1102,6 @@ tr.clickable {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.tile.red .big small {
+  color: oklch(0.95 0.03 25);
+}
