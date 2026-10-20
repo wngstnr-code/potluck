@@ -35,6 +35,17 @@ export {
   SYSTEM_EVENTS_KEY,
 } from "./events.js";
 export {
+  type AccountReconciliation,
+  type BalanceDeltaRule,
+  balanceDeltas,
+  balanceRule,
+  type Deltas,
+  type ReconcileOptions,
+  readSummedBalance,
+  reconcileAccounts,
+  storageMapKey,
+} from "./reconcile.js";
+export {
   BLOCK_HASH_BATCH,
   connectWs,
   DEFAULT_RETRY,
