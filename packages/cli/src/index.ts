@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
 import { runBuild } from "./build.js";
+import { runPublish } from "./publish.js";
 import { reportsOk, runVerify } from "./verify.js";
 
 const USAGE = `potluck <command> [options]
@@ -21,6 +22,12 @@ Commands:
     --rebuild           Re-index each chunk range from the source chain and compare raw hashes
     --no-reconcile      Skip reconciliation against source-chain state
     --concurrency <n>   In-flight requests (default: 32)
+
+  publish <build-dir> Store spec, chunks and manifest in Portaldot TransactionStorage and register them
+    --registry <h160>   PotluckRegistry address (required unless --dry-run)
+    --dry-run           Build every transaction and estimate fees without submitting
+    --from-address <ss58>  Account for estimates when PUBLISHER_SEED is not set
+  Env: PUBLISHER_SEED (dev-only seed, never commit), PORTALDOT_WS
 `;
 
 async function main(argv: string[]): Promise<void> {
@@ -39,6 +46,9 @@ async function main(argv: string[]): Promise<void> {
       chunks: { type: "string" },
       rebuild: { type: "boolean" },
       "no-reconcile": { type: "boolean" },
+      registry: { type: "string" },
+      "dry-run": { type: "boolean" },
+      "from-address": { type: "string" },
     },
   });
   const int = (value: string | undefined) =>
@@ -77,6 +87,18 @@ async function main(argv: string[]): Promise<void> {
       const ok = reportsOk(reports);
       log(ok ? "VERIFIED" : "VERIFICATION FAILED");
       if (!ok) process.exitCode = 2;
+      return;
+    }
+    case "publish": {
+      const dir = positionals[0];
+      if (!dir) throw new Error("publish: missing <build-dir>");
+      await runPublish({
+        dir,
+        registry: values.registry,
+        dryRun: values["dry-run"] ?? false,
+        fromAddress: values["from-address"],
+        log,
+      });
       return;
     }
     default:
