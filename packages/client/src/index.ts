@@ -15,4 +15,14 @@ export {
   PortaldotSource,
   type PortaldotSourceOptions,
 } from "./source.js";
+export {
+  type HistoryReconciliation,
+  type ReconcileHistoryOptions,
+  reconcileHistory,
+  type SpecHistory,
+  type SpecHistoryOptions,
+  type SpecProgressEvent,
+  type SpecSegmentReport,
+  specHistory,
+} from "./spec-history.js";
 export { type FollowOptions, followHistory } from "./tail.js";
