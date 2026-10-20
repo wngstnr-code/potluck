@@ -33,7 +33,11 @@ export {
   decodeEvents,
   type EventField,
   fetchRawEvents,
+  type RawBlockEvents,
+  type ScanOptions,
+  type ScanResult,
   SYSTEM_EVENTS_KEY,
+  scanRawEvents,
 } from "./events.js";
 export {
   type AccountReconciliation,
