@@ -1,0 +1,19 @@
+[profile.default]
+src = "src"
+test = "test"
+script = "script"
+out = "out"
+libs = ["lib"]
+solc_version = "0.8.28"
+# Revive's EVM backend support for newer opcodes is verified in spike S8; cancun is the target.
+evm_version = "cancun"
+optimizer = true
+optimizer_runs = 200
+fs_permissions = [{ access = "read", path = "./" }]
+
+[rpc_endpoints]
+portaldot_testnet = "${PORTALDOT_EVM_RPC}"
+
+[fmt]
+line_length = 100
+tab_width = 4

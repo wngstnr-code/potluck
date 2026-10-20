@@ -15,7 +15,6 @@ build/
 contracts/out/
 contracts/cache/
 contracts/broadcast/
-contracts/lib/
 
 # Local data and caches
 *.sqlite

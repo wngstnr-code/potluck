@@ -14,7 +14,9 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
     "lint": "biome check .",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "build:contracts": "forge build --root contracts",
+    "test:contracts": "forge test --root contracts -vv"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
