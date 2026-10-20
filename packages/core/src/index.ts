@@ -65,6 +65,7 @@ export {
   reconcileAccounts,
   storageMapKey,
 } from "./reconcile.js";
+export { FLAG_REASON, REGISTRY_ABI } from "./registry.js";
 export {
   BLOCK_HASH_BATCH,
   connectWs,

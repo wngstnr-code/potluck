@@ -3,17 +3,9 @@ import type { SubmittableExtrinsic } from "@polkadot/api/types";
 import { Keyring } from "@polkadot/keyring";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import { u8aToHex } from "@polkadot/util";
-import { type Abi, decodeFunctionResult, encodeFunctionData, type Hex, parseAbi } from "viem";
+import { type Abi, decodeFunctionResult, encodeFunctionData, type Hex } from "viem";
 
-/** Registry ABI subset used by the CLI (source of truth: contracts/src/PotluckRegistry.sol). */
-export const REGISTRY_ABI = parseAbi([
-  "struct Spec { address author; uint64 registeredAt; uint32 tsBlock; uint32 tsIndex; }",
-  "struct ManifestInput { bytes32 specHash; bytes32 sourceGenesis; uint64 fromBlock; uint64 toBlock; bytes32 toBlockHash; bytes32 chunksRoot; bytes32 manifestDigest; uint32 tsBlock; uint32 tsIndex; uint32 chunkCount; }",
-  "function registerSpec(bytes32 specHash, uint32 tsBlock, uint32 tsIndex)",
-  "function getSpec(bytes32 specHash) view returns (Spec)",
-  "function publish(ManifestInput m) returns (uint256 id)",
-  "function manifestCount() view returns (uint256)",
-]);
+export { REGISTRY_ABI } from "@potluck/core";
 
 export type ManifestInput = {
   specHash: Hex;
