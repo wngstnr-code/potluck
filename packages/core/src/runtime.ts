@@ -64,6 +64,26 @@ export class RuntimeMap {
   }
 }
 
+/** Storage key of `System.LastRuntimeUpgrade` (twox128("System") ++ twox128("LastRuntimeUpgrade")). */
+export const LAST_RUNTIME_UPGRADE_KEY =
+  "0x26aa394eea5630e07c48ae0c9558cef7f9cce9c888469bb1a0dceaa129672ef8";
+
+/** Decodes the leading SCALE Compact<u32> of a hex value (here: LastRuntimeUpgradeInfo.spec_version). */
+export function decodeCompactU32(hex: string): number {
+  const b = hexToBytes(hex);
+  const first = b[0] ?? 0;
+  switch (first & 3) {
+    case 0:
+      return first >> 2;
+    case 1:
+      return (first | ((b[1] ?? 0) << 8)) >> 2;
+    case 2:
+      return ((first | ((b[1] ?? 0) << 8) | ((b[2] ?? 0) << 16) | ((b[3] ?? 0) << 24)) >>> 2) >>> 0;
+    default:
+      return ((b[1] ?? 0) | ((b[2] ?? 0) << 8) | ((b[3] ?? 0) << 16) | ((b[4] ?? 0) << 24)) >>> 0;
+  }
+}
+
 export interface BuildRuntimeMapOptions {
   /** Number of evenly spaced samples before refining boundaries (default 64). */
   samples?: number;
@@ -86,8 +106,21 @@ export async function buildRuntimeMap(
 ): Promise<RuntimeMap> {
   const start = Math.max(0, fromBlock - 2);
   const samples = Math.max(2, options.samples ?? 64);
-  const versionAt = async (block: number) =>
-    (await getRuntimeVersion(client, await options.hashOf(block))).specVersion;
+  // The post-state version of block b is the version that executed block b + 1, which FRAME
+  // records in System.LastRuntimeUpgrade at the start of b + 1. Reading that small storage value is
+  // cheap, while state_getRuntimeVersion executes the runtime: on the public Portaldot node each
+  // switch between runtime versions costs ~8.5 s, so a binary search over an upgrade boundary took
+  // minutes. state_getRuntimeVersion remains the fallback (last block, chains without the value).
+  const versionAt = async (block: number) => {
+    if (block < toBlock) {
+      const raw = await client.send<string | null>("state_getStorage", [
+        LAST_RUNTIME_UPGRADE_KEY,
+        await options.hashOf(block + 1),
+      ]);
+      if (raw) return decodeCompactU32(raw);
+    }
+    return (await getRuntimeVersion(client, await options.hashOf(block))).specVersion;
+  };
 
   const points: { block: number; version: number }[] = [];
   const step = Math.max(1, Math.floor((toBlock - start) / (samples - 1)));

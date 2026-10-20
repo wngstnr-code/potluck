@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { decodeEvents } from "../src/events.js";
 import type { RpcClient } from "../src/rpc.js";
-import { buildRuntimeMap, RuntimeLoader, RuntimeMap } from "../src/runtime.js";
+import {
+  buildRuntimeMap,
+  decodeCompactU32,
+  LAST_RUNTIME_UPGRADE_KEY,
+  RuntimeLoader,
+  RuntimeMap,
+} from "../src/runtime.js";
 import { fixtureBlock, metadataBytes, polkadotAh, runtime } from "./fixtures.js";
 
 const UPGRADE = 16_946_479; // Polkadot AH block that applied the 2002001 → 2003000 upgrade
@@ -74,23 +80,42 @@ describe("decodeEvents on real Polkadot AH blocks", () => {
   });
 });
 
-/** Transport answering like a real node whose runtime upgrades at the given blocks. */
+/** SCALE Compact<u32> in four-byte mode, as LastRuntimeUpgradeInfo stores spec_version. */
+const compact = (v: number) => {
+  const n = ((v << 2) | 2) >>> 0;
+  return `0x${[n & 255, (n >>> 8) & 255, (n >>> 16) & 255, (n >>> 24) & 255].map((x) => x.toString(16).padStart(2, "0")).join("")}`;
+};
+
+/**
+ * Transport answering like a real node whose runtime upgrades (set_code) land at the given blocks:
+ * the post-state runtime version changes at `at`, and System.LastRuntimeUpgrade records the new
+ * version one block later, when it first executes a block. `lastRuntimeUpgrade: false` models a
+ * chain without that value.
+ */
 function upgradingChain(
   upgrades: { at: number; spec: number }[],
   initial: number,
-): RpcClient & { calls: number } {
-  const state = { calls: 0 };
+  options: { lastRuntimeUpgrade?: boolean } = {},
+): RpcClient & { calls: Record<string, number> } {
+  const calls: Record<string, number> = {};
+  const postState = (block: number) => {
+    let spec = initial;
+    for (const u of upgrades) if (block >= u.at) spec = u.spec;
+    return spec;
+  };
   return {
-    get calls() {
-      return state.calls;
-    },
+    calls,
     async send<T>(method: string, params: unknown[]): Promise<T> {
-      state.calls++;
-      if (method !== "state_getRuntimeVersion") throw new Error(`unexpected ${method}`);
-      const block = Number.parseInt(String(params[0]).slice(2), 16);
-      let spec = initial;
-      for (const u of upgrades) if (block >= u.at) spec = u.spec;
-      return { specName: "asset-hub-polkadot", specVersion: spec } as T;
+      calls[method] = (calls[method] ?? 0) + 1;
+      const block = Number.parseInt(String(params.at(-1)).slice(2), 16);
+      if (method === "state_getRuntimeVersion") {
+        return { specName: "asset-hub-polkadot", specVersion: postState(block) } as T;
+      }
+      if (method === "state_getStorage" && params[0] === LAST_RUNTIME_UPGRADE_KEY) {
+        if (options.lastRuntimeUpgrade === false) return null as T;
+        return compact(block === 0 ? postState(0) : postState(block - 1)) as T;
+      }
+      throw new Error(`unexpected ${method}`);
     },
     async close() {},
   };
@@ -126,6 +151,22 @@ describe("buildRuntimeMap", () => {
     expect(map.segments).toEqual([{ fromBlock: 21_999_998, specVersion: 2005000 }]);
     expect(map.executingVersion(21_999_999)).toBe(2005000);
   });
+
+  it("reads LastRuntimeUpgrade instead of executing the runtime (one runtime call, for the last block)", async () => {
+    const client = upgradingChain([{ at: UPGRADE, spec: 2003000 }], 2002001);
+    const map = await buildRuntimeMap(client, 16_000_000, 17_000_000, { hashOf, samples: 16 });
+    expect(map.upgradeBlocks).toEqual([UPGRADE]);
+    expect(client.calls.state_getRuntimeVersion).toBe(1);
+  });
+
+  it("falls back to state_getRuntimeVersion on chains without LastRuntimeUpgrade", async () => {
+    const client = upgradingChain([{ at: UPGRADE, spec: 2003000 }], 2002001, {
+      lastRuntimeUpgrade: false,
+    });
+    const map = await buildRuntimeMap(client, 16_000_000, 17_000_000, { hashOf, samples: 16 });
+    expect(map.upgradeBlocks).toEqual([UPGRADE]);
+    expect(map.executingVersion(UPGRADE + 1)).toBe(2003000);
+  });
 });
 
 describe("RuntimeLoader", () => {
@@ -153,5 +194,14 @@ describe("RuntimeLoader", () => {
     await expect(new RuntimeLoader(client).load(2005000, "0xwrong")).rejects.toThrow(
       "expected 2005000",
     );
+  });
+});
+
+describe("decodeCompactU32", () => {
+  it("decodes every Compact mode", () => {
+    expect(decodeCompactU32("0x04")).toBe(1); // single byte
+    expect(decodeCompactU32("0x1501")).toBe(69); // two bytes
+    expect(decodeCompactU32("0xf2b4d20b")).toBe(49_589_564); // four bytes
+    expect(decodeCompactU32("0x03ffffffff")).toBe(4_294_967_295); // big-integer mode
   });
 });
