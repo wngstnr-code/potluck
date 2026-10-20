@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-20 (M0 done; no-tPOT spikes done; M3 done except real deployment; M2 substrate path done)._
+_Last updated: 2026-10-20 (M0, M2 done; no-tPOT spikes done; M3 done except real deployment)._
 
 | Area | Status |
 |---|---|
@@ -18,7 +18,7 @@ _Last updated: 2026-10-20 (M0 done; no-tPOT spikes done; M3 done except real dep
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
 | Git repository | ✅ Public: https://github.com/wngstnr-code/potluck (`main`); sole contributor `wngstnr-code` |
 | Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks S2, S3, real deploy, all testnet txs). **Ask for ≥ ~4,000 tPOT**: deploy deposits are ≈ 433 (EVM) + ≈ 3,293 (PVM) tPOT, plus manifest/spec deposits |
-| Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK on testnet). `spec` done (17 tests). `core` substrate path done (52 offline tests on recorded real data + 2 live end-to-end tests). Missing: `revive-logs` source for Portaldot unified history, `client`, `cli` |
+| Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK). `spec` done (23 tests). `core` done: Substrate + Revive EVM logs, range scan, reconciliation (65 offline tests on recorded real data + 5 live tests: Polkadot AH window and Portaldot genesis → head, 894/894 accounts reconcile). Missing: `cli`, `client`, apps |
 | Spikes | ✅ S1, S4, S6, S7 done (results in `spikes/results/`). 🟡 S5 partial. 🟡 S8 dry-run done, real deploy needs tPOT. ⏳ S2, S3 need tPOT |
 | DoraHacks check-in (Oct 24, 12:00 UTC) | ❌ Not submitted |
 
@@ -38,8 +38,8 @@ _Last updated: 2026-10-20 (M0 done; no-tPOT spikes done; M3 done except real dep
 - Recovery-timeline spec starts at Kusama AH #17,836,634 (S7).
 
 **Next engineering steps (in order):**
-1. M2b: `revive-logs` source kind + `portaldot.unified-history` spec (dual-VM history: Balances + ERC-20 logs, addresses via `ReviveApi`).
-2. M4 `cli` publisher (build/publish/renew/verify) on top of `core`. Building works without tPOT; publishing needs it.
+1. M4 `cli` publisher (build/publish/renew/verify) on top of `core`. Building works without tPOT; publishing needs it.
+2. Report to the Portaldot team: held funds can vanish on `System.KilledAccount` without a Balances event (TransactionStorage hold, block #89,388).
 2. When tPOT arrives: write and run `contracts/deploy/deploy.ts`, i.e. `revive.instantiateWithCode` signed by the SS58 dev account for both EVM and PVM. Pass code as **hex**. Record addresses + tx hashes; then a real `registerSpec`/`publish` round trip to measure per-manifest deposits (S8).
 4. Prepare the **check-in package for Oct 24**: README, architecture diagram, progress notes, deployed registry address + tx hash, and a ≤3 min demo video of one core function (e.g. direct-sync history of a Portaldot account + one `transactionStorage.store`).
 
@@ -131,7 +131,7 @@ Each milestone lists tasks, a **done-when** check, and the **planned commits**. 
 
 Record every result in `ARCHITECTURE.md` §0/§14 (`docs(arch): record spike S<n> results`).
 
-### M2: `spec` + `core` (🟡 substrate path done; `revive-logs` source pending)
+### M2: `spec` + `core` (✅ done, incl. Revive EVM logs)
 - Tasks:
   - JSON Schema + validator for specs; canonical spec hashing.
   - Source adapters: Substrate events (safe RPC), Revive logs (`eth_getLogs`).
