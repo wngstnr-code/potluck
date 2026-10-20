@@ -6,6 +6,7 @@ export {
   type HistoryOptions,
   type HistoryResult,
   type ProgressEvent,
+  reviveAccountIdOf,
   reviveAddressOf,
   type SegmentReport,
 } from "./history.js";

@@ -247,3 +247,14 @@ export async function reviveAddressOf(portaldot: RpcClient, accountId32: string)
     throw new Error(`unexpected ReviveApi_address result ${result}`);
   return result.toLowerCase();
 }
+
+/** AccountId32 that pallet-revive maps an H160 to, via the `ReviveApi_account_id` runtime API. */
+export async function reviveAccountIdOf(portaldot: RpcClient, h160: string): Promise<string> {
+  if (!/^0x[0-9a-fA-F]{40}$/.test(h160))
+    throw new Error("reviveAccountIdOf: expected a 20-byte H160");
+  const result = await portaldot.send<string>("state_call", ["ReviveApi_account_id", h160]);
+  if (!/^0x[0-9a-fA-F]{64}$/.test(result)) {
+    throw new Error(`unexpected ReviveApi_account_id result ${result}`);
+  }
+  return result.toLowerCase();
+}

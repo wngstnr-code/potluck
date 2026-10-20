@@ -27,7 +27,7 @@ import {
 } from "@potluck/core";
 import { parseSpec, type Spec } from "@potluck/spec";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { accountHistory, reviveAddressOf } from "../src/history.js";
+import { accountHistory, reviveAccountIdOf, reviveAddressOf } from "../src/history.js";
 import type { ManifestEntry, ManifestSource } from "../src/source.js";
 
 const LIVE = process.env.POTLUCK_LIVE === "1";
@@ -183,5 +183,11 @@ describe.skipIf(!LIVE)("accountHistory on Portaldot V3 testnet", () => {
     expect(await reviveAddressOf(client, validator)).toBe(
       "0x9234511ee6f98f944b846d19d4013a81f93bd5f9",
     );
+  });
+
+  it("maps the H160 back to the same AccountId32", async () => {
+    const validator = u8aToHex(decodeAddress("5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY"));
+    const h160 = await reviveAddressOf(client, validator);
+    expect(await reviveAccountIdOf(client, h160)).toBe(validator);
   });
 });
