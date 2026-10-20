@@ -24,6 +24,32 @@ importers:
         specifier: 5.0.5
         version: 5.0.5(@types/node@26.6.5)(vite@8.3.4(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15))
 
+  packages/cli:
+    dependencies:
+      '@potluck/core':
+        specifier: workspace:*
+        version: link:../core
+      '@potluck/spec':
+        specifier: workspace:*
+        version: link:../spec
+
+  packages/client:
+    dependencies:
+      '@potluck/core':
+        specifier: workspace:*
+        version: link:../core
+      '@potluck/spec':
+        specifier: workspace:*
+        version: link:../spec
+
+  packages/core:
+    dependencies:
+      '@potluck/spec':
+        specifier: workspace:*
+        version: link:../spec
+
+  packages/spec: {}
+
 packages:
 
   '@biomejs/biome@2.5.15':
