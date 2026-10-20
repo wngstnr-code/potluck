@@ -76,7 +76,11 @@ If two docs disagree: `DEVELOPMENT.md` (status) > `ARCHITECTURE.md` (design) > `
 - Portaldot native has 14 decimals, EVM side 18 (`nativeToEthRatio` 10000).
 - **`state_queryStorage` is blocked ("unsafe") on Polkadot public nodes.** Use safe RPCs only (`chain_getBlockHash` + `state_getStorage` per block, `archive_v1_*`).
 - Polkadot AH & Kusama AH public nodes are archive nodes. Polkadot AH has ≥35 runtime versions, with metadata v14 from block 1000.
-- Full Portaldot testnet event sync takes ~5.2 s (9,202 events). The Polkadot AH window (10.65 M blocks) takes ~15 h single-connection.
+- Full Portaldot testnet event sync takes ~5.2 s (9,202 events). The Polkadot AH Revive window (~10.65 M blocks) takes **~2–4 days** to sync naively in a browser. The publisher needs ~12 h at ~250 blocks/s with batched `chain_getBlockHash([n…])` (S6). Only the Parity Asset Hub endpoint is reliable.
+- **Decode a block's events with the runtime that executed it (parent state's runtime version)**, never the block's post-state version, which fails on `set_code` blocks (S1).
+- Take accounts from codecs via `toHex()`. `toJSON()` yields SS58 strings and silently breaks storage keys (S4).
+- Balance reconciliation is exact (319/319 accounts, S4). Balance-history volume over the Revive window is ~0.6–1 GB gzip, so the publish scope is open decision 5 in `docs/ARCHITECTURE.md` §15.
+- Kusama AH Recovery inheritance API starts at block **17,836,634** (S7).
 - Portaldot `recovery.securityDeposit = 0` (Kusama AH uses ~0.17 KSM).
 
 ## 8. Engineering conventions

@@ -14,7 +14,13 @@
 | `byteFee` / `entryFee` | 10 / 1000 planck | 25 MB ≈ 0.0000025 POT; cost is dominated by the tx fee, not by storage |
 | `bitswap_v1_get` | Works on public nodes (tested at 16 KB) | Chunk download path from the browser. MB-sized blobs need a spike |
 | Full Portaldot sync | 5.2 s (9,202 events) | **Direct** mode is already enough today |
-| Polkadot AH | 22.05 million blocks, ~3 events/block, **≥35 runtime versions**, metadata **v14** since #1000, public nodes are **archive** | Multi-runtime decoder; no manual types needed (v14 is self-describing) |
+| Polkadot AH | 22.05 million blocks, ~3 events/block, **≥35 runtime versions** overall and **10 versions / 9 upgrades inside the Revive window** (S1), metadata **v14** since #1000 (561–639 KB per version), Parity public node is **archive** | Multi-runtime decoder; no manual types needed (v14 is self-describing) |
+| Decoding runtime (S1) | A block's events decode **only** with the runtime that executed it (parent state). The post-state version fails at the `set_code` block #16,946,479 | `core` resolves metadata via `runtimeVersion(parentHash)` |
+| Public RPC throughput (S6) | Only the Parity Asset Hub endpoint is reliable. ~2.2 blocks/s per in-flight request; **~250 blocks/s** at 128 in flight with batched `chain_getBlockHash([n…])`, 0 errors | Publisher batches hash lookups and keeps a high in-flight count; builds are resumable. Naive browser sync of the Revive window ≈ **2–4 days** |
+| Balance reconciliation (S4) | **319/319** touched accounts reconcile exactly; closed rule table for all 30 `Balances` variants | L3 verification is sound; rule table lives in `core` |
+| Balance-history volume (S4) | Revive window ≈ **24–34 M rows, ~0.6–1 GB gzip (78–130 chunks)**; 52% `Deposit`, 34% `Transfer`, 12% `Withdraw` | Full-window publish is too heavy for the MVP; see §15 decision 5 |
+| Kusama AH Recovery (S7) | Pallet since #11,135,052; **inheritance API since #17,836,634** (2026-06-12, spec 2003000) | Recovery-timeline spec `fromBlock = 17836634` |
+| Huge blocks (S1) | #20,485,673 holds 1,888 events / 112,929 bytes | Chunk by bytes; one oversized block may form its own chunk |
 | Kusama AH | 22.78 million blocks, ~4.7 events/block, Recovery-inheritance live (121 configurations) | Real source for Wasiat-lite |
 | `state_queryStorage` on Polkadot nodes | **Blocked** (unsafe) | The publisher uses **only** safe RPC: `chain_getBlockHash` + `state_getStorage(System.Events, hash)` per block, or `archive_v1_*` |
 | Revive account mapping | Regular accounts: `keccak256(AccountId32)[12..]`; **851 distinct `map_account` accounts** | Address normalization is **mandatory** via the runtime API `ReviveApi.address` / `ReviveApi.accountId` + storage `revive.originalAccount`, not computed locally |
@@ -159,15 +165,15 @@ potluck/
 
 ## 6. Indexing pipeline (the publisher and direct mode use the same code)
 
-1. **Runtime map:** binary search on `state_getRuntimeVersion` to find the blocks where `specVersion` changes (≥35 versions on Polkadot AH, about 25 calls per boundary). Metadata per version is cached (disk for the CLI, OPFS for the browser).
-2. **Fetch events:** per block, `chain_getBlockHash(n)` then `state_getStorage(System.Events, hash)`. Bounded parallelism (8–16), multi-endpoint, retry with backoff.
+1. **Runtime map:** sample the range, then binary search on `state_getRuntimeVersion` to find the blocks where `specVersion` changes (S1: 161 samples + 144 probes for the Revive window). Metadata per version is cached (disk for the CLI, OPFS for the browser). **Decode block N with the runtime of block N−1's state** (the executing runtime), never with N's post-state version.
+2. **Fetch events:** batch `chain_getBlockHash([n1, n2, …])` (up to 500 per call), then `state_getStorage(System.Events, hash)` per block with high bounded parallelism (publisher: ~128 in flight), retry with backoff, resumable checkpoints.
 3. **Decode** with the metadata registry of that block's version, then **match** the spec and **project** into rows.
 4. **Canonical normalization:**
-   - addresses as AccountId32 hex (H160 for Revive, plus a mapping column);
+   - addresses as AccountId32 hex taken from the codec via `toHex()` (never `toJSON()`, which yields SS58), H160 for Revive plus a mapping column;
    - bigint as a decimal string;
    - row order `(block, eventIndex, logIndex)`;
    - JSON with key order = `columns`, one row per line (NDJSON), no whitespace.
-5. **Chunking:** split by `maxBlocks` or `maxBytes` (≤ 8 MB after compression).
+5. **Chunking:** split by `maxBlocks` or `maxBytes` (≤ 8 MB after compression); a single oversized block (e.g. 1,888 events in a migration block) may form its own chunk.
 6. Per chunk:
    - `rawHash = blake2b-256(NDJSON)`, used for determinism across publishers;
    - `blob = gzip(NDJSON)` (gzip does not need to be deterministic because the blob hash is recorded separately);
@@ -291,7 +297,7 @@ pot.follow();                                     // live tail
 **Pantry** (`apps/pantry`)
 - Catalog of specs & manifests from the registry: publisher, block range, size, retention status, flags.
 - "Try an address": history + a human-readable L1/L2/L3 verification report ("This history matches the balance on Polkadot Asset Hub ✓").
-- Comparison panel: DIRECT estimate (for example "~1.8 hours") vs SNAPSHOT (seconds).
+- Comparison panel: DIRECT estimate (for example "~2–4 days" for the Revive window) vs SNAPSHOT (seconds).
 - Attack demo button: loads a tampered manifest, then shows L3 failing, an on-chain flag, and switching to an honest publisher.
 
 **Wasiat-lite** (`apps/wasiat`)
@@ -328,7 +334,7 @@ pot.follow();                                     // live tail
 | 2 | `cli` build/publish/renew/verify/tamper | Real manifests for 3 specs on Portaldot testnet (`store` tx + registry, with explorer links) |
 | 3 | `PotluckRegistry.sol` | Deployed on testnet; Foundry tests; events readable from the browser |
 | 4 | `client` | Adaptive sync, loader + bloom, L1/L2/L3, SQLite-WASM, live tail |
-| 5 | Pantry | Polkadot AH account history (~1.5 million block window) loads in **< 5 seconds cold** and passes L3. DIRECT vs SNAPSHOT panel |
+| 5 | Pantry | Polkadot AH account history (published range per §15 decision 5) loads in **< 5 seconds cold** and passes L3. DIRECT vs SNAPSHOT panel |
 | 6 | Attack demo | Tampered manifest **100% detected** for the affected account; on-chain flag |
 | 7 | Wasiat-lite | Real Recovery timeline from Kusama AH + state-replay ✓ + `setFriendGroups` tx on Portaldot V3 |
 | 8 | Portaldot unified history | Dual-VM history (Balances + Revive ERC-20) in DIRECT mode + address normalization via `ReviveApi` |
@@ -346,13 +352,13 @@ Free-form JS handlers · on-chain slashing/adjudication · smoldot light client 
 
 | Spike | Status | Question |
 |---|---|---|
-| S1 Multi-runtime Polkadot AH event decoding in the browser | ⏳ | Metadata size/latency per version; correct at every version boundary? |
+| S1 Multi-runtime Polkadot AH event decoding in the browser | ✅ [results](../spikes/results/S1.md) | Metadata size/latency per version; correct at every version boundary? |
 | S2 Store 1/4/8 MB on Portaldot testnet | ⏳ (needs tPOT) | Does it pass the block limit & weight? What is the real fee? |
 | S3 `bitswap_v1_get` for MB-sized blobs over WSS | ⏳ | RPC response size limit? Latency? |
-| S4 Polkadot AH balance reconciliation | ⏳ | Which events change `free+reserved` (fee, reserve, dust, AHM migration)? Does it pass for 20 random accounts? |
+| S4 Polkadot AH balance reconciliation | ✅ [results](../spikes/results/S4.md) | Which events change `free+reserved` (fee, reserve, dust, AHM migration)? Does it pass for 20 random accounts? |
 | S5 Revive address mapping | ✅ partial | Use `ReviveApi.address/accountId`, because the keccak formula does not hold for `map_account` accounts |
-| S6 Public RPC rate limits during build | ⏳ | Safe throughput per endpoint; how many endpoints are needed? |
-| S7 Recovery runtime boundary on Kusama AH | ⏳ | At which block the pallet appears (spec starting point) |
+| S6 Public RPC rate limits during build | ✅ [results](../spikes/results/S6.md) | Safe throughput per endpoint; how many endpoints are needed? |
+| S7 Recovery runtime boundary on Kusama AH | ✅ [results](../spikes/results/S7.md) | At which block the pallet appears (spec starting point) |
 
 ---
 
@@ -361,9 +367,9 @@ Free-form JS handlers · on-chain slashing/adjudication · smoldot light client 
 ### Decided (2026-10-20)
 1. **Polkadot AH window = since Hub smart contracts went live**: the Revive pallet first exists at **block #11,405,259 (2026-01-27T10:59:24Z, spec 2000005)**.
    - The window is about **10.65 million blocks (266 days)**.
-   - Naive sync: ~15 hours (1 connection) / ~2 hours (8 connections).
+   - Naive sync (S6): ~2–4 days in a browser (33–63 blocks/s); publisher build ≈ 12 h at ~250 blocks/s. *(Corrected 2026-10-20; the earlier ~15 h figure was wrong.)*
    - Currently there are 593 Revive accounts/contracts on the Hub.
-   - Data estimate *(assumption ~0.5 Balances events/block, to be validated in S4)*: ~5 million rows, ~200–250 MB compressed, ~30 chunks.
+   - Data (S4, measured): ~24–34 M rows, **~0.6–1 GB gzip, 78–130 chunks**. The earlier ~250 MB assumption was wrong.
 2. **Contract: a single Solidity source, dual deployment on Revive.**
    - **PVM** (resolc, PolkaVM, primary) + **EVM** (solc, backup and comparison), identical ABI.
    - The client uses either address through viem/MetaMask with no code difference.
@@ -372,5 +378,10 @@ Free-form JS handlers · on-chain slashing/adjudication · smoldot light client 
    - ink! is deliberately **not** used: rewriting the registry in Rust adds no functionality, duplicates code, and ink! v6 for Revive has not been verified on Portaldot.
 
 ### Still open
-3. Coordination with the Portaldot team about the ~250 MB volume on testnet (material for the 28–29 Oct office hour).
+3. Coordination with the Portaldot team about storing up to ~0.6–1 GB on testnet (material for the 28–29 Oct office hour).
 4. **User prerequisite:** create a dev SS58 account and request tPOT via a Discord ticket. Not done yet.
+5. **Publish scope for the Polkadot AH balance-history spec** (raised by S4: ~0.6–1 GB for the full Revive window). The spec keeps `fromBlock = 11405259`; what changes is what the MVP *publishes*.
+   - **Recommended: progressive backfill.** Publish the newest range first (e.g. the last ~1.5 M blocks ≈ 90–140 MB, ~12–18 chunks), then older ranges as extra manifests as testnet capacity and time allow.
+     - The client merges manifests, shows a coverage bar, and direct-syncs any uncovered range.
+     - This fits the Potluck story: any publisher can "bring a chunk" of older history.
+   - Alternatives: publish the full window (heavy on a shared testnet, ~12 h build); or change the demo spec to a lighter one (e.g. Revive contract logs only). The latter weakens the reconciliation (L3) story.

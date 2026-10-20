@@ -14,7 +14,7 @@
 |---|---|---|
 | Data indexed | Portaldot only | **Any polkadot-sdk-based chain**, prioritizing heavy chains (Polkadot & Kusama Asset Hub). Portaldot itself is still supported. |
 | Role of Portaldot | The chain being indexed | **Data layer (warehouse + registry)** for other chains' history |
-| Wow moment | "2 seconds", even though a direct sync takes only 5.2 seconds | **~31 hours becomes ~3 seconds** on real Asset Hub data |
+| Wow moment | "2 seconds", even though a direct sync takes only 5.2 seconds | **~2–4 days becomes ~3 seconds** on real Asset Hub data |
 | Verification | k random chunks (2.5% chance of catching fraud) | **Reconciliation against the source chain**: per-row claim checks + balance must match (100% for user-owned data) |
 | Snapshot | Dependency | **Optional accelerator**: if absent, the client syncs by itself |
 | Index spec | Free-form JS handler (rabbit hole) | **Declarative JSON spec** (deterministic by construction) |
@@ -27,7 +27,7 @@
 | Chain | Blocks | Events/block | Full sync from browser |
 |---|---|---|---|
 | Portaldot V3 testnet | ~112k | ~0.08 | **5.2 seconds**, does not need Potluck |
-| Polkadot Asset Hub | ~22.05 million | ~3.0 | **~31 hours**, needs Potluck |
+| Polkadot Asset Hub | ~22.05 million | ~3.0 | **~2–4 days** for the Revive window alone (S6), needs Potluck |
 | Kusama Asset Hub | ~22.78 million | ~4.7 | Tens of hours, needs Potluck |
 
 Both Asset Hubs have public **archive** nodes (block #1000 can be read), so anyone can build and verify an index permissionlessly.
@@ -97,14 +97,14 @@ Once Portaldot gets busy, snapshots start being published and dApps use them aut
 | # | Spec | Source chain | Who uses it |
 |---|---|---|---|
 | 1 | **Recovery timeline** (`recovery.*`: friend group set, attempt started/approved/cancelled/completed, slash) | **Kusama AH** (real data: 121 configurations, 13 inheritances) + Portaldot V3 | **Wasiat-lite** |
-| 2 | **Account transfer history** (native DOT/KSM + assets) | Polkadot AH | Any wallet/dApp; the "31 hours to 3" demo |
+| 2 | **Account transfer history** (native DOT/KSM + assets) | Polkadot AH | Any wallet/dApp; the "days to seconds" demo |
 | 3 | **Unified Portaldot history** (native transfers + Revive ERC-20 logs, SS58↔H160, 14↔18 decimals) | Portaldot V3 | Hacker House teams (potscan, PortalProof, PotKit, and others) |
 
 **Wasiat-lite** (one screen): enter an address, then a full timeline of that account's inheritance setup and recovery attempts is shown (who the witnesses are, when an attempt started, who cancelled as proof of life, when the inheritance completed), verified against Kusama AH, plus a button to set up the same configuration on Portaldot V3. The narrative: *an inheritance app must outlive its maker's servers, and Potluck makes that possible.*
 
 ## 5. Demo scenario (≤ 3 minutes)
 
-1. **The problem (20 seconds):** open the history of a Polkadot Asset Hub account naively and show the progress ("estimated 31 hours").
+1. **The problem (20 seconds):** open the history of a Polkadot Asset Hub account naively and show the progress ("estimated 2–4 days").
 2. **Potluck (40 seconds):** an incognito window, the same dApp with the Potluck SDK. The full history appears within seconds. The verification panel shows "N rows checked against Polkadot AH ✓, balance matches ✓", and the Network tab contains only connections to the node.
 3. **On-chain proof (30 seconds):** click the manifest, open the `store` tx and the registry on the Portaldot testnet.
 4. **Attack (40 seconds):** a malicious publisher publishes a manifest with one transfer deleted. Balance reconciliation fails, the manifest is flagged red on-chain, and the client automatically switches to an honest publisher.
