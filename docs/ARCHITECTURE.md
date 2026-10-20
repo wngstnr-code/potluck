@@ -127,57 +127,59 @@ potluck/
 
 ## 5. Spec format (declarative)
 
+**Source of truth:** the zod schema in [`packages/spec/src/schema.ts`](../packages/spec/src/schema.ts) plus the semantic checks in [`validate.ts`](../packages/spec/src/validate.ts). The reference specs live in [`/specs`](../specs) and are validated by a test.
+
 ```jsonc
 {
   "potluck": 1,
   "name": "polkadot-ah.balance-history",
+  "description": "...",
   "source": {
-    "kind": "substrate-events",                  // | "revive-logs" | "multi" (Portaldot)
+    "kind": "substrate-events",
+    "chain": "polkadot-asset-hub",
     "genesisHash": "0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f",
-    "fromBlock": 11405259                       // Revive active on Polkadot AH (2026-01-27)
+    "fromBlock": 11405259
   },
+  "columns": ["kind", "from", "to", "amount"],   // `block` and `eventIndex` are implicit
+  "accounts": ["from", "to"],                     // bloom + per-account queries
   "match": [
-    { "pallet": "Balances", "event": "Transfer",  "row": { "kind": "transfer", "from": "$from", "to": "$to", "amount": "$amount" } },
-    { "pallet": "Balances", "event": "Deposit",   "row": { "kind": "deposit",  "to": "$who",   "amount": "$amount" } },
-    { "pallet": "Balances", "event": "Withdraw",  "row": { "kind": "withdraw", "from": "$who", "amount": "$amount" } },
-    { "pallet": "Balances", "event": "Minted",    "row": { "kind": "mint",     "to": "$who",   "amount": "$amount" } },
-    { "pallet": "Balances", "event": "Burned",    "row": { "kind": "burn",     "from": "$who", "amount": "$amount" } }
-    // + Reserved/Unreserved/Slashed/Endowed/DustLost/ReserveRepatriated ... as needed for reconciliation
+    { "pallet": "Balances", "event": "Transfer", "row": { "kind": "Transfer", "from": "$from", "to": "$to", "amount": "$amount" } },
+    { "pallet": "Balances", "event": "Withdraw", "row": { "kind": "Withdraw", "from": "$who", "amount": "$amount" } },
+    { "pallet": "Balances", "event": "BalanceSet", "row": { "kind": "BalanceSet", "to": "$who", "amount": "$free" }, "absolute": true }
+    // ... all 13 delta events of the S4 rule table
   ],
-  "columns": ["block", "eventIndex", "kind", "from", "to", "amount"],
-  "accounts": ["from", "to"],                   // for per-chunk bloom & per-account queries
   "reconcile": {
-    "type": "balance-delta",
-    "storage": "System.Account",
-    "value": "data.free + data.reserved",
-    "delta": { "transfer": "-from +to", "deposit": "+to", "withdraw": "-from", "mint": "+to", "burn": "-from" }
+    "type": "balance-delta",                      // or { "type": "none" }
+    "storage": { "pallet": "System", "item": "Account" },
+    "sum": ["data.free", "data.reserved"],
+    "debit": "from", "credit": "to", "amount": "amount"
   },
-  "chunk": { "maxBlocks": 100000, "maxBytes": 8000000 }
+  "chunk": { "maxBlocks": 50000, "maxRawBytes": 32000000 }
 }
 ```
 
-- `specHash = blake2b-256(canonical JSON of the spec)`. The spec is also stored in TransactionStorage and registered in the registry.
+- Row values: `"$field"` references a decoded event field (metadata snake_case names); anything else is a literal.
+- `absolute: true` marks rows that set a value instead of changing it (e.g. `BalanceSet`). Their accounts are excluded from delta reconciliation.
+- `specHash = blake2b-256(canonical JSON)`: sorted keys, no whitespace, integers only. Because the stored spec blob is exactly that canonical JSON, the hash also equals its TransactionStorage content digest.
 - **No free-form code.** Only `match → row → columns`, so it is deterministic by construction.
-- The `kusama-ah.recovery-timeline` spec uses `reconcile.type = "state-replay"`: events are replayed into state (friend group, attempt, inheritor), then compared against the `recovery.*` storage at `toBlock`.
-- The `portaldot.unified-history` spec uses `source.kind = "multi"`: `Balances.*` events + `Transfer(address,address,uint256)` logs from all Revive contracts (`eth_getLogs`). Addresses are normalized via `ReviveApi.accountId(h160)`, and the EVM amount is divided by `nativeToEthRatio` when the token is native.
-
----
+- `kusama-ah.recovery-timeline` uses `reconcile: none` in the spec. Its state-replay check (replay events into friend groups / attempts / inheritors, compare with `recovery.*` storage) is client-side work in M5.
+- **Not built yet:** a `revive-logs` source kind for the Portaldot unified dual-VM history (Balances events + ERC-20 `Transfer` logs via `eth_getLogs`, addresses via `ReviveApi.accountId`, amounts divided by `nativeToEthRatio` for native value).
 
 ## 6. Indexing pipeline (the publisher and direct mode use the same code)
 
-1. **Runtime map:** sample the range, then binary search on `state_getRuntimeVersion` to find the blocks where `specVersion` changes (S1: 161 samples + 144 probes for the Revive window). Metadata per version is cached (disk for the CLI, OPFS for the browser). **Decode block N with the runtime of block N−1's state** (the executing runtime), never with N's post-state version.
+1. **Runtime map:** sample the range (starting at fromBlock − 2, so storage at fromBlock − 1 can be decoded for reconciliation), then binary search on `state_getRuntimeVersion` to find the blocks where `specVersion` changes. The live test rebuilds the Revive-window map and finds the S1 upgrades plus #11,405,258, the block that enabled Revive. Metadata per version is cached (disk for the CLI, OPFS for the browser). **Decode block N with the runtime of block N−1's state** (the executing runtime), never with N's post-state version.
 2. **Fetch events:** batch `chain_getBlockHash([n1, n2, …])` (up to 500 per call), then `state_getStorage(System.Events, hash)` per block with high bounded parallelism (publisher: ~128 in flight), retry with backoff, resumable checkpoints.
 3. **Decode** with the metadata registry of that block's version, then **match** the spec and **project** into rows.
 4. **Canonical normalization:**
    - addresses as AccountId32 hex taken from the codec via `toHex()` (never `toJSON()`, which yields SS58), H160 for Revive plus a mapping column;
    - bigint as a decimal string;
-   - row order `(block, eventIndex, logIndex)`;
-   - JSON with key order = `columns`, one row per line (NDJSON), no whitespace.
-5. **Chunking:** split by `maxBlocks` or `maxBytes` (≤ 8 MB after compression); a single oversized block (e.g. 1,888 events in a migration block) may form its own chunk.
+   - row order `(block, eventIndex)`;
+   - JSON with key order `block`, `eventIndex`, the spec columns in declared order, then `"absolute":true` only for absolute rows; one row per line (NDJSON), no whitespace. The decoder re-encodes every line and rejects non-canonical input.
+5. **Chunking:** chunk ranges are contiguous and cover the whole published range; a block is never split. A chunk closes before the next block that would exceed `maxRawBytes` or lie ≥ `maxBlocks` after its start, and an oversized block (e.g. 1,888 events in a migration block) forms its own chunk. The gzip blob must stay ≤ 8,388,608 bytes.
 6. Per chunk:
    - `rawHash = blake2b-256(NDJSON)`, used for determinism across publishers;
    - `blob = gzip(NDJSON)` (gzip does not need to be deterministic because the blob hash is recorded separately);
-   - account **bloom** (4 KB, k=7, target false positive ~1%).
+   - account **bloom** sized per chunk (9.6 bits per distinct account, k=7, ~1% false positives; a fixed 4 KB would saturate with thousands of accounts per chunk).
 7. `chunksRoot` = keccak256 Merkle root over the `rawHash` values (in chunk order), so it can be verified in Solidity going forward.
 
 ---
