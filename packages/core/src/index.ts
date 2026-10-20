@@ -1,4 +1,15 @@
 export { SPEC_FORMAT_VERSION } from "@potluck/spec";
+export { AccountBloom, BLOOM_HASHES } from "./bloom.js";
+export {
+  type BuiltChunk,
+  buildChunk,
+  type ChunkPlan,
+  chunkAccounts,
+  gunzip,
+  gzip,
+  MAX_BLOB_BYTES,
+  planChunks,
+} from "./chunk.js";
 export {
   decodeNdjson,
   encodeNdjson,
