@@ -8,6 +8,8 @@
 
 | Fact | Measured value | Design implication |
 |---|---|---|
+| Runtime execution on the public Portaldot node | `state_getRuntimeVersion` / `state_getMetadata` take ~8.5 s whenever the node switches runtime version | The runtime map reads `System.LastRuntimeUpgrade` instead (post-state version of block b = value at b + 1; code changed at #50,000 and #57,052, the value at #50,001 and #57,053) and probes in parallel: genesis → head map in 1.9 s instead of 22 s. Browsers cache metadata in IndexedDB |
+| Browser direct sync of Portaldot V3 (Pantry, Chrome) | 118,991 blocks → 2,248 rows in 2 min 25 s; L3 905 / 905 account checks in 22.7 s | Direct sync is fine for Portaldot today; snapshots are what make heavy chains load in seconds |
 | Portaldot block length limit | normal 14,942,208 bytes | One 8 MB chunk fits per block, so **max chunk size is 8 MB** and 1 store per tx |
 | `TransactionStorage.maxTransactionSize` | 8,388,608 bytes | Same |
 | Retention | 100,800 blocks (~7 days) | The manifest stores `(tsBlock, tsIndex)` for each chunk for `renew` |
