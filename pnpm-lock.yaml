@@ -70,6 +70,49 @@ importers:
         specifier: 8.3.2
         version: 8.3.2(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15)
 
+  apps/wasiat:
+    dependencies:
+      '@polkadot/api':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@polkadot/extension-dapp':
+        specifier: 0.64.1
+        version: 0.64.1(@polkadot/api@17.0.2)(@polkadot/util-crypto@14.0.3(@polkadot/util@14.0.3))(@polkadot/util@14.0.3)
+      '@polkadot/util':
+        specifier: 14.0.3
+        version: 14.0.3
+      '@polkadot/util-crypto':
+        specifier: 14.0.3
+        version: 14.0.3(@polkadot/util@14.0.3)
+      '@potluck/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@potluck/theme':
+        specifier: workspace:*
+        version: link:../../packages/theme
+      '@potluck/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
+      react-dom:
+        specifier: 19.3.0
+        version: 19.3.0(react@19.3.0)
+    devDependencies:
+      '@types/react':
+        specifier: 19.3.0
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 19.3.0
+        version: 19.3.0(@types/react@19.3.0)
+      '@vitejs/plugin-react':
+        specifier: 6.1.2
+        version: 6.1.2(vite@8.3.2(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15))
+      vite:
+        specifier: 8.3.2
+        version: 8.3.2(@types/node@26.6.5)(esbuild@0.28.2)(tsx@4.23.15)
+
   contracts:
     devDependencies:
       '@parity/resolc':
@@ -527,6 +570,21 @@ packages:
   '@polkadot/api@17.0.2':
     resolution: {integrity: sha512-PB9OHLh4UoAUmdX/vt3A6XmfCigG920wEbC4/2TLhLjM+orO5DWbpodqb09wBIy5Hr8eisKwFO6yNUTlZbELtg==}
     engines: {node: '>=18'}
+
+  '@polkadot/extension-dapp@0.64.1':
+    resolution: {integrity: sha512-sIAj50PvC2KIZA/EXINHYeRTBU4XAnq65j2RJSz5D40+lLexNCgrWJpCNlbFTnLNBMvBYc7BMW9HIu1Pszbb0A==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@polkadot/api': '*'
+      '@polkadot/util': '*'
+      '@polkadot/util-crypto': '*'
+
+  '@polkadot/extension-inject@0.64.1':
+    resolution: {integrity: sha512-kbkkLkGStH7n6rF4OCwKdwYoIpBIGPBIjNXYYPtTP4q5DOXVJeBz0nisPcjCNF4oBYHkt4AivGJfPf8eem+alA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@polkadot/api': '*'
+      '@polkadot/util': '*'
 
   '@polkadot/keyring@14.0.3':
     resolution: {integrity: sha512-ozp1dQwaHCjgX/fpTTORmHjxdUNQnyiTVJszpzUaUpvtH/IGZhSU/mSHXMqNETS/g57vQa7NatIDcWfyR9abyA==}
@@ -1763,6 +1821,30 @@ snapshots:
       '@polkadot/util-crypto': 14.0.3(@polkadot/util@14.0.3)
       eventemitter3: 5.0.4
       rxjs: 7.8.2
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@polkadot/extension-dapp@0.64.1(@polkadot/api@17.0.2)(@polkadot/util-crypto@14.0.3(@polkadot/util@14.0.3))(@polkadot/util@14.0.3)':
+    dependencies:
+      '@polkadot/api': 17.0.2
+      '@polkadot/extension-inject': 0.64.1(@polkadot/api@17.0.2)(@polkadot/util@14.0.3)
+      '@polkadot/util': 14.0.3
+      '@polkadot/util-crypto': 14.0.3(@polkadot/util@14.0.3)
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@polkadot/extension-inject@0.64.1(@polkadot/api@17.0.2)(@polkadot/util@14.0.3)':
+    dependencies:
+      '@polkadot/api': 17.0.2
+      '@polkadot/rpc-provider': 17.0.2
+      '@polkadot/types': 17.0.2
+      '@polkadot/util': 14.0.3
+      '@polkadot/util-crypto': 14.0.3(@polkadot/util@14.0.3)
+      '@polkadot/x-global': 14.0.3
       tslib: 2.8.1
     transitivePeerDependencies:
       - bufferutil

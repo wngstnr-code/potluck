@@ -1,0 +1,162 @@
+/* Wasiat-lite additions to @potluck/ui. Serif (IBM Plex Serif) is used only for headings here. */
+
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+h1.serif {
+  font-size: 30px;
+}
+.back {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.state.bad {
+  background: var(--red);
+  color: white;
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 8px 18px 18px;
+}
+.timeline li {
+  display: grid;
+  grid-template-columns: 120px 28px 1fr;
+  min-height: 76px;
+}
+.timeline .when {
+  text-align: right;
+  padding: 2px 14px 0 0;
+  display: grid;
+  align-content: start;
+  gap: 2px;
+}
+.timeline .when b {
+  font-weight: 600;
+  font-size: 13px;
+}
+.timeline .when span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.timeline .mark {
+  position: relative;
+}
+.timeline .mark::before {
+  content: "";
+  position: absolute;
+  left: 13px;
+  top: 0;
+  bottom: 0;
+  border-left: 2px solid var(--line);
+}
+.timeline .mark::after {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  background: var(--navy);
+  box-shadow: 0 0 0 4px var(--surface);
+}
+.timeline li.carried-over .mark::after {
+  background: var(--series-9);
+}
+.timeline li.now .mark::after {
+  background: var(--yellow);
+  box-shadow:
+    0 0 0 4px var(--surface),
+    inset 0 0 0 2px var(--navy);
+}
+.timeline li:last-child .mark::before {
+  bottom: auto;
+  height: 12px;
+}
+.timeline .what {
+  padding: 0 0 18px 12px;
+}
+.timeline h3 {
+  margin: 0 0 2px;
+  font-size: 21px;
+  line-height: 1.25;
+}
+.timeline p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 70ch;
+}
+.origin {
+  display: inline-block;
+  margin-top: 6px;
+  font: 500 11px var(--font-mono);
+  padding: 3px 7px 2px;
+  border-radius: var(--radius-sm);
+}
+.origin.event {
+  background: var(--navy);
+  color: white;
+}
+.origin.carried-over {
+  background: var(--series-9);
+  color: var(--ink);
+}
+
+.groups {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 18px 16px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.group {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 12px 0 0;
+}
+.group-h {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0 12px 8px;
+}
+.group-h b {
+  font-weight: 600;
+}
+.group-h span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.friends {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 12px 10px;
+}
+.friend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.friend .idn {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+}
+.group .ledger {
+  margin: 0 12px 12px;
+}
+.empty-note {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
