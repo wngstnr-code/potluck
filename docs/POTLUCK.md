@@ -33,7 +33,7 @@
 Both Asset Hubs have public **archive** nodes (block #1000 can be read), so anyone can build and verify an index permissionlessly.
 
 **Why Portaldot has to be the warehouse** (the answer to "why Portaldot is essential" in the pitch deck):
-1. **Portaldot's TransactionStorage is permissionless and fee-based.** Anyone can store (0 authorization required), it is cheap (`byteFee` 10 planck/byte), max 8 MB per tx.
+1. **Portaldot's TransactionStorage is permissionless and fee-based.** Anyone can store (0 authorization required), it costs ≈ 100 tPOT per MB on testnet (paid once per published byte; any number of readers then fetch it for free), max 8 MB per tx.
 2. **Polkadot Bulletin Chain**, its counterpart on Polkadot, **depends on authorization** (per-account quota, no token). Ordinary developers cannot use it directly.
 3. **IPFS** needs someone to keep *pinning*, in other words a server. On Portaldot, **validators must prove they still hold the data** (`checkProof` every block) during the retention period.
 4. Blobs can be fetched directly from a node via **`bitswap_v1_get`** (tested), without a gateway.
@@ -117,7 +117,7 @@ Once Portaldot gets busy, snapshots start being published and dApps use them aut
 |---|---|
 | **Technical Feasibility 30%** | Real `store` tx + registry + flag on the Portaldot testnet; CLI + SDK + dApp runnable; tests against a live node; incremental commits. |
 | **Innovation 30%** | TransactionStorage + bitswap + Revive + multi-chain all at once (exactly "WASM/EVM compatibility, modular architecture, multi-chain capabilities"). The first serverless indexer in the Polkadot ecosystem. Reconciliation-based verification. |
-| **Ecosystem Contribution 20%** | A ready-to-use Portaldot index for other teams; creates demand for POT (byteFee + tx fee); positions Portaldot as a *data layer* for Polkadot; open-source. |
+| **Ecosystem Contribution 20%** | A ready-to-use Portaldot index for other teams; creates demand for POT (≈ 100 POT per MB stored, paid by publishers); positions Portaldot as a *data layer* for Polkadot; open-source. |
 | **Business Potential 20%** | The model in §7; market = dApps on hundreds of polkadot-sdk chains that currently pay SubQuery/Subscan or run their own servers. |
 
 **Main track:** **Modular Cloud & Middleware** ("storage/data components, and APIs"). This lane is empty for indexers; the Multi-Chain track already has a strong bridge-zero. The multi-chain side still boosts the Innovation score and the chance at the **Grand Prize** (highest total score).

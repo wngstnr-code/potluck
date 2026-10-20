@@ -71,7 +71,7 @@ If two docs disagree: `DEVELOPMENT.md` (status) > `ARCHITECTURE.md` (design) > `
   - EVM chain ID `420420777`; token `tPOT`, 14 decimals, SS58 prefix 42.
   - Explorer: https://node-console.portaldot.dev/
 - Portaldot V3 live: `wss://live-v3-node.portaldot.dev`.
-- TransactionStorage: max 8,388,608 B per tx, retention 100,800 blocks (~7 days), `byteFee` 10 planck/byte, `entryFee` 1000, permissionless. Normal block length is 14,942,208 B.
+- TransactionStorage: max 8,388,608 B per tx, retention 100,800 blocks (~7 days), permissionless. **Real cost ≈ 100 tPOT per MB** (transaction length fee; `byteFee` 10 planck/byte is negligible) (S2). Normal block length is 14,942,208 B. Upload blobs with a ≥ 90 s request timeout.
 - `bitswap_v1_get(CID)` works on the public Portaldot node.
 - **Revive address mapping must come from runtime API `ReviveApi.address` / `ReviveApi.accountId` + `revive.originalAccount`.** Never compute it locally: the keccak rule fails for 851 `map_account` accounts.
 - Portaldot native has 14 decimals, EVM side 18 (`nativeToEthRatio` 10000).

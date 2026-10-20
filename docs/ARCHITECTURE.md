@@ -11,7 +11,8 @@
 | Portaldot block length limit | normal 14,942,208 bytes | One 8 MB chunk fits per block, so **max chunk size is 8 MB** and 1 store per tx |
 | `TransactionStorage.maxTransactionSize` | 8,388,608 bytes | Same |
 | Retention | 100,800 blocks (~7 days) | The manifest stores `(tsBlock, tsIndex)` for each chunk for `renew` |
-| `byteFee` / `entryFee` | 10 / 1000 planck | 25 MB ≈ 0.0000025 POT; cost is dominated by the tx fee, not by storage |
+| Storage cost (S2, `paymentInfo`) | **≈ 0.0001 tPOT per byte ≈ 100 tPOT per MB**, linear up to 7.8 MB; `byteFee`/`entryFee` (10/1000 planck) are negligible next to the transaction length fee | Bytes are the cost driver: the first Polkadot AH backfill (~19 MB) ≈ 1,900 tPOT. Encoding efficiency (dictionary/columnar) is a P1 cost lever. *(Corrects an earlier "25 MB ≈ 0.0000025 POT" estimate.)* |
+| Blob upload over WSS (S2) | 7.8 MB accepted; travels as hex (2×), ~28 s from the developer's link | Request timeout ≥ 90 s; keep chunk blobs ≲ 4.5 MB |
 | `bitswap_v1_get` | Works on public nodes (tested at 16 KB) | Chunk download path from the browser. MB-sized blobs need a spike |
 | Full Portaldot sync | 5.2 s (9,202 events) | **Direct** mode is already enough today |
 | Polkadot AH | 22.05 million blocks, ~3 events/block, **≥35 runtime versions** overall and **10 versions / 9 upgrades inside the Revive window** (S1), metadata **v14** since #1000 (561–639 KB per version), Parity public node is **archive** | Multi-runtime decoder; no manual types needed (v14 is self-describing) |
@@ -215,18 +216,33 @@ potluck/
 
 ---
 
-## 8. Publish flow (CLI)
+## 8. Publisher CLI (`packages/cli`)
 
 ```
-potluck build   --spec specs/polkadot-ah.balance-history.json --to finalized
-potluck publish --network portaldot-testnet   # uses an SS58 account (seed from local env)
+potluck build   <spec.json> [--last N | --from A --to B] [--concurrency 64]   # resumable
+potluck verify  <build-dir> [--rebuild] [--no-reconcile] [--chunks i,j]
+potluck publish <build-dir> --registry <h160> [--dry-run --from-address <ss58>]
+potluck tamper  <build-dir> --out <dir>                                       # demo only
 ```
 
-1. `transactionStorage.store(blob_i)`, one tx per chunk. Record `(tsBlock, tsIndex)` from the `Stored` event.
-2. `utility.batchAll([ transactionStorage.store(manifest.json), revive.call(PotluckRegistry, publish(...)) ])`: the manifest and the registration are **atomic** in a single tx (the SS58 account is mapped to H160 automatically).
-3. `potluck renew`: renews chunks nearing expiry, then calls `noteRenewal` in the registry. Anyone can call it.
-4. `potluck verify <manifestId>`: re-runs the spec and compares `rawHash`, used as a "second publisher" for quorum.
-5. `potluck tamper` (demo only): publishes a manifest with one row removed.
+- **build**:
+  - checks the endpoint genesis against the spec and builds the runtime map;
+  - scans segments (queryStorage with exact reconstruction, or per block when refused);
+  - decodes with the executing runtime and streams rows into the `ChunkAccumulator`;
+  - writes `chunks/<i>.ndjson.gz` and persists `state.json` after every closed chunk (resumable), then writes `spec.json` (canonical) and `manifest.draft.json`;
+  - metadata is cached in `.cache/potluck/metadata/<genesis>/`.
+  - Two independent builds are byte-identical.
+- **verify**: L1 integrity (blob digest/size, raw hash, canonical NDJSON, rows in range, bloom coverage); `--rebuild` re-indexes each chunk range and compares raw hashes (the second-publisher check); L3 reconciles every account of each chunk against source-chain state.
+- **publish**:
+  1. Checks every chunk locally first.
+  2. `transactionStorage.store` of the spec blob (if the spec is not registered yet), then `registerSpec`.
+  3. One `store` per chunk. Each `Stored(index, content_hash)` is checked against the manifest digest and its `(block, index)` recorded (resumable via `publish-state.json`).
+  4. `store` of the final manifest (chunk locations + publisher H160 filled in).
+  5. `registry.publish(...)` through `revive.call`, with weight/deposit limits from a `ReviveApi.call` dry run (+20%).
+  - Steps 4 and 5 are two transactions, not one atomic batch: the manifest entry must carry its own blob location, which is only known after inclusion.
+  - `--dry-run` builds the same transactions and estimates fees with `paymentInfo`, without funds.
+- **tamper** (demo): copies a build with one debit row removed and all hashes recomputed. It passes L1 alone; `verify --rebuild` reports a mismatch and L3 points at the victim account.
+- **renew**: not built yet (P1). It will re-store chunks nearing the 100,800-block retention and call `noteRenewal`.
 
 ---
 
