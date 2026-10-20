@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-20 (end of planning phase)._
+_Last updated: 2026-10-20 (M0 done; no-tPOT spikes done)._
 
 | Area | Status |
 |---|---|
@@ -16,10 +16,10 @@ _Last updated: 2026-10-20 (end of planning phase)._
 | Product decision | ✅ Potluck + Wasiat-lite (option C) |
 | Concept & architecture | ✅ `POTLUCK.md`, `ARCHITECTURE.md` |
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
-| Git repository | ❌ Not initialized yet (local `git init` pending; public GitHub repo to be created by the user) |
+| Git repository | ✅ Local repo on `main` with focused commits (M0). ❌ Public GitHub repo not created yet (user action) |
 | Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks S2, contract deploy, all testnet txs) |
-| Code | ❌ None yet |
-| Spikes S1–S7 | ⏳ Only S5 partially done (Revive mapping via runtime API) |
+| Code | 🟡 Workspace + empty `spec`/`core`/`client`/`cli` packages build, typecheck, test and lint |
+| Spikes | ✅ S1, S4, S6, S7 done (results in `spikes/results/`). 🟡 S5 partial. ⏳ S2, S3, S8 need tPOT |
 | DoraHacks check-in (Oct 24, 12:00 UTC) | ❌ Not submitted |
 
 ## 2. Immediate next steps & blockers
@@ -29,10 +29,17 @@ _Last updated: 2026-10-20 (end of planning phase)._
 2. **Create a public GitHub repo** (e.g. `wngstnr-code/potluck`) when ready. Claude must not create or push it unless asked.
 3. Confirm the DoraHacks registration for the Hacker House is complete. A screenshot is needed for the faucet ticket.
 
+**Decision needed (user):** publish scope for the Polkadot AH balance-history spec. S4 measured ~0.6–1 GB gzip for the full Revive window. See `ARCHITECTURE.md` §15 decision 5; progressive backfill is recommended.
+
+**Key spike findings to apply in M2** (details in `spikes/results/`):
+- Decode block N with the runtime of N−1 (S1).
+- Batch `chain_getBlockHash([n…])` and use ~128 in flight on the Parity endpoint (S6).
+- Take accounts via `toHex()` (S4); apply the closed `Balances` delta rule table (S4).
+- Recovery-timeline spec starts at Kusama AH #17,836,634 (S7).
+
 **Next engineering steps (in order):**
-1. M0 repo bootstrap (§5).
-2. M1 spikes that need no tPOT: S1, S4, S6, S7.
-3. M3 registry contract with local Foundry tests (deploy once tPOT arrives).
+1. M3 registry contract with local Foundry tests (deploy once tPOT arrives).
+2. M2 `spec` + `core`, porting the proven spike logic (runtime map, executing-runtime decoding, delta rules, canonical NDJSON).
 4. Prepare the **check-in package for Oct 24**: README, architecture diagram, progress notes, deployed registry address + tx hash, and a ≤3 min demo video of one core function (e.g. direct-sync history of a Portaldot account + one `transactionStorage.store`).
 
 ---
@@ -113,10 +120,10 @@ Each milestone lists tasks, a **done-when** check, and the **planned commits**. 
 ### M1: Spikes (de-risk before building)
 | Spike | Needs tPOT | Done when | Commit |
 |---|---|---|---|
-| S1 multi-runtime event decoding (Polkadot AH, ≥35 versions) | no | Decodes `System.Events` correctly on both sides of 3+ runtime upgrades; metadata size/latency recorded | `test(spike): decode events across Polkadot AH runtime upgrades` |
-| S4 balance reconciliation (Polkadot AH) | no | For 20 random accounts, `free+reserved` delta over a window = Σ balance-event deltas; list of required events documented; row-volume estimate replaces the ~250 MB assumption | `test(spike): validate windowed balance reconciliation` |
-| S6 public RPC throughput | no | Safe sustained req/s per endpoint and the needed parallelism recorded | `test(spike): measure public RPC throughput limits` |
-| S7 Recovery start block (Kusama AH) | no | First block containing the Recovery `friendGroups` storage found | `test(spike): locate Recovery pallet activation on Kusama AH` |
+| ✅ S1 multi-runtime event decoding (Polkadot AH, ≥35 versions) | no | Decodes `System.Events` correctly on both sides of 3+ runtime upgrades; metadata size/latency recorded | `test(spike): decode events across Polkadot AH runtime upgrades` |
+| ✅ S4 balance reconciliation (Polkadot AH) | no | For 20 random accounts, `free+reserved` delta over a window = Σ balance-event deltas; list of required events documented; row-volume estimate replaces the ~250 MB assumption | `test(spike): validate windowed balance reconciliation` |
+| ✅ S6 public RPC throughput | no | Safe sustained req/s per endpoint and the needed parallelism recorded | `test(spike): measure public RPC throughput limits` |
+| ✅ S7 Recovery start block (Kusama AH) | no | First block containing the Recovery `friendGroups` storage found | `test(spike): locate Recovery pallet activation on Kusama AH` |
 | S2 store 1/4/8 MB in TransactionStorage | **yes** | Real tx hashes; fees recorded; 8 MB passes block length/weight | `test(spike): store 1-8 MB blobs in TransactionStorage` |
 | S3 `bitswap_v1_get` for MB blobs | **yes** (after S2) | MB blob retrieved via WSS from a browser context; latency recorded | `test(spike): fetch MB blobs via bitswap_v1_get` |
 | S8 resolc → PVM deploy on Portaldot | **yes** | Trivial contract compiled with resolc and deployed; version pair recorded | `test(spike): deploy PVM contract via resolc` |
@@ -168,7 +175,7 @@ Record every result in `ARCHITECTURE.md` §0/§14 (`docs(arch): record spike S<n
 |---|---|---|
 | **Oct 24, 12:00** | Check-in submission | Progress + outstanding items; public repo with README, dev records, **architecture diagram**; testnet deployment info (**contract address, tx hash, explorer link**); demo link or ≤3 min video of one core function |
 | Oct 26, 16:00 | Feedback announced | Read and adjust |
-| Oct 27, 12:00 | Office-hour application | Ask about: storing ~250 MB on testnet, `securityDeposit = 0`, resolc version, bitswap limits |
+| Oct 27, 12:00 | Office-hour application | Ask about: storing ~0.6–1 GB on testnet (or a backfilled subset), `securityDeposit = 0`, resolc version, bitswap limits |
 | Oct 28–29 | Office hours | n/a |
 | **Nov 6, 04:00** | **Final submission / code freeze** | Everything in M7 |
 | Nov 8–9 | Live demo day (Discord) | Live demo |
