@@ -84,6 +84,9 @@ If two docs disagree: `DEVELOPMENT.md` (status) > `ARCHITECTURE.md` (design) > `
 - Kusama AH Recovery inheritance API starts at block **17,836,634** (S7).
 - **Pass raw byte payloads to `@polkadot/api` as hex strings, never `Uint8Array`.** A `Uint8Array` for `Bytes` is treated as already SCALE-encoded and silently truncated (S8).
 - Revive storage deposits: `depositPerByte` 0.06 tPOT, `depositPerItem` 0.15 tPOT. Deploying the registry costs ≈ 433 tPOT (EVM) / ≈ 3,293 tPOT (PVM) (S8 dry-run).
+- EVM logs are `Revive.ContractEmitted` events in `System.Events`; one pipeline covers both VMs. ERC-20/ERC-721 `Transfer` share a selector (differ by indexed count).
+- The public Portaldot WSS drops connections every ~60 s; always use `connectWs` + `withRetry` (auto-reconnect, ~15 s retry window).
+- `System.KilledAccount` can erase held funds without a Balances event; specs model it as an `effect: "reset"` row.
 - Portaldot `recovery.securityDeposit = 0` (Kusama AH uses ~0.17 KSM).
 
 ## 8. Engineering conventions

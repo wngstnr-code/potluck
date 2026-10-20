@@ -21,6 +21,11 @@
 | Balance-history volume (S4) | Revive window ≈ **24–34 M rows, ~0.6–1 GB gzip (78–130 chunks)**; 52% `Deposit`, 34% `Transfer`, 12% `Withdraw` | Full-window publish is too heavy for the MVP; see §15 decision 5 |
 | Kusama AH Recovery (S7) | Pallet since #11,135,052; **inheritance API since #17,836,634** (2026-06-12, spec 2003000) | Recovery-timeline spec `fromBlock = 17836634` |
 | Huge blocks (S1) | #20,485,673 holds 1,888 events / 112,929 bytes | Chunk by bytes; one oversized block may form its own chunk |
+| EVM logs on Revive (M2b) | Logs are `Revive.ContractEmitted { contract, data, topics }` events inside `System.Events`; native value moved by EVM calls appears as ordinary `Balances` events | One pipeline (executing-runtime decoding) covers both VMs; no `eth_getLogs` path needed. ERC-20 and ERC-721 `Transfer` share topics[0] and differ by indexed-topic count |
+| Portaldot unified history, genesis → head (M2b live test) | 115,471 blocks, 2 runtime upgrades (#50,000, #57,052), 2,156 rows incl. 16 token rows; token rows equal `eth_getLogs` as a multiset; **894/894 native accounts reconcile** | Dual-VM history is exact today; direct sync is the right mode for Portaldot |
+| Holds can vanish without a Balances event (M2b) | An account's 166,640-planck TransactionStorage hold disappeared when `System.KilledAccount` reaped it | `KilledAccount` is a **reset** row (value 0 at end of block); worth reporting to the Portaldot team |
+| Public Portaldot WSS (M2b) | Drops every connection ~60 s after opening (close 1006); reconnect ≈ 2 s; calls ≈ 0.45 s from Indonesia | Auto-reconnect + ~15 s retry window; clients must re-subscribe after reconnects. Full-chain scan took 5.2 s in S1 conditions and ~117 s under current load |
+| `state_queryStorage` semantics | Reports only blocks whose value changed | Range scan rebuilds every block as the latest change at or before it (exact), with per-block fallback |
 | Kusama AH | 22.78 million blocks, ~4.7 events/block, Recovery-inheritance live (121 configurations) | Real source for Wasiat-lite |
 | `state_queryStorage` on Polkadot nodes | **Blocked** (unsafe) | The publisher uses **only** safe RPC: `chain_getBlockHash` + `state_getStorage(System.Events, hash)` per block, or `archive_v1_*` |
 | Revive account mapping | Regular accounts: `keccak256(AccountId32)[12..]`; **851 distinct `map_account` accounts** | Address normalization is **mandatory** via the runtime API `ReviveApi.address` / `ReviveApi.accountId` + storage `revive.originalAccount`, not computed locally |
@@ -159,11 +164,15 @@ potluck/
 ```
 
 - Row values: `"$field"` references a decoded event field (metadata snake_case names); anything else is a literal.
-- `absolute: true` marks rows that set a value instead of changing it (e.g. `BalanceSet`). Their accounts are excluded from delta reconciliation.
+- `effect` changes how a row reconciles (default: delta):
+  - `"reset"`: the credit account's value is exactly `amount` at the **end of the row's block**. `System.KilledAccount` → `"0"`; same-block rows of that account are part of the reset, because `KilledAccount` is emitted before the `Transfer` that empties the account.
+  - `"opaque"`: the change cannot be expressed (e.g. `BalanceSet` sets `free` but not `reserved`); the account is excluded from reconciliation.
+  - Non-delta rows carry `"effect":"reset"|"opaque"` at the end of their NDJSON line.
+- A match may also be a **Revive EVM log**: `{ "log": "Transfer(address indexed from, address indexed to, uint256 value)", "contracts"?: [...], "row": {...} }`, with `$contract` and parameter references. `balance-delta` accepts an optional `when` filter (e.g. only `asset == "native"` rows).
 - `specHash = blake2b-256(canonical JSON)`: sorted keys, no whitespace, integers only. Because the stored spec blob is exactly that canonical JSON, the hash also equals its TransactionStorage content digest.
 - **No free-form code.** Only `match → row → columns`, so it is deterministic by construction.
 - `kusama-ah.recovery-timeline` uses `reconcile: none` in the spec. Its state-replay check (replay events into friend groups / attempts / inheritors, compare with `recovery.*` storage) is client-side work in M5.
-- **Not built yet:** a `revive-logs` source kind for the Portaldot unified dual-VM history (Balances events + ERC-20 `Transfer` logs via `eth_getLogs`, addresses via `ReviveApi.accountId`, amounts divided by `nativeToEthRatio` for native value).
+- `portaldot-v3-testnet.unified-history` combines Balances events (`asset: "native"`, AccountId32 hex) with ERC-20 and ERC-721 `Transfer` logs (`asset`: token contract, H160 accounts, `tokenId` for NFTs). Clients query a user's AccountId32 for native rows and its H160 (`ReviveApi.address`) for token rows.
 
 ## 6. Indexing pipeline (the publisher and direct mode use the same code)
 
