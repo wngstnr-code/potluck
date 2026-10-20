@@ -29,7 +29,7 @@ _Last updated: 2026-10-20 (M0 done; no-tPOT spikes done)._
 2. **Create a public GitHub repo** (e.g. `wngstnr-code/potluck`) when ready. Claude must not create or push it unless asked.
 3. Confirm the DoraHacks registration for the Hacker House is complete. A screenshot is needed for the faucet ticket.
 
-**Decision needed (user):** publish scope for the Polkadot AH balance-history spec. S4 measured ~0.6–1 GB gzip for the full Revive window. See `ARCHITECTURE.md` §15 decision 5; progressive backfill is recommended.
+**Decided:** publish scope = progressive backfill (newest ~1.5 M blocks first, older ranges later; `ARCHITECTURE.md` §15 decision 5).
 
 **Key spike findings to apply in M2** (details in `spikes/results/`):
 - Decode block N with the runtime of N−1 (S1).

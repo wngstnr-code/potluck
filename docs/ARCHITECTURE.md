@@ -376,12 +376,13 @@ Free-form JS handlers · on-chain slashing/adjudication · smoldot light client 
    - Feasibility proof: the testnet already contains 1 PVM contract (4,995 bytes) and 13 EVM codes.
    - If the resolc spike fails, EVM alone is enough. No change in the client.
    - ink! is deliberately **not** used: rewriting the registry in Rust adds no functionality, duplicates code, and ink! v6 for Revive has not been verified on Portaldot.
+5. **Publish scope = progressive backfill** (decided 2026-10-20, after S4 measured ~0.6–1 GB for the full Revive window).
+   - The spec keeps `fromBlock = 11405259`; only the *published* coverage grows over time.
+   - **MVP publishes the newest range first**: the last ~1.5 M blocks ≈ 90–140 MB, ~12–18 chunks. Older ranges follow as additional manifests as testnet capacity and time allow.
+   - Manifests for one spec may cover disjoint or adjacent ranges. The registry's `latest(specHash, n)` returns all of them; the client merges them, shows a **coverage bar**, and direct-syncs any uncovered range.
+   - This matches the Potluck story: any publisher can "bring a chunk" of older history.
+   - Rejected alternatives: publishing the full window now (heavy on a shared testnet, ~12 h build), or a lighter demo spec such as Revive contract logs only (weakens the L3 reconciliation story).
 
 ### Still open
-3. Coordination with the Portaldot team about storing up to ~0.6–1 GB on testnet (material for the 28–29 Oct office hour).
+3. Coordination with the Portaldot team about testnet storage for the backfill: ~90–140 MB first, up to ~0.6–1 GB eventually (material for the 28–29 Oct office hour).
 4. **User prerequisite:** create a dev SS58 account and request tPOT via a Discord ticket. Not done yet.
-5. **Publish scope for the Polkadot AH balance-history spec** (raised by S4: ~0.6–1 GB for the full Revive window). The spec keeps `fromBlock = 11405259`; what changes is what the MVP *publishes*.
-   - **Recommended: progressive backfill.** Publish the newest range first (e.g. the last ~1.5 M blocks ≈ 90–140 MB, ~12–18 chunks), then older ranges as extra manifests as testnet capacity and time allow.
-     - The client merges manifests, shows a coverage bar, and direct-syncs any uncovered range.
-     - This fits the Potluck story: any publisher can "bring a chunk" of older history.
-   - Alternatives: publish the full window (heavy on a shared testnet, ~12 h build); or change the demo spec to a lighter one (e.g. Revive contract logs only). The latter weakens the reconciliation (L3) story.
