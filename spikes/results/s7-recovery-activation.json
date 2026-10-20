@@ -1,0 +1,25 @@
+{
+  "spike": "S7",
+  "measuredAt": "2026-10-20T04:05:40.641Z",
+  "chain": "kusama-asset-hub",
+  "endpoint": "wss://kusama-asset-hub-rpc.polkadot.io",
+  "head": 22783533,
+  "binarySearchProbes": 49,
+  "recoveryFirstBlock": 11135052,
+  "recoveryFirstBlockHash": "0x766305cdb6002446e5074e42c47e2bbb3626566e2d49bb9f547bfa94dfcb622f",
+  "recoveryFirstTimestamp": "2025-10-06T09:07:24.000Z",
+  "specVersionAtFirstBlock": 1009001,
+  "friendGroupsApiAtFirstBlock": false,
+  "headStorageVersion": 1,
+  "inheritanceApiFirstBlock": 17836634,
+  "inheritanceApiFirstBlockHash": "0x0d9a97855e4f9907465988da493b7c0a512548acda73eaf1c89f35f669796d5d",
+  "inheritanceApiFirstTimestamp": "2026-06-12T09:39:36.000Z",
+  "specVersionAtInheritanceBlock": 2003000,
+  "friendGroupsApiAtInheritanceBlock": true,
+  "blocksSinceInheritanceApi": 4946899,
+  "usageNow": {
+    "configuredAccounts": 121,
+    "openAttempts": 14,
+    "inheritorsRecorded": 13
+  }
+}
