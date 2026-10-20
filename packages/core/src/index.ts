@@ -73,6 +73,7 @@ export {
   getBlockHashes,
   getFinalizedHead,
   getGenesisHash,
+  isRetryable,
   mapPool,
   type RetryOptions,
   type RpcClient,

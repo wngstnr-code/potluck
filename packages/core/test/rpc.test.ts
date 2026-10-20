@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { getBlockHashes, mapPool, type RpcClient, withRetry, withTimeout } from "../src/rpc.js";
+import {
+  getBlockHashes,
+  isRetryable,
+  mapPool,
+  type RpcClient,
+  withRetry,
+  withTimeout,
+} from "../src/rpc.js";
 
 /** In-memory transport that records calls; used to test client-side batching and retry logic. */
 function recordingClient(handler: (method: string, params: unknown[]) => unknown): RpcClient & {
@@ -82,5 +89,23 @@ describe("mapPool", () => {
     });
     expect(out).toEqual([50, 10, 40, 20, 30]);
     expect(peak).toBe(2);
+  });
+});
+
+describe("isRetryable", () => {
+  it("retries transport errors but not JSON-RPC error responses", async () => {
+    expect(isRetryable(new Error("WebSocket is not connected"))).toBe(true);
+    expect(isRetryable(new Error("timeout after 30000 ms: state_getStorage"))).toBe(true);
+    expect(
+      isRetryable(new Error('RpcError: -32810: Transaction not found: {"variant":"NotFound"}')),
+    ).toBe(false);
+    expect(isRetryable(new Error("4003: RPC call is unsafe to be called externally"))).toBe(false);
+    const client = recordingClient(() => {
+      throw new Error("-32602: Invalid params");
+    });
+    await expect(
+      withRetry(client, { attempts: 5, baseDelayMs: 1, timeoutMs: 1000 }).send("m", []),
+    ).rejects.toThrow("Invalid params");
+    expect(client.calls).toHaveLength(1);
   });
 });

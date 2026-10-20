@@ -36,7 +36,17 @@ export async function withTimeout<T>(promise: Promise<T>, ms: number, label: str
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Wraps a client so every call gets a timeout and exponential-backoff retries. */
+/**
+ * True for errors worth retrying (dropped connection, timeout). JSON-RPC error responses carry a
+ * code (e.g. "-32810: Transaction not found", "4003: RPC call is unsafe") and are deterministic:
+ * retrying them only delays the caller.
+ */
+export function isRetryable(error: unknown): boolean {
+  const message = String((error as Error)?.message ?? error);
+  return !/(^|RpcError: |\b)-?\d{4,5}: /.test(message);
+}
+
+/** Wraps a client so every call gets a timeout and exponential-backoff retries of transport errors. */
 export function withRetry(client: RpcClient, options: RetryOptions = DEFAULT_RETRY): RpcClient {
   return {
     async send<T>(method: string, params: unknown[]): Promise<T> {
@@ -46,6 +56,7 @@ export function withRetry(client: RpcClient, options: RetryOptions = DEFAULT_RET
           return await withTimeout(client.send<T>(method, params), options.timeoutMs, method);
         } catch (error) {
           lastError = error;
+          if (!isRetryable(error)) break;
           if (attempt < options.attempts - 1) await sleep(options.baseDelayMs * 2 ** attempt);
         }
       }
