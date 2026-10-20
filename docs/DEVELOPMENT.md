@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-20 (M0, M2 done; no-tPOT spikes done; M3 done except real deployment)._
+_Last updated: 2026-10-20 (M0, M2, M4 done; M3 done except real deployment; S2 fees measured)._
 
 | Area | Status |
 |---|---|
@@ -17,9 +17,9 @@ _Last updated: 2026-10-20 (M0, M2 done; no-tPOT spikes done; M3 done except real
 | Concept & architecture | ✅ `POTLUCK.md`, `ARCHITECTURE.md` |
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
 | Git repository | ✅ Public: https://github.com/wngstnr-code/potluck (`main`); sole contributor `wngstnr-code` |
-| Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks S2, S3, real deploy, all testnet txs). **Ask for ≥ ~4,000 tPOT**: deploy deposits are ≈ 433 (EVM) + ≈ 3,293 (PVM) tPOT, plus manifest/spec deposits |
-| Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK). `spec` done (23 tests). `core` done: Substrate + Revive EVM logs, range scan, reconciliation (65 offline tests on recorded real data + 5 live tests: Polkadot AH window and Portaldot genesis → head, 894/894 accounts reconcile). Missing: `cli`, `client`, apps |
-| Spikes | ✅ S1, S4, S6, S7 done (results in `spikes/results/`). 🟡 S5 partial. 🟡 S8 dry-run done, real deploy needs tPOT. ⏳ S2, S3 need tPOT |
+| Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks real deploy, real publish, S3). **Ask for ≈ 6,000–8,000 tPOT**: deploy deposits ≈ 433 (EVM) + ≈ 3,293 (PVM); storing data ≈ 100 tPOT/MB, so the first Polkadot AH backfill (~19 MB) ≈ 1,900 tPOT |
+| Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK). `spec` done (23 tests). `core` done: Substrate + Revive EVM logs, range scan, reconciliation (65 offline tests on recorded real data + 5 live tests: Polkadot AH window and Portaldot genesis → head, 894/894 accounts reconcile). `cli` done: build (resumable, deterministic), verify (L1 + re-index + L3), publish (dry run tested; submission awaits tPOT), tamper (demo). Missing: `client`, apps |
+| Spikes | ✅ S1, S4, S6, S7 done; S2 fees measured (results in `spikes/results/`). 🟡 S5 partial. 🟡 S8 dry-run done, real deploy needs tPOT. ⏳ S3 (bitswap MB fetch) needs a stored blob |
 | DoraHacks check-in (Oct 24, 12:00 UTC) | ❌ Not submitted |
 
 ## 2. Immediate next steps & blockers
@@ -38,7 +38,8 @@ _Last updated: 2026-10-20 (M0, M2 done; no-tPOT spikes done; M3 done except real
 - Recovery-timeline spec starts at Kusama AH #17,836,634 (S7).
 
 **Next engineering steps (in order):**
-1. M4 `cli` publisher (build/publish/renew/verify) on top of `core`. Building works without tPOT; publishing needs it.
+1. M5 `client` SDK (adaptive sync, bitswap loader, verifier L1–L3, SQLite-WASM, live tail).
+2. When tPOT arrives: `pnpm --filter @potluck/contracts deploy` (EVM first if tPOT is short), then `potluck publish` for the Portaldot unified history and the first Polkadot AH backfill.
 2. Report to the Portaldot team: held funds can vanish on `System.KilledAccount` without a Balances event (TransactionStorage hold, block #89,388).
 2. When tPOT arrives: write and run `contracts/deploy/deploy.ts`, i.e. `revive.instantiateWithCode` signed by the SS58 dev account for both EVM and PVM. Pass code as **hex**. Record addresses + tx hashes; then a real `registerSpec`/`publish` round trip to measure per-manifest deposits (S8).
 4. Prepare the **check-in package for Oct 24**: README, architecture diagram, progress notes, deployed registry address + tx hash, and a ≤3 min demo video of one core function (e.g. direct-sync history of a Portaldot account + one `transactionStorage.store`).
@@ -151,7 +152,7 @@ Record every result in `ARCHITECTURE.md` §0/§14 (`docs(arch): record spike S<n
 - Done when: tests pass locally, and once tPOT is available both deployments are on testnet with addresses recorded in `.env.example`/README.
 - Commits: `feat(contracts): add PotluckRegistry`, `test(contracts): …`, `build(contracts): add EVM and PVM deploy scripts`, `chore(contracts): record testnet deployment addresses`.
 
-### M4: `cli` publisher
+### M4: `cli` publisher (✅ build/verify/publish/tamper; renew pending)
 - Tasks: `build`, `publish` (store chunks, then atomic `utility.batchAll[store(manifest), revive.call(publish)]`), `renew`, `verify`, `tamper` (demo only).
 - Done when: real manifests for all 3 specs exist on Portaldot testnet with explorer links.
 
