@@ -4,6 +4,8 @@
 
 On-chain history for any dApp, loaded in the browser with no servers, stored and guaranteed by [Portaldot](https://portaldot-dev.readthedocs.io/), and verified against the chain it came from.
 
+**Live:** [Pantry](https://wngstnr-code.github.io/potluck/pantry/) · [Wasiat-lite](https://wngstnr-code.github.io/potluck/wasiat/) (static files on GitHub Pages; every number is read from the chains in your browser).
+
 Built for **Portaldot Hacker House 2026** (track: Modular Cloud & Middleware). Solo project by [@wngstnr-code](https://github.com/wngstnr-code).
 
 ## The problem
