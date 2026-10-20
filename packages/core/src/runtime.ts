@@ -84,6 +84,9 @@ export function decodeCompactU32(hex: string): number {
   }
 }
 
+/** Probes per round when locating a runtime upgrade boundary. */
+const SEARCH_WAYS = 16;
+
 export interface BuildRuntimeMapOptions {
   /** Number of evenly spaced samples before refining boundaries (default 64). */
   samples?: number;
@@ -122,12 +125,15 @@ export async function buildRuntimeMap(
     return (await getRuntimeVersion(client, await options.hashOf(block))).specVersion;
   };
 
-  const points: { block: number; version: number }[] = [];
+  // Samples and search probes are independent reads, so they are issued in parallel: the map
+  // costs a few round trips instead of one per probe.
   const step = Math.max(1, Math.floor((toBlock - start) / (samples - 1)));
-  for (let block = start; block < toBlock; block += step) {
-    points.push({ block, version: await versionAt(block) });
-  }
-  points.push({ block: toBlock, version: await versionAt(toBlock) });
+  const sampleBlocks: number[] = [];
+  for (let block = start; block < toBlock; block += step) sampleBlocks.push(block);
+  sampleBlocks.push(toBlock);
+  const points = await Promise.all(
+    sampleBlocks.map(async (block) => ({ block, version: await versionAt(block) })),
+  );
 
   const segments: RuntimeSegment[] = [{ fromBlock: start, specVersion: points[0]?.version ?? 0 }];
   for (let i = 1; i < points.length; i++) {
@@ -138,9 +144,21 @@ export async function buildRuntimeMap(
       let lo = left.block;
       let hi = right.block;
       while (hi - lo > 1) {
-        const mid = Math.floor((lo + hi) / 2);
-        if ((await versionAt(mid)) === left.version) lo = mid;
-        else hi = mid;
+        // k-ary search: probe up to SEARCH_WAYS evenly spaced blocks at once.
+        const probes = [
+          ...new Set(
+            Array.from({ length: Math.min(SEARCH_WAYS, hi - lo - 1) }, (_, j) =>
+              Math.floor(lo + ((j + 1) * (hi - lo)) / (Math.min(SEARCH_WAYS, hi - lo - 1) + 1)),
+            ),
+          ),
+        ].filter((b) => b > lo && b < hi);
+        const versions = await Promise.all(probes.map(versionAt));
+        const first = versions.findIndex((v) => v !== left.version);
+        if (first === -1) lo = probes.at(-1) ?? lo + 1;
+        else {
+          hi = probes[first] as number;
+          if (first > 0) lo = probes[first - 1] as number;
+        }
       }
       const version = hi === right.block ? right.version : await versionAt(hi);
       segments.push({ fromBlock: hi, specVersion: version });
