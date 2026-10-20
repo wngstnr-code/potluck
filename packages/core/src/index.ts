@@ -1,5 +1,14 @@
 export { SPEC_FORMAT_VERSION } from "@potluck/spec";
 export {
+  decodeNdjson,
+  encodeNdjson,
+  encodeRow,
+  merkleProof,
+  merkleRoot,
+  rawHash,
+  verifyMerkleProof,
+} from "./encoding.js";
+export {
   type Cell,
   type CompiledSpec,
   compileSpec,
