@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Attack } from "./Attack";
 import { Icon, type IconName } from "./components/Icon";
 import { PORTALDOT, UNIFIED_SPEC_NAME } from "./config";
 import { Overview } from "./Overview";
@@ -18,6 +19,7 @@ function readCollapsed(): boolean {
 const PAGES: { id: string; label: string; icon: IconName; section: string }[] = [
   { id: "overview", label: "Overview", icon: "home", section: "Pantry" },
   { id: "verify", label: "Verify account", icon: "shield", section: "Pantry" },
+  { id: "attack", label: "Attack demo", icon: "bolt", section: "Pantry" },
 ];
 
 export function App() {
@@ -85,6 +87,7 @@ export function App() {
         </div>
         {page === "overview" && <Overview />}
         {page === "verify" && <Verify />}
+        {page === "attack" && <Attack />}
       </main>
     </div>
   );

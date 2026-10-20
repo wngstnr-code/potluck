@@ -8,6 +8,7 @@ const PATHS = {
     </>
   ),
   check: <path d="M3.5 8.5l3 3 6-6.5" />,
+  bolt: <path d="M9 1.5L3.5 9H8l-1 5.5L12.5 7H8z" />,
   cross: <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" />,
   arrow: <path d="M4 12L12 4M6 4h6v6" />,
   collapse: (

@@ -882,3 +882,125 @@ tr.clickable {
   border-radius: 4px;
   transition: width var(--duration-in) var(--ease-out);
 }
+
+.btn.danger {
+  background: linear-gradient(180deg, oklch(0.6 0.19 25), var(--red));
+  color: white;
+  box-shadow:
+    0 8px 18px oklch(0.55 0.19 25 / 0.3),
+    inset 0 1px 0 oklch(1 0 0 / 0.2);
+}
+.bar-label {
+  font-weight: 600;
+  color: var(--ink);
+}
+.verify-bar select {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: 13px;
+  color: var(--ink);
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0 18px 4px;
+  display: grid;
+}
+.step {
+  display: grid;
+  grid-template-columns: 76px 1fr auto;
+  gap: 14px;
+  align-items: start;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+  transition: opacity var(--duration-in) var(--ease-out);
+}
+.step.todo {
+  opacity: 0.55;
+}
+.step b {
+  display: block;
+  font-weight: 600;
+}
+.step p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.step .v {
+  font-size: 12px;
+  color: var(--muted);
+  padding-top: 2px;
+}
+.step .who {
+  font: 600 11px var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-align: center;
+  padding: 5px 0 4px;
+  border-radius: var(--radius-sm);
+}
+.who.attacker {
+  background: var(--red);
+  color: white;
+}
+.who.client {
+  background: var(--navy);
+  color: white;
+}
+.step.active .who {
+  box-shadow: 0 0 0 3px oklch(0.93 0.16 108);
+}
+
+.victim {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 0 18px 14px;
+}
+.victim b {
+  display: block;
+  font-size: 14px;
+}
+.victim small {
+  color: var(--muted);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.subhead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 18px 6px;
+  border-top: 1px solid var(--line);
+}
+.subhead b {
+  font-weight: 600;
+}
+.subhead span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.rows tr.hl td {
+  background: oklch(0.96 0.1 108);
+}
+.rows tr.hl td:first-child {
+  box-shadow: inset 4px 0 0 var(--red);
+}
+
+.panel.grow .ids {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}

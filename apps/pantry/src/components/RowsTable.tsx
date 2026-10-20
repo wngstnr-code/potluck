@@ -1,6 +1,6 @@
 import type { IndexedRow } from "@potluck/core";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { direction, fmt, formatAmount, shortHex } from "../lib/format";
 import { seriesOf } from "../lib/kinds";
 import { Identicon } from "./Identicon";
@@ -23,9 +23,12 @@ export function RowsTable({
   rows,
   filter,
   perspective,
+  highlight,
 }: {
   rows: readonly IndexedRow[];
   filter: string | null;
+  /** A row to mark (e.g. the one an attacker hid). */
+  highlight?: IndexedRow;
   /** Address forms of the account being viewed: signs become relative to it. */
   perspective?: ReadonlySet<string>;
 }) {
@@ -44,6 +47,10 @@ export function RowsTable({
     estimateSize: () => ROW_HEIGHT,
     overscan: 12,
   });
+  const highlightIndex = highlight ? visible.indexOf(highlight) : -1;
+  useEffect(() => {
+    if (highlightIndex >= 0) virtual.scrollToIndex(highlightIndex, { align: "center" });
+  }, [highlightIndex, virtual]);
   const items = virtual.getVirtualItems();
   const padTop = items[0]?.start ?? 0;
   const padBottom = virtual.getTotalSize() - (items.at(-1)?.end ?? 0);
@@ -92,7 +99,11 @@ export function RowsTable({
                   ? "credited"
                   : "debited";
             return (
-              <tr key={`${row.block}:${row.eventIndex}`} style={{ height: ROW_HEIGHT }}>
+              <tr
+                key={`${row.block}:${row.eventIndex}`}
+                className={row === highlight ? "hl" : undefined}
+                style={{ height: ROW_HEIGHT }}
+              >
                 <td>
                   <div className="who">
                     <Identicon account={party} />
