@@ -9,9 +9,9 @@ import {
 } from "@potluck/client";
 import { connectWs, type IndexedRow, type RpcClient, withRetry } from "@potluck/core";
 import type { Spec } from "@potluck/spec";
+import { IndexedDbMetadataStore } from "@potluck/ui/metadataStore";
 import { useEffect, useState } from "react";
 import { PORTALDOT } from "../config";
-import { IndexedDbMetadataStore } from "./metadataStore";
 
 export type Phase = "connecting" | "loading" | "verifying" | "live" | "error";
 

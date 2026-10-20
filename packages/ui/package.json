@@ -1,0 +1,30 @@
+{
+  "name": "@potluck/ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared React shell, components, formatting and styles for the Potluck apps (source package, bundled by each app).",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./Shell": "./src/Shell.tsx",
+    "./Icon": "./src/Icon.tsx",
+    "./Identicon": "./src/Identicon.tsx",
+    "./format": "./src/format.ts",
+    "./metadataStore": "./src/metadataStore.ts",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@potluck/core": "workspace:*",
+    "@potluck/theme": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "react": "19.3.0"
+  }
+}

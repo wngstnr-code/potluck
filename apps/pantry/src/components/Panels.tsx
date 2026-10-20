@@ -1,7 +1,7 @@
-import { fmt, formatDuration } from "../lib/format";
+import { fmt, formatDuration } from "@potluck/ui/format";
+import { Icon } from "@potluck/ui/Icon";
 import type { ActivityBucket, KindStat } from "../lib/kinds";
 import type { HistoryState } from "../lib/useHistory";
-import { Icon } from "./Icon";
 
 type Check = {
   title: string;

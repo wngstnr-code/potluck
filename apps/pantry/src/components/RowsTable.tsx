@@ -1,9 +1,9 @@
 import type { IndexedRow } from "@potluck/core";
+import { direction, fmt, formatAmount, shortHex } from "@potluck/ui/format";
+import { Identicon } from "@potluck/ui/Identicon";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef } from "react";
-import { direction, fmt, formatAmount, shortHex } from "../lib/format";
 import { seriesOf } from "../lib/kinds";
-import { Identicon } from "./Identicon";
 
 export function KindTag({ kind, series }: { kind: string; series: number }) {
   return (

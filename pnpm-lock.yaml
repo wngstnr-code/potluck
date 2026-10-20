@@ -44,6 +44,9 @@ importers:
       '@potluck/theme':
         specifier: workspace:*
         version: link:../../packages/theme
+      '@potluck/ui':
+        specifier: workspace:*
+        version: link:../../packages/ui
       '@tanstack/react-virtual':
         specifier: 3.14.13
         version: 3.14.13(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -181,6 +184,22 @@ importers:
       '@fontsource/ibm-plex-serif':
         specifier: 5.3.0
         version: 5.3.0
+
+  packages/ui:
+    dependencies:
+      '@potluck/core':
+        specifier: workspace:*
+        version: link:../core
+      '@potluck/theme':
+        specifier: workspace:*
+        version: link:../theme
+    devDependencies:
+      '@types/react':
+        specifier: 19.3.0
+        version: 19.3.0
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
 
   spikes:
     dependencies:

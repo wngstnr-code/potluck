@@ -1,7 +1,7 @@
+import { fmt, formatDuration } from "@potluck/ui/format";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityPanel, KindsPanel, ProofBar, VerificationPanel } from "./components/Panels";
 import { RowsTable } from "./components/RowsTable";
-import { fmt, formatDuration } from "./lib/format";
 import { useSharedHistory } from "./lib/HistoryContext";
 import { accountsOf, activity, kindStats } from "./lib/kinds";
 

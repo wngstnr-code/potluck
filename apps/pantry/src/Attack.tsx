@@ -1,10 +1,10 @@
+import { fmt, formatAmount, formatDuration, formatNative, shortHex } from "@potluck/ui/format";
+import { Icon } from "@potluck/ui/Icon";
+import { Identicon } from "@potluck/ui/Identicon";
 import { useMemo, useState } from "react";
-import { Icon } from "./components/Icon";
-import { Identicon } from "./components/Identicon";
 import { KindTag, RowsTable } from "./components/RowsTable";
 import { activeAccounts } from "./lib/account";
 import { type AttackResult, type AttackStep, hideableDebit, runAttack } from "./lib/attack";
-import { fmt, formatAmount, formatDuration, formatNative, shortHex } from "./lib/format";
 import { useSharedHistory } from "./lib/HistoryContext";
 import { seriesOf } from "./lib/kinds";
 

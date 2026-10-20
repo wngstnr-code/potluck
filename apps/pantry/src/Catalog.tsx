@@ -1,10 +1,10 @@
 import { type ManifestEntry, PortaldotSource } from "@potluck/client";
 import { type Spec, specHash } from "@potluck/spec";
+import { fmt, shortHex } from "@potluck/ui/format";
+import { Icon } from "@potluck/ui/Icon";
 import { useEffect, useMemo, useState } from "react";
-import { Icon } from "./components/Icon";
 import { KindTag } from "./components/RowsTable";
 import { PORTALDOT, SPECS, UNIFIED_SPEC } from "./config";
-import { fmt, shortHex } from "./lib/format";
 import { useSharedHistory } from "./lib/HistoryContext";
 import { seriesOf } from "./lib/kinds";
 

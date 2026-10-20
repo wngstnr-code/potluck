@@ -1,11 +1,11 @@
+import { fmt, formatDuration, formatNative, shortHex } from "@potluck/ui/format";
+import { Icon } from "@potluck/ui/Icon";
+import { Identicon } from "@potluck/ui/Identicon";
 import { type FormEvent, useMemo, useState } from "react";
-import { Icon } from "./components/Icon";
-import { Identicon } from "./components/Identicon";
 import { ActivityPanel } from "./components/Panels";
 import { RowsTable } from "./components/RowsTable";
 import { PORTALDOT } from "./config";
 import { type AccountReport, activeAccounts, verifyAccount } from "./lib/account";
-import { fmt, formatDuration, formatNative, shortHex } from "./lib/format";
 import { useSharedHistory } from "./lib/HistoryContext";
 import { activity } from "./lib/kinds";
 import type { HistoryState } from "./lib/useHistory";
