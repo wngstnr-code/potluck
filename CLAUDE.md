@@ -22,7 +22,7 @@ Read this file fully at the start of every session, then read `docs/DEVELOPMENT.
    - Before committing, run `git status` and `git diff --staged` and confirm only intended files are staged.
 4. **Format:** Conventional Commits, `type(scope): imperative summary` (subject ≤ 72 chars, no trailing period). Add a body explaining *why* when the change is non-trivial.
    - Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `ci`, `chore`.
-   - Scopes: `repo`, `spec`, `core`, `client`, `cli`, `contracts`, `specs`, `pantry`, `wasiat`, `docs`, `spike`.
+   - Scopes: `repo`, `spec`, `core`, `client`, `cli`, `contracts`, `specs`, `theme`, `pantry`, `wasiat`, `docs`, `spike`.
    - Examples:
      - `feat(core): add runtime-version map via binary search`
      - `test(contracts): cover flag deduplication per address`
@@ -48,6 +48,7 @@ Read this file fully at the start of every session, then read `docs/DEVELOPMENT.
 | `docs/DEVELOPMENT.md` | **Canonical, living** | Current status, prerequisites, milestone plan, commit plan, session protocol |
 | `docs/ARCHITECTURE.md` | **Canonical** | Detailed design, formats, contract interface, MVP scope, spikes, decisions |
 | `docs/POTLUCK.md` | **Canonical** | Product concept, demo script, rubric mapping, business model, judge Q&A |
+| `docs/DESIGN.md` | **Canonical** | UI direction, design-review rules, palette, type, components |
 | `docs/HACKATHON.MD` | Reference | Rules, rubric weights, deadlines, submission requirements, verified chain facts |
 | `docs/RESEARCH-STAGE2.md` | Background | Past winners, competitor repos, untouched V3 primitives, market |
 | `docs/IDEAS.md`, `docs/ROAST.md`, `docs/ROAST-WASIAT.md` | Historical | How we got here; do not treat as current design |

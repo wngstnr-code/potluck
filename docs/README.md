@@ -8,6 +8,7 @@ Start with [`../CLAUDE.md`](../CLAUDE.md) (rules), then [`DEVELOPMENT.md`](./DEV
 | [DEVELOPMENT.md](./DEVELOPMENT.md) | Current status, blockers, prerequisites, milestone plan with commit plan, deadlines, submission checklist |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Detailed design: measured constraints, components, spec/chunk/manifest formats, registry contract, client SDK, verification levels, threat model, MVP scope, spikes, decisions |
 | [POTLUCK.md](./POTLUCK.md) | Product concept after the reframe: why Portaldot, how it works, demo script, rubric mapping, business model, judge Q&A |
+| [DESIGN.md](./DESIGN.md) | UI design system: direction, design-review rules, palette, typography, components |
 
 ## Reference
 | Doc | Purpose |
