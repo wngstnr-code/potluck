@@ -16,7 +16,8 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "build:contracts": "forge build --root contracts",
-    "test:contracts": "forge test --root contracts -vv"
+    "test:contracts": "forge test --root contracts -vv",
+    "fix": "biome check --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
