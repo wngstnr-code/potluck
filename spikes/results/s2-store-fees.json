@@ -1,0 +1,48 @@
+{
+  "spike": "S2 (fees only)",
+  "measuredAt": "2026-10-20T10:01:56.454Z",
+  "endpoint": "wss://test-node-v3.portaldot.dev",
+  "maxTransactionSize": 8388608,
+  "measurements": [
+    {
+      "bytes": 1000,
+      "feePlanck": "11110757142646",
+      "feeTpot": 0.11110757142646,
+      "tpotPerMB": 111.10757142646,
+      "weightRefTime": "866886000",
+      "estimateMs": 372
+    },
+    {
+      "bytes": 100000,
+      "feePlanck": "1001151326200477",
+      "feeTpot": 10.01151326200477,
+      "tpotPerMB": 100.1151326200477,
+      "weightRefTime": "1627008000",
+      "estimateMs": 1154
+    },
+    {
+      "bytes": 1000000,
+      "feePlanck": "10001156499437514",
+      "feeTpot": 100.01156499437514,
+      "tpotPerMB": 100.01156499437514,
+      "weightRefTime": "8537208000",
+      "estimateMs": 3954
+    },
+    {
+      "bytes": 4000000,
+      "feePlanck": "40001173743452943",
+      "feeTpot": 400.01173743452944,
+      "tpotPerMB": 100.00293435863236,
+      "weightRefTime": "31571208000",
+      "estimateMs": 15074
+    },
+    {
+      "bytes": 7800000,
+      "feePlanck": "78001195585344496",
+      "feeTpot": 780.011955853445,
+      "tpotPerMB": 100.00153280172371,
+      "weightRefTime": "60747608000",
+      "estimateMs": 28076
+    }
+  ]
+}

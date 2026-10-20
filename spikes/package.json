@@ -10,7 +10,8 @@
     "s1": "tsx src/s1-runtime-decoding.ts",
     "s4": "tsx src/s4-balance-reconciliation.ts",
     "s6": "tsx src/s6-rpc-throughput.ts",
-    "s7": "tsx src/s7-recovery-activation.ts"
+    "s7": "tsx src/s7-recovery-activation.ts",
+    "s2": "tsx src/s2-store-fees.ts"
   },
   "dependencies": {
     "@polkadot/api": "17.0.2",
