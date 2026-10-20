@@ -33,6 +33,10 @@ export interface HistoryState {
   reconciliation: HistoryReconciliation | null;
   reconcileProgress: { done: number; total: number } | null;
   startedAt: number;
+  /** Connection to the source chain, shared by every page (null until connected). */
+  client: RpcClient | null;
+  /** The loaded history with its runtime/hash helpers, for per-account checks (null until loaded). */
+  history: SpecHistory | null;
 }
 
 const initial = (fromBlock: number): HistoryState => ({
@@ -49,6 +53,8 @@ const initial = (fromBlock: number): HistoryState => ({
   reconciliation: null,
   reconcileProgress: null,
   startedAt: Date.now(),
+  client: null,
+  history: null,
 });
 
 /**
@@ -73,7 +79,7 @@ export function useHistory(spec: Spec): HistoryState {
             registry: PORTALDOT.registry,
           })
         : undefined;
-      patch({ phase: "loading", startedAt: Date.now() });
+      patch({ phase: "loading", startedAt: Date.now(), client });
 
       const history: SpecHistory = await specHistory({
         spec,
@@ -97,6 +103,7 @@ export function useHistory(spec: Spec): HistoryState {
         head: history.head,
         verifiedTo: history.toBlock,
         rows: history.rows,
+        history,
         progress: null,
         integrityOk: history.integrityOk,
         source: {

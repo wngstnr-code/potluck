@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { ActivityPanel, KindsPanel, ProofBar, VerificationPanel } from "./components/Panels";
 import { RowsTable } from "./components/RowsTable";
-import { UNIFIED_SPEC } from "./config";
 import { fmt, formatDuration } from "./lib/format";
+import { useSharedHistory } from "./lib/HistoryContext";
 import { accountsOf, activity, kindStats } from "./lib/kinds";
-import { useHistory } from "./lib/useHistory";
 
 export function Overview() {
-  const history = useHistory(UNIFIED_SPEC);
+  const history = useSharedHistory();
   const [filter, setFilter] = useState<string | null>(null);
   const [, tick] = useState(0);
   const loading = !history.source && history.phase !== "error";
@@ -33,7 +32,7 @@ export function Overview() {
   const elapsed = history.source?.ms ?? Date.now() - history.startedAt;
 
   return (
-    <>
+    <div className="page">
       <div className="head">
         <div>
           <h1>Unified history, verified</h1>
@@ -137,6 +136,6 @@ export function Overview() {
           />
         </aside>
       </div>
-    </>
+    </div>
   );
 }

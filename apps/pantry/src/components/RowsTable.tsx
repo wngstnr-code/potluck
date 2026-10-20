@@ -22,9 +22,12 @@ const ROW_HEIGHT = 52;
 export function RowsTable({
   rows,
   filter,
+  perspective,
 }: {
   rows: readonly IndexedRow[];
   filter: string | null;
+  /** Address forms of the account being viewed: signs become relative to it. */
+  perspective?: ReadonlySet<string>;
 }) {
   const visible = useMemo(() => {
     const out: IndexedRow[] = [];
@@ -69,18 +72,39 @@ export function RowsTable({
             const to = row.cells.to ?? undefined;
             const kind = row.cells.kind ?? "?";
             const asset = row.cells.asset ?? undefined;
-            const party = from || to;
-            const sign = direction(row);
+            const sign = direction(row, perspective);
+            // In an account view, show the other side of the row; otherwise the first party.
+            const mine = (a: string | undefined) => !!a && !!perspective?.has(a);
+            const party = perspective ? (mine(from) ? to : from) : from || to;
+            const note = perspective
+              ? mine(from) && mine(to)
+                ? "between its own addresses"
+                : !party
+                  ? mine(to)
+                    ? "credited"
+                    : "debited"
+                  : mine(from)
+                    ? "sent to"
+                    : "received from"
+              : from && to
+                ? `→ ${shortHex(to)}`
+                : to
+                  ? "credited"
+                  : "debited";
             return (
               <tr key={`${row.block}:${row.eventIndex}`} style={{ height: ROW_HEIGHT }}>
                 <td>
                   <div className="who">
                     <Identicon account={party} />
                     <div>
-                      <b className="mono">{shortHex(party)}</b>
-                      <small>
-                        {from && to ? `→ ${shortHex(to)}` : to ? "credited" : "debited"}
-                      </small>
+                      {perspective && party && <small>{note}</small>}
+                      {party ? (
+                        <b className="mono">{shortHex(party)}</b>
+                      ) : (
+                        <b>{note.charAt(0).toUpperCase() + note.slice(1)}</b>
+                      )}
+                      {!perspective && party && <small>{note}</small>}
+                      {!party && <small>no counterparty</small>}
                     </div>
                   </div>
                 </td>

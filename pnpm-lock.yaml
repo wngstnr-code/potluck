@@ -26,6 +26,12 @@ importers:
 
   apps/pantry:
     dependencies:
+      '@polkadot/util':
+        specifier: 14.0.3
+        version: 14.0.3
+      '@polkadot/util-crypto':
+        specifier: 14.0.3
+        version: 14.0.3(@polkadot/util@14.0.3)
       '@potluck/client':
         specifier: workspace:*
         version: link:../../packages/client

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Icon, type IconName } from "./components/Icon";
 import { PORTALDOT, UNIFIED_SPEC_NAME } from "./config";
 import { Overview } from "./Overview";
+import { Verify } from "./Verify";
 
 const RAIL_KEY = "potluck.rail";
 
@@ -16,6 +17,7 @@ function readCollapsed(): boolean {
 /** Pages are added to the rail as they are built; nothing here is a placeholder. */
 const PAGES: { id: string; label: string; icon: IconName; section: string }[] = [
   { id: "overview", label: "Overview", icon: "home", section: "Pantry" },
+  { id: "verify", label: "Verify account", icon: "shield", section: "Pantry" },
 ];
 
 export function App() {
@@ -82,6 +84,7 @@ export function App() {
           </div>
         </div>
         {page === "overview" && <Overview />}
+        {page === "verify" && <Verify />}
       </main>
     </div>
   );

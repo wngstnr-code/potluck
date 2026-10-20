@@ -163,7 +163,7 @@ button {
 .main {
   min-height: 0;
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 16px;
   padding: 18px 24px 20px;
   background:
@@ -697,4 +697,188 @@ table.rows {
   .spin {
     animation-duration: 2.4s;
   }
+}
+
+/* Pages: a column whose last section (.content) takes the remaining height. */
+.page {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.page > .content {
+  flex: 1;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: var(--radius-md);
+  padding: 11px 18px;
+  white-space: nowrap;
+  transition: transform 160ms var(--ease-out);
+}
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+.btn:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.btn.primary {
+  background: linear-gradient(180deg, oklch(0.4 0.13 262), var(--navy));
+  color: white;
+  box-shadow:
+    0 8px 18px oklch(0.31 0.11 264 / 0.3),
+    inset 0 1px 0 oklch(1 0 0 / 0.18);
+}
+.btn.plain {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--lift), var(--highlight);
+}
+.btn:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.verify-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 8px 8px 8px 18px;
+  box-shadow: var(--lift), var(--highlight);
+  color: var(--muted);
+}
+.verify-bar input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: 14px;
+  color: var(--ink);
+  padding: 10px 0;
+}
+.verify-bar:focus-within {
+  box-shadow:
+    var(--lift),
+    var(--highlight),
+    0 0 0 2px var(--blue);
+}
+
+tr.clickable {
+  cursor: pointer;
+}
+
+.tile.red {
+  background: linear-gradient(155deg, oklch(0.6 0.18 25), oklch(0.5 0.19 25));
+  color: white;
+  box-shadow:
+    0 12px 28px oklch(0.55 0.19 25 / 0.35),
+    inset 0 1px 0 oklch(1 0 0 / 0.25);
+}
+.tile.red .lbl,
+.tile.red .sub {
+  color: oklch(0.95 0.03 25);
+}
+
+.explain {
+  margin: 0;
+  padding: 0 18px 18px 38px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+.explain li {
+  padding-left: 4px;
+}
+.explain b {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.explain span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.ledger {
+  margin: 0 18px 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--page);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 12px;
+  font-size: 13px;
+}
+.ledger dt {
+  color: var(--muted);
+}
+.ledger dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+}
+
+.ids {
+  margin: 0;
+  padding: 0 18px 16px;
+  display: grid;
+  gap: 4px;
+}
+.ids dt {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.ids dd {
+  margin: 0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.loading-state {
+  flex: 1;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  padding: 24px;
+  text-align: center;
+}
+.loading-state b {
+  font-size: 16px;
+  font-weight: 600;
+}
+.loading-state span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.loading-state small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.loading-state .track {
+  width: min(420px, 70vw);
+  height: 8px;
+  border-radius: 4px;
+  background: var(--track);
+  overflow: hidden;
+  margin: 6px 0;
+}
+.loading-state .track i {
+  display: block;
+  height: 100%;
+  background: var(--navy);
+  border-radius: 4px;
+  transition: width var(--duration-in) var(--ease-out);
 }
