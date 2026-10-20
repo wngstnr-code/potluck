@@ -1,0 +1,21 @@
+{
+  "name": "@potluck/theme",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared design tokens and self-hosted fonts for the Potluck apps.",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./tokens.css": "./tokens.css",
+    "./fonts.css": "./fonts.css"
+  },
+  "files": [
+    "tokens.css",
+    "fonts.css"
+  ],
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@fontsource/ibm-plex-sans": "5.3.0",
+    "@fontsource/ibm-plex-serif": "5.3.0"
+  }
+}

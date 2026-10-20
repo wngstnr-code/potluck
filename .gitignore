@@ -36,3 +36,6 @@ contracts/out-pvm/
 
 # Potluck build output (chunks, manifests, resumable state)
 builds/
+
+# Brand/typography previews (generated)
+.brand-preview/
