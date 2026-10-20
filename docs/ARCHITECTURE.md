@@ -9,11 +9,12 @@
 | Fact | Measured value | Design implication |
 |---|---|---|
 | Runtime execution on the public Portaldot node | `state_getRuntimeVersion` / `state_getMetadata` take ~8.5 s whenever the node switches runtime version | The runtime map reads `System.LastRuntimeUpgrade` instead (post-state version of block b = value at b + 1; code changed at #50,000 and #57,052, the value at #50,001 and #57,053) and probes in parallel: genesis → head map in 1.9 s instead of 22 s. Browsers cache metadata in IndexedDB |
+| Polkadot AH backfill build (newest 1.5 M blocks, #20,572,285–#22,072,284) | 2,173,842 rows in 30 chunks, **62 MB gz**, built in 5,372 s at ~279 blocks/s (per-block, 128 in flight) | Publishing it costs ≈ 6,200 tPOT at ~100 tPOT/MB. Publish a smaller newest window first (e.g. the newest ~5 chunks ≈ 10 MB) and extend as tPOT allows; denser encoding (dictionary/columnar) is the P1 cost lever |
 | Browser direct sync of Portaldot V3 (Pantry, Chrome) | 118,991 blocks → 2,248 rows in 2 min 25 s; L3 905 / 905 account checks in 22.7 s | Direct sync is fine for Portaldot today; snapshots are what make heavy chains load in seconds |
 | Portaldot block length limit | normal 14,942,208 bytes | One 8 MB chunk fits per block, so **max chunk size is 8 MB** and 1 store per tx |
 | `TransactionStorage.maxTransactionSize` | 8,388,608 bytes | Same |
 | Retention | 100,800 blocks (~7 days) | The manifest stores `(tsBlock, tsIndex)` for each chunk for `renew` |
-| Storage cost (S2, `paymentInfo`) | **≈ 0.0001 tPOT per byte ≈ 100 tPOT per MB**, linear up to 7.8 MB; `byteFee`/`entryFee` (10/1000 planck) are negligible next to the transaction length fee | Bytes are the cost driver: the first Polkadot AH backfill (~19 MB) ≈ 1,900 tPOT. Encoding efficiency (dictionary/columnar) is a P1 cost lever. *(Corrects an earlier "25 MB ≈ 0.0000025 POT" estimate.)* |
+| Storage cost (S2, `paymentInfo`) | **≈ 0.0001 tPOT per byte ≈ 100 tPOT per MB**, linear up to 7.8 MB; `byteFee`/`entryFee` (10/1000 planck) are negligible next to the transaction length fee | Bytes are the cost driver. Measured: the newest 1.5 M Polkadot AH blocks are **62 MB gz** (≈ 6,200 tPOT), not the ~19 MB first estimated. Encoding efficiency (dictionary/columnar) is a P1 cost lever. *(Corrects an earlier "25 MB ≈ 0.0000025 POT" estimate.)* |
 | Blob upload over WSS (S2) | 7.8 MB accepted; travels as hex (2×), ~28 s from the developer's link | Request timeout ≥ 90 s; keep chunk blobs ≲ 4.5 MB |
 | `bitswap_v1_get` | Works on public nodes (tested at 16 KB) | Chunk download path from the browser. MB-sized blobs need a spike |
 | Full Portaldot sync | 5.2 s (9,202 events) | **Direct** mode is already enough today |
