@@ -290,34 +290,39 @@ Notes:
 
 ## 10. Client SDK `@potluck/client`
 
+**Source of truth:** [`packages/client/src`](../packages/client/src). The SDK bundles for browsers (esbuild, no Node built-ins). Implemented API:
+
 ```ts
-const pot = await Potluck.open({
-  spec: "polkadot-ah.balance-history",
-  source: ["wss://polkadot-asset-hub-rpc.polkadot.io", "wss://…"],   // bring-your-own-node
-  portaldot: "wss://test-node-v3.portaldot.dev",
-  registry: "0x…", evmRpc: "https://test-evm-rpc-v3.portaldot.dev",
+const source = withRetry(await connectWs("wss://polkadot-asset-hub-rpc.polkadot.io")); // bring-your-own-node
+const manifests = new PortaldotSource({
+  portaldot: withRetry(await connectWs("wss://test-node-v3.portaldot.dev")),
+  evmRpcUrl: "https://test-evm-rpc-v3.portaldot.dev",                                     // CORS: *
+  registry: "0x…",
 });
-pot.on("progress", e => …);                       // "Verifying chunk 7/25…"
-const rows = await pot.sql(`SELECT * FROM rows WHERE "from"=?1 OR "to"=?1 ORDER BY block DESC`, [acct]);
-const report = await pot.verifyAccount(acct);     // { integrity, rowsChecked, reconciled, details[] }
-pot.follow();                                     // live tail
+const result = await accountHistory({ spec, source, manifests, accounts: [accountId32, h160], onProgress });
+// result: { rows, segments: [{ mode, chunksDownloaded, chunksSkippedByBloom, integrityProblems,
+//           rowTruthFailures, reconciliation }], verified, uncovered, head }
+const stop = followHistory({ spec, source, accounts, afterBlock: result.head, onRows });
 ```
 
-**Loader:** read `latest(specHash)` from the registry, fetch the manifest via `bitswap_v1_get`, then fetch **only the chunks whose bloom contains the requested account**. The contents are checked against `rawHash` and `chunksRoot`, then inserted into SQLite.
+- **Manifests:** `PortaldotSource.list` reads `latest(specHash)` from the registry via `eth_call` and fetches each manifest via `bitswap_v1_get` (CID = raw CIDv1 of the blake2b-256 digest, `blobCid`). It keeps only manifests that hash to their registered digest and match the spec, source chain, range and chunks root.
+- **Coverage (`planCoverage`):** unflagged manifests first, reaching furthest. Gaps ≤ `maxDirectBlocks` (default 200,000) are synced directly; longer gaps are reported as `uncovered` (the UI's coverage bar).
+- **Loader:** only chunks whose bloom may contain one of the account ids are downloaded; every blob is digest-checked (`fetchBlob`).
+- **Accounts:** for the Portaldot unified spec, query both the AccountId32 and its H160 (`reviveAddressOf`, via the `ReviveApi_address` runtime API).
 
-**Verifier (3 levels):**
+**Verifier (3 levels, all against the source chain):**
 
 | Level | What | Cost | Catches |
 |---|---|---|---|
-| L1 Integrity | blob hash = CID; `rawHash` = manifest; Merkle root = registry | local | Corrupted/swapped chunks |
-| L2 Row truth | for every row belonging to the account: fetch `System.Events` at that block from the source chain, decode, compare | ~1 RPC per unique block | Fake/altered rows |
-| L3 Completeness (windowed reconciliation) | for **every** chunk in the range: `balance(A, to) − balance(A, from−1)` = Σ deltas of A's rows in the chunk. For chunks whose bloom says "A is not here", the balance must be unchanged | 2 storage reads per chunk | **Deleted/hidden rows**, including when the bloom is also forged |
+| L1 Integrity (`checkChunkIntegrity`) | blob digest/size, raw hash, canonical NDJSON, rows in range, account count, bloom coverage | local | Corrupted/swapped chunks. A consistent forgery passes L1 alone |
+| L2 Row truth (`checkRowTruth`) | re-derive every block the account's rows touch from source events; each row must exist byte-for-byte | ~2 RPC per unique block | Fake/altered rows |
+| L3 Completeness (`reconcileAccounts`) | for **every** chunk and direct segment, including bloom-skipped chunks: value(to) = value(from−1) + deltas (or reset value + later deltas) | 2 storage reads per chunk | **Deleted/hidden rows**, including when the bloom is forged too (live-tested) |
 
-**State-replay** (Recovery): events are replayed into state, then compared against `recovery.friendGroups/attempt/inheritor` at `toBlock`.
+**Live tail (`followHistory`):** polls the finalized head instead of subscribing, because the public Portaldot endpoint drops connections every ~60 s and silently ends subscriptions. New blocks are decoded with their executing runtime.
 
-**Live tail:** `chainHead_v1_follow` (fallback `subscribeFinalizedHeads`). The spec is run on each new block.
-
-**Local storage:** SQLite-WASM (OPFS) per spec, cursor per source, metadata cache per runtime version. Works offline.
+**Not built yet:**
+- Recovery state replay (check the timeline against `recovery.*` storage).
+- A persistent local store (SQLite-WASM/IndexedDB cache with a per-spec cursor). Apps keep results in memory for the MVP.
 
 ---
 
