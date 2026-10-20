@@ -2,7 +2,13 @@ import { existsSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { blake2AsHex } from "@polkadot/util-crypto";
-import { type Manifest, manifestBytes, manifestDigest, parseManifest } from "@potluck/core";
+import {
+  checkChunkIntegrity,
+  type Manifest,
+  manifestBytes,
+  manifestDigest,
+  parseManifest,
+} from "@potluck/core";
 import { parseSpec, specHash } from "@potluck/spec";
 import { encodeFunctionData, type Hex, zeroAddress } from "viem";
 import { PORTALDOT } from "./config.js";
@@ -19,7 +25,6 @@ import {
   storeTx,
   submit,
 } from "./portaldot.js";
-import { checkChunkIntegrity } from "./verify.js";
 
 export interface PublishOptions {
   dir: string;

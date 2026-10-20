@@ -1,22 +1,17 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { blake2AsHex } from "@polkadot/util-crypto";
 import {
-  AccountBloom,
   buildRuntimeMap,
-  chunkAccounts,
+  checkChunkIntegrity,
   compileSpec,
   connectWs,
   type DecodingRuntime,
   decodeEvents,
-  decodeNdjson,
   encodeNdjson,
   eventsToRows,
   getBlockHashes,
   getGenesisHash,
-  gunzip,
   type IndexedRow,
-  type ManifestChunk,
   parseManifest,
   type RpcClient,
   RuntimeLoader,
@@ -77,40 +72,6 @@ export async function indexRange(
     rows.push(...eventsToRows(compiled, decodeEvents(await runtimeFor(block), block, raw)));
   }
   return { rows, runtimeFor, hashOf };
-}
-
-/** L1: blob digest, raw hash, canonical NDJSON, rows inside the chunk range, bloom coverage. */
-export async function checkChunkIntegrity(
-  spec: Spec,
-  chunk: ManifestChunk,
-  blob: Uint8Array,
-): Promise<{ problems: string[]; rows: IndexedRow[] }> {
-  const problems: string[] = [];
-  if (blake2AsHex(blob, 256) !== chunk.blob.digest) problems.push("blob digest mismatch");
-  if (blob.length !== chunk.blob.size) problems.push("blob size mismatch");
-  const raw = await gunzip(blob);
-  if (rawHash(raw) !== chunk.rawHash) problems.push("raw hash mismatch");
-  let rows: IndexedRow[] = [];
-  try {
-    rows = decodeNdjson(spec, raw);
-  } catch (error) {
-    problems.push(`non-canonical NDJSON: ${(error as Error).message}`);
-  }
-  if (rows.length !== chunk.rows) problems.push(`row count ${rows.length} != ${chunk.rows}`);
-  if (rows.some((r) => r.block < chunk.fromBlock || r.block > chunk.toBlock)) {
-    problems.push("row outside the chunk range");
-  }
-  const bloom = AccountBloom.fromBase64(chunk.bloom);
-  const accounts = chunkAccounts(spec, rows);
-  if (accounts.size !== chunk.accounts)
-    problems.push(`account count ${accounts.size} != ${chunk.accounts}`);
-  for (const account of accounts) {
-    if (!bloom.has(account)) {
-      problems.push(`bloom misses ${account}`);
-      break;
-    }
-  }
-  return { problems, rows };
 }
 
 export async function runVerify(options: VerifyOptions): Promise<ChunkReport[]> {

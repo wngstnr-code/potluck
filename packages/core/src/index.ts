@@ -92,3 +92,4 @@ export {
   type RuntimeSegment,
   type RuntimeVersion,
 } from "./runtime.js";
+export { checkChunkIntegrity, checkRowTruth, type RowTruthOptions } from "./verify.js";
