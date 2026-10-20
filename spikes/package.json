@@ -1,0 +1,20 @@
+{
+  "name": "@potluck/spikes",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Throwaway-but-recorded technical spikes that de-risk the Potluck architecture. Results live in results/.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "s1": "tsx src/s1-runtime-decoding.ts",
+    "s4": "tsx src/s4-balance-reconciliation.ts",
+    "s6": "tsx src/s6-rpc-throughput.ts",
+    "s7": "tsx src/s7-recovery-activation.ts"
+  },
+  "dependencies": {
+    "@polkadot/api": "17.0.2",
+    "@polkadot/util": "14.0.3",
+    "@polkadot/util-crypto": "14.0.3"
+  }
+}
