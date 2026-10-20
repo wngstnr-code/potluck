@@ -3,6 +3,7 @@ export { AccountBloom, BLOOM_HASHES } from "./bloom.js";
 export {
   type BuiltChunk,
   buildChunk,
+  ChunkAccumulator,
   type ChunkPlan,
   chunkAccounts,
   gunzip,

@@ -13,11 +13,74 @@ export interface ChunkPlan {
 }
 
 /**
- * Splits sorted rows of [fromBlock, toBlock] into contiguous chunks that together cover the whole
- * range. A block is never split. A chunk is closed before the next block with rows when that
- * block is ≥ maxBlocks after the chunk start or would push the chunk over maxRawBytes; a single
- * block larger than maxRawBytes becomes its own chunk. Ranges without rows still belong to a chunk
- * (possibly empty), so coverage is explicit.
+ * Streaming chunk planner. Feed it each block's rows in block order; it returns chunks as soon as
+ * they close. Rules: chunks are contiguous and cover the whole range; a block is never split; a
+ * chunk closes before the next block WITH rows when that block is ≥ maxBlocks after the chunk start
+ * or would push the chunk over maxRawBytes; a single block larger than maxRawBytes becomes its own
+ * chunk; blocks without rows never close a chunk.
+ *
+ * Because boundaries depend only on the row sequence, a build resumed at a closed chunk's
+ * `toBlock + 1` produces exactly the chunks an uninterrupted build would.
+ */
+export class ChunkAccumulator {
+  #start: number;
+  #current: IndexedRow[] = [];
+  #bytes = 0;
+  #lastBlock: number;
+
+  constructor(
+    private readonly spec: Spec,
+    fromBlock: number,
+  ) {
+    this.#start = fromBlock;
+    this.#lastBlock = fromBlock - 1;
+  }
+
+  /** Start block of the chunk currently being filled. */
+  get start(): number {
+    return this.#start;
+  }
+
+  /** Adds the rows of `block` (all with that block number; may be empty). */
+  push(block: number, rows: readonly IndexedRow[]): ChunkPlan[] {
+    if (block <= this.#lastBlock) throw new Error(`block #${block} pushed out of order`);
+    this.#lastBlock = block;
+    if (rows.length === 0) return [];
+    let groupBytes = 0;
+    for (const row of rows) {
+      if (row.block !== block) throw new Error(`row of block #${row.block} pushed as #${block}`);
+      groupBytes += encodeRow(this.spec, row).length + 1;
+    }
+    const closed: ChunkPlan[] = [];
+    const { maxBlocks, maxRawBytes } = this.spec.chunk;
+    if (
+      this.#current.length > 0 &&
+      (block - this.#start >= maxBlocks || this.#bytes + groupBytes > maxRawBytes)
+    ) {
+      closed.push({ fromBlock: this.#start, toBlock: block - 1, rows: this.#current });
+      this.#start = block;
+      this.#current = [];
+      this.#bytes = 0;
+    }
+    this.#current.push(...rows);
+    this.#bytes += groupBytes;
+    return closed;
+  }
+
+  /** Closes the last chunk at `toBlock` (it may be empty). */
+  finish(toBlock: number): ChunkPlan {
+    if (toBlock < this.#lastBlock)
+      throw new Error(`finish(#${toBlock}) before last block #${this.#lastBlock}`);
+    const plan = { fromBlock: this.#start, toBlock, rows: this.#current };
+    this.#current = [];
+    this.#bytes = 0;
+    return plan;
+  }
+}
+
+/**
+ * Splits sorted rows of [fromBlock, toBlock] into contiguous chunks covering the whole range
+ * (see ChunkAccumulator for the rules). Ranges without rows still belong to a chunk.
  */
 export function planChunks(
   spec: Spec,
@@ -25,12 +88,8 @@ export function planChunks(
   range: { fromBlock: number; toBlock: number },
 ): ChunkPlan[] {
   if (range.fromBlock > range.toBlock) throw new Error("planChunks: empty range");
-  const { maxBlocks, maxRawBytes } = spec.chunk;
+  const accumulator = new ChunkAccumulator(spec, range.fromBlock);
   const plans: ChunkPlan[] = [];
-  let start = range.fromBlock;
-  let current: IndexedRow[] = [];
-  let bytes = 0;
-
   let i = 0;
   while (i < rows.length) {
     const block = (rows[i] as IndexedRow).block;
@@ -38,22 +97,11 @@ export function planChunks(
       throw new Error(`row at block #${block} is outside [${range.fromBlock}, ${range.toBlock}]`);
     }
     const group: IndexedRow[] = [];
-    let groupBytes = 0;
-    while (i < rows.length && (rows[i] as IndexedRow).block === block) {
-      groupBytes += encodeRow(spec, rows[i] as IndexedRow).length + 1;
-      group.push(rows[i] as IndexedRow);
-      i++;
-    }
-    if (current.length > 0 && (block - start >= maxBlocks || bytes + groupBytes > maxRawBytes)) {
-      plans.push({ fromBlock: start, toBlock: block - 1, rows: current });
-      start = block;
-      current = [];
-      bytes = 0;
-    }
-    current.push(...group);
-    bytes += groupBytes;
+    while (i < rows.length && (rows[i] as IndexedRow).block === block)
+      group.push(rows[i++] as IndexedRow);
+    plans.push(...accumulator.push(block, group));
   }
-  plans.push({ fromBlock: start, toBlock: range.toBlock, rows: current });
+  plans.push(accumulator.finish(range.toBlock));
   return plans;
 }
 

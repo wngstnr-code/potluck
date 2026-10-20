@@ -4,7 +4,14 @@ import { join } from "node:path";
 import { parseSpec, type Spec } from "@potluck/spec";
 import { describe, expect, it } from "vitest";
 import { AccountBloom } from "../src/bloom.js";
-import { buildChunk, chunkAccounts, gunzip, gzip, planChunks } from "../src/chunk.js";
+import {
+  buildChunk,
+  ChunkAccumulator,
+  chunkAccounts,
+  gunzip,
+  gzip,
+  planChunks,
+} from "../src/chunk.js";
 import { encodeRow, rawHash } from "../src/encoding.js";
 import { compileSpec, eventsToRows, type IndexedRow } from "../src/engine.js";
 import { decodeEvents } from "../src/events.js";
@@ -144,5 +151,39 @@ describe("AccountBloom", () => {
     const h160 = `0x${randomBytes(20).toString("hex")}`;
     const bloom = AccountBloom.of([h160]);
     expect(bloom.has(h160.toUpperCase().replace("0X", "0x"))).toBe(true);
+  });
+});
+
+describe("ChunkAccumulator", () => {
+  const spec = withChunk({ maxBlocks: 3, maxRawBytes: 32_000_000 });
+  const blocks = [10, 11, 13, 14, 15, 19, 20];
+  const rowsOfBlock = (b: number) => rowsAt([b]);
+
+  it("streams the same chunks as planChunks", () => {
+    const acc = new ChunkAccumulator(spec, 8);
+    const streamed = [];
+    for (let b = 8; b <= 22; b++)
+      streamed.push(...acc.push(b, blocks.includes(b) ? rowsOfBlock(b) : []));
+    streamed.push(acc.finish(22));
+    expect(streamed).toEqual(planChunks(spec, rowsAt(blocks), { fromBlock: 8, toBlock: 22 }));
+  });
+
+  it("resumed at a closed chunk boundary yields the remaining chunks unchanged", () => {
+    const full = planChunks(spec, rowsAt(blocks), { fromBlock: 8, toBlock: 22 });
+    const resumeAt = (full[0]?.toBlock as number) + 1;
+    const acc = new ChunkAccumulator(spec, resumeAt);
+    const rest = [];
+    for (let b = resumeAt; b <= 22; b++)
+      rest.push(...acc.push(b, blocks.includes(b) ? rowsOfBlock(b) : []));
+    rest.push(acc.finish(22));
+    expect(rest).toEqual(full.slice(1));
+  });
+
+  it("rejects out-of-order blocks and mislabeled rows", () => {
+    const acc = new ChunkAccumulator(spec, 1);
+    acc.push(5, []);
+    expect(() => acc.push(5, [])).toThrow("out of order");
+    expect(() => acc.push(6, rowsOfBlock(7))).toThrow("pushed as #6");
+    expect(() => acc.finish(4)).toThrow("before last block");
   });
 });
