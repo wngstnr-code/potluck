@@ -16,6 +16,7 @@ Commands:
     --out <dir>         Output root (default: builds)
     --concurrency <n>   In-flight requests when scanning per block (default: 64)
     --segment <n>       Blocks per processing segment (default: 2000)
+    --strategy <s>      auto (state_queryStorage when allowed) or per-block (default: auto)
 
   verify <build-dir>  Check a build's chunks: integrity (L1), optional re-index and reconciliation (L3)
     --endpoint <wss>    Source chain RPC (default: known endpoint for the spec's chain)
@@ -49,6 +50,7 @@ async function main(argv: string[]): Promise<void> {
       out: { type: "string" },
       concurrency: { type: "string" },
       segment: { type: "string" },
+      strategy: { type: "string" },
       chunks: { type: "string" },
       rebuild: { type: "boolean" },
       "no-reconcile": { type: "boolean" },
@@ -75,6 +77,7 @@ async function main(argv: string[]): Promise<void> {
         last: int(values.last),
         concurrency: int(values.concurrency) ?? 64,
         segment: int(values.segment) ?? 2000,
+        strategy: values.strategy === "per-block" ? "per-block" : "auto",
         log,
       });
       return;

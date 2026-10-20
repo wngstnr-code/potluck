@@ -39,6 +39,11 @@ export interface BuildOptions {
   concurrency: number;
   /** Blocks fetched and processed per segment. */
   segment: number;
+  /**
+   * Scan strategy (default "auto"). "auto" uses state_queryStorage where the node allows it; "per-block" is faster
+   * on nodes that answer it slowly (Kusama AH: 63 blocks/s via queryStorage).
+   */
+  strategy?: "auto" | "per-block";
   log: (line: string) => void;
 }
 
@@ -130,7 +135,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       );
     };
 
-    let strategy: "auto" | "per-block" = "auto";
+    let strategy: "auto" | "per-block" = options.strategy ?? "auto";
     let rows = state.chunks.reduce((n, c) => n + c.rows, 0);
     const total = toBlock - state.nextBlock + 1;
     let processed = 0;
