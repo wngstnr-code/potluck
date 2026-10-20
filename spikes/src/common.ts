@@ -55,6 +55,33 @@ export async function mapPool<T, R>(
   return out;
 }
 
+/** Any decorated query section, e.g. `api.query` or `(await api.at(hash)).query`. */
+type QuerySection = Record<string, Record<string, unknown> | undefined>;
+
+/** Returns a storage query function, failing loudly if the runtime does not expose it. */
+export function storageQuery(
+  query: unknown,
+  pallet: string,
+  item: string,
+): ((...args: unknown[]) => Promise<unknown>) & {
+  entries: (...args: unknown[]) => Promise<[unknown, unknown][]>;
+  keys: (...args: unknown[]) => Promise<unknown[]>;
+} {
+  const fn = (query as QuerySection)[pallet]?.[item];
+  if (typeof fn !== "function") throw new Error(`runtime has no storage ${pallet}.${item}`);
+  return fn as never;
+}
+
+export function hasStorage(query: unknown, pallet: string, item: string): boolean {
+  return typeof (query as QuerySection)[pallet]?.[item] === "function";
+}
+
+/** Reads `timestamp.now` (ms) from a decorated query section. */
+export async function blockTimestamp(query: unknown): Promise<number> {
+  const value = (await storageQuery(query, "timestamp", "now")()) as { toNumber(): number };
+  return value.toNumber();
+}
+
 export function nowIso(): string {
   return new Date().toISOString();
 }

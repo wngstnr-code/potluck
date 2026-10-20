@@ -7,7 +7,16 @@
  * exposes the friend-group API, and snapshot current usage.
  */
 import { xxhashAsHex } from "@polkadot/util-crypto";
-import { connect, ENDPOINTS, log, nowIso, writeResult } from "./common.js";
+import {
+  blockTimestamp,
+  connect,
+  ENDPOINTS,
+  hasStorage,
+  log,
+  nowIso,
+  storageQuery,
+  writeResult,
+} from "./common.js";
 
 const STORAGE_VERSION_KEY = `${xxhashAsHex("Recovery", 128)}${xxhashAsHex(":__STORAGE_VERSION__:", 128).slice(2)}`;
 
@@ -35,9 +44,9 @@ async function main(): Promise<void> {
   const firstBlock = lo;
   const firstHash = await api.rpc.chain.getBlockHash(firstBlock);
   const at = await api.at(firstHash);
-  const timestamp = (await at.query.timestamp.now()).toNumber();
+  const timestamp = await blockTimestamp(at.query);
   const runtime = await api.rpc.state.getRuntimeVersion(firstHash);
-  const hasFriendGroupsAtStart = typeof at.query.recovery?.friendGroups === "function";
+  const hasFriendGroupsAtStart = hasStorage(at.query, "recovery", "friendGroups");
   log(`Recovery first present at #${firstBlock} (${new Date(timestamp).toISOString()})`);
 
   // The pallet existed before it gained the inheritance (friend-group) API. Find the first block
@@ -61,17 +70,17 @@ async function main(): Promise<void> {
   const inheritanceBlock = vlo;
   const inheritanceHash = await api.rpc.chain.getBlockHash(inheritanceBlock);
   const inheritanceAt = await api.at(inheritanceHash);
-  const inheritanceTimestamp = (await inheritanceAt.query.timestamp.now()).toNumber();
+  const inheritanceTimestamp = await blockTimestamp(inheritanceAt.query);
   const inheritanceRuntime = await api.rpc.state.getRuntimeVersion(inheritanceHash);
-  const friendGroupsApi = typeof inheritanceAt.query.recovery?.friendGroups === "function";
+  const friendGroupsApi = hasStorage(inheritanceAt.query, "recovery", "friendGroups");
   log(
     `Recovery storage version ${headVersion} (inheritance API=${friendGroupsApi}) from #${inheritanceBlock} (${new Date(inheritanceTimestamp).toISOString()})`,
   );
 
   // Current usage snapshot.
-  const configs = await api.query.recovery.friendGroups.entries();
-  const attempts = await api.query.recovery.attempt.entries();
-  const inheritors = await api.query.recovery.inheritor.entries();
+  const configs = await storageQuery(api.query, "recovery", "friendGroups").entries();
+  const attempts = await storageQuery(api.query, "recovery", "attempt").entries();
+  const inheritors = await storageQuery(api.query, "recovery", "inheritor").entries();
 
   const result = {
     spike: "S7",
