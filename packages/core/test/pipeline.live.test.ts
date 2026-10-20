@@ -104,8 +104,17 @@ describe.skipIf(!LIVE)("live pipeline on Polkadot Asset Hub", () => {
     expect(results.length).toBeGreaterThan(10);
     expect(failures.map((f) => `${f.account}: ${f.expectedDelta} != ${f.actualDelta}`)).toEqual([]);
 
-    // Tampering is detected: drop one debit row and its account no longer reconciles.
-    const victim = rows.find((r) => r.cells.from !== null && r.cells.to === null);
+    // Tampering is detected: drop one debit row of an account that is not reset (reaped) in the
+    // window — a reset legitimately absorbs same-block rows — and it no longer reconciles.
+    const resetAccounts = new Set(rows.filter((r) => r.effect === "reset").map((r) => r.cells.to));
+    const victim = rows.find(
+      (r) =>
+        r.effect === "delta" &&
+        r.cells.from !== null &&
+        r.cells.to === null &&
+        !resetAccounts.has(r.cells.from),
+    );
+    expect(victim).toBeDefined();
     if (victim) {
       const tampered = await reconcileAccounts({
         client,
