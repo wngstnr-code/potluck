@@ -1,0 +1,52 @@
+{
+  "spike": "S6",
+  "measuredAt": "2026-10-20T04:14:32.297Z",
+  "chain": "polkadot-asset-hub",
+  "method": "chain_getBlockHash + state_getStorage(System.Events) per block, raw WsProvider",
+  "blocksPerLevel": 600,
+  "batchedBlockHashes": true,
+  "reviveWindowBlocks": 10646519,
+  "endpoints": [
+    {
+      "name": "parity",
+      "url": "wss://polkadot-asset-hub-rpc.polkadot.io",
+      "reachable": true,
+      "head": 22051778,
+      "archive": true,
+      "levels": [
+        {
+          "concurrency": 32,
+          "blocks": 600,
+          "errors": 0,
+          "seconds": 6.32,
+          "blocksPerSecond": 95,
+          "bytes": 97399
+        },
+        {
+          "concurrency": 64,
+          "blocks": 600,
+          "errors": 0,
+          "seconds": 3.09,
+          "blocksPerSecond": 194.4,
+          "bytes": 71223
+        },
+        {
+          "concurrency": 128,
+          "blocks": 600,
+          "errors": 0,
+          "seconds": 2.4,
+          "blocksPerSecond": 249.7,
+          "bytes": 83753
+        },
+        {
+          "concurrency": 192,
+          "blocks": 600,
+          "errors": 0,
+          "seconds": 2.16,
+          "blocksPerSecond": 278.1,
+          "bytes": 84170
+        }
+      ]
+    }
+  ]
+}

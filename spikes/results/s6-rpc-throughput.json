@@ -1,0 +1,135 @@
+{
+  "spike": "S6",
+  "measuredAt": "2026-10-20T04:13:36.480Z",
+  "chain": "polkadot-asset-hub",
+  "method": "chain_getBlockHash + state_getStorage(System.Events) per block, raw WsProvider",
+  "blocksPerLevel": 200,
+  "reviveWindowBlocks": 10646347,
+  "endpoints": [
+    {
+      "name": "parity",
+      "url": "wss://polkadot-asset-hub-rpc.polkadot.io",
+      "reachable": true,
+      "head": 22051606,
+      "archive": true,
+      "levels": [
+        {
+          "concurrency": 1,
+          "blocks": 200,
+          "errors": 0,
+          "seconds": 89.28,
+          "blocksPerSecond": 2.2,
+          "bytes": 31239
+        },
+        {
+          "concurrency": 4,
+          "blocks": 200,
+          "errors": 0,
+          "seconds": 23.37,
+          "blocksPerSecond": 8.6,
+          "bytes": 50271
+        },
+        {
+          "concurrency": 8,
+          "blocks": 200,
+          "errors": 0,
+          "seconds": 11.69,
+          "blocksPerSecond": 17.1,
+          "bytes": 15874
+        },
+        {
+          "concurrency": 16,
+          "blocks": 200,
+          "errors": 0,
+          "seconds": 6.11,
+          "blocksPerSecond": 32.8,
+          "bytes": 25110
+        },
+        {
+          "concurrency": 32,
+          "blocks": 200,
+          "errors": 0,
+          "seconds": 3.17,
+          "blocksPerSecond": 63,
+          "bytes": 31381
+        }
+      ]
+    },
+    {
+      "name": "dwellir",
+      "url": "wss://asset-hub-polkadot-rpc.dwellir.com",
+      "reachable": false,
+      "error": "Error: timeout after 15000 ms: ready dwellir"
+    },
+    {
+      "name": "ibp",
+      "url": "wss://sys.ibp.network/asset-hub-polkadot",
+      "reachable": false,
+      "error": "Error: timeout after 15000 ms: ready ibp"
+    },
+    {
+      "name": "dotters",
+      "url": "wss://asset-hub-polkadot.dotters.network",
+      "reachable": false,
+      "error": "Error: timeout after 15000 ms: ready dotters"
+    },
+    {
+      "name": "onfinality",
+      "url": "wss://statemint.api.onfinality.io/public-ws",
+      "reachable": true,
+      "head": 22051677,
+      "archive": true,
+      "levels": [
+        {
+          "concurrency": 1,
+          "blocks": 200,
+          "errors": 0,
+          "seconds": 56.72,
+          "blocksPerSecond": 3.5,
+          "bytes": 25057
+        },
+        {
+          "concurrency": 4,
+          "blocks": 200,
+          "errors": 0,
+          "seconds": 12.49,
+          "blocksPerSecond": 16,
+          "bytes": 20263
+        },
+        {
+          "concurrency": 8,
+          "blocks": 200,
+          "errors": 48,
+          "seconds": 5.59,
+          "blocksPerSecond": 27.2,
+          "bytes": 46761
+        },
+        {
+          "concurrency": 16,
+          "blocks": 200,
+          "errors": 173,
+          "seconds": 1.76,
+          "blocksPerSecond": 15.4,
+          "bytes": 2696
+        }
+      ]
+    },
+    {
+      "name": "luckyfriday",
+      "url": "wss://rpc-asset-hub-polkadot.luckyfriday.io",
+      "reachable": true,
+      "head": 22051717,
+      "archive": true,
+      "levels": [
+        {
+          "concurrency": 1,
+          "blocks": 200,
+          "errors": 77,
+          "seconds": 82.14,
+          "blocksPerSecond": 1.5,
+          "bytes": 11032
+        }
+      ]
+    }
+  ]
+}
