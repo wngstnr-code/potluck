@@ -20,7 +20,7 @@ export interface Deltas {
   absolute: Set<string>;
 }
 
-/** Sums the debit/credit/amount columns of the rows into per-account deltas. */
+/** Sums the debit/credit/amount columns of the rows (those passing `when`) into per-account deltas. */
 export function balanceDeltas(spec: Spec, rows: readonly IndexedRow[]): Deltas {
   const rule = balanceRule(spec);
   const deltas = new Map<string, bigint>();
@@ -29,6 +29,7 @@ export function balanceDeltas(spec: Spec, rows: readonly IndexedRow[]): Deltas {
     if (account) deltas.set(account, (deltas.get(account) ?? 0n) + value);
   };
   for (const row of rows) {
+    if (rule.when && row.cells[rule.when.column] !== rule.when.equals) continue;
     if (row.absolute) {
       for (const column of spec.accounts) {
         const account = row.cells[column];

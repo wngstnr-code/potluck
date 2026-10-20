@@ -44,3 +44,31 @@ export function runtime(specVersion: number): DecodingRuntime {
   }
   return r;
 }
+
+export interface PortaldotBlock {
+  number: number;
+  hash: string;
+  executingSpec: number;
+  eventsHex: string;
+  ethTransferLogs: { address: string; topics: string[]; data: string; logIndex: string }[];
+}
+
+/** Real Portaldot V3 testnet blocks with ERC-20 logs, recorded by test/fixtures/record-portaldot.ts. */
+export const portaldotV3 = JSON.parse(
+  readFileSync(join(DIR, "portaldot-v3.blocks.json"), "utf8"),
+) as { genesisHash: string; blocks: PortaldotBlock[] };
+
+const portaldotRuntimes = new Map<number, DecodingRuntime>();
+export function portaldotRuntime(specVersion: number): DecodingRuntime {
+  let r = portaldotRuntimes.get(specVersion);
+  if (!r) {
+    r = createDecodingRuntime(
+      specVersion,
+      new Uint8Array(
+        gunzipSync(readFileSync(join(DIR, `metadata-portaldot-v3-${specVersion}.scale.gz`))),
+      ),
+    );
+    portaldotRuntimes.set(specVersion, r);
+  }
+  return r;
+}
