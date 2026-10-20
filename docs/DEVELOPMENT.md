@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-20 (M0, M2, M4, M5 done; M3 done except real deployment; S2 fees measured)._
+_Last updated: 2026-10-20 (M0, M2, M4, M5 done; M3 done except real deployment; M6 Pantry overview done; S2 fees measured)._
 
 | Area | Status |
 |---|---|
@@ -18,7 +18,7 @@ _Last updated: 2026-10-20 (M0, M2, M4, M5 done; M3 done except real deployment; 
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
 | Git repository | ✅ Public: https://github.com/wngstnr-code/potluck (`main`); sole contributor `wngstnr-code` |
 | Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks real deploy, real publish, S3). **Ask for ≈ 6,000–8,000 tPOT**: deploy deposits ≈ 433 (EVM) + ≈ 3,293 (PVM); storing data ≈ 100 tPOT/MB, so the first Polkadot AH backfill (~19 MB) ≈ 1,900 tPOT |
-| Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK). `spec` done (23 tests). `core` done: Substrate + Revive EVM logs, range scan, reconciliation (65 offline tests on recorded real data + 5 live tests: Polkadot AH window and Portaldot genesis → head, 894/894 accounts reconcile). `cli` done: build (resumable, deterministic), verify (L1 + re-index + L3), publish (dry run tested; submission awaits tPOT), tamper (demo). `client` done: verified account history (coverage planning, bloom-filtered snapshot loading, L1/L2/L3, direct-sync gaps), registry/bitswap source, reconnect-proof live tail; bundles for browsers. Missing: apps (Pantry, Wasiat-lite) |
+| Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK). `spec` done (23 tests). `core` done: Substrate + Revive EVM logs, range scan, reconciliation (65 offline tests on recorded real data + 5 live tests: Polkadot AH window and Portaldot genesis → head, 894/894 accounts reconcile). `cli` done: build (resumable, deterministic), verify (L1 + re-index + L3), publish (dry run tested; submission awaits tPOT), tamper (demo). `client` done: verified account history (coverage planning, bloom-filtered snapshot loading, L1/L2/L3, direct-sync gaps), registry/bitswap source, reconnect-proof live tail; bundles for browsers; `specHistory`/`reconcileHistory` for whole-spec loads. `theme` done (docs/DESIGN.md). `pantry` overview done: in-browser direct sync of Portaldot V3 from genesis (2,248 rows in 2 min 25 s) + L3 905/905 in 22.7 s + live tail. Missing: Pantry verify-account, catalog and attack-demo pages; Wasiat-lite |
 | Spikes | ✅ S1, S4, S6, S7 done; S2 fees measured (results in `spikes/results/`). 🟡 S5 partial. 🟡 S8 dry-run done, real deploy needs tPOT. ⏳ S3 (bitswap MB fetch) needs a stored blob |
 | DoraHacks check-in (Oct 24, 12:00 UTC) | ❌ Not submitted |
 
@@ -38,7 +38,7 @@ _Last updated: 2026-10-20 (M0, M2, M4, M5 done; M3 done except real deployment; 
 - Recovery-timeline spec starts at Kusama AH #17,836,634 (S7).
 
 **Next engineering steps (in order):**
-1. M6 apps: Pantry (catalog, try-an-address with verification report, DIRECT-vs-SNAPSHOT panel, attack demo) and Wasiat-lite.
+1. M6 apps: Pantry pages for verify-account (accountHistory + L1/L2/L3 report), catalog (registry) and the attack demo; then Wasiat-lite.
 2. When tPOT arrives: `pnpm --filter @potluck/contracts deploy` (EVM first if tPOT is short), then `potluck publish` for the Portaldot unified history and the first Polkadot AH backfill.
 2. Report to the Portaldot team: held funds can vanish on `System.KilledAccount` without a Balances event (TransactionStorage hold, block #89,388).
 2. When tPOT arrives: write and run `contracts/deploy/deploy.ts`, i.e. `revive.instantiateWithCode` signed by the SS58 dev account for both EVM and PVM. Pass code as **hex**. Record addresses + tx hashes; then a real `registerSpec`/`publish` round trip to measure per-manifest deposits (S8).
