@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-20 (M0 done; no-tPOT spikes done)._
+_Last updated: 2026-10-20 (M0 done; no-tPOT spikes done; M3 done except real deployment)._
 
 | Area | Status |
 |---|---|
@@ -17,9 +17,9 @@ _Last updated: 2026-10-20 (M0 done; no-tPOT spikes done)._
 | Concept & architecture | ✅ `POTLUCK.md`, `ARCHITECTURE.md` |
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
 | Git repository | ✅ Public: https://github.com/wngstnr-code/potluck (`main`); sole contributor `wngstnr-code` |
-| Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks S2, contract deploy, all testnet txs) |
-| Code | 🟡 Workspace + empty `spec`/`core`/`client`/`cli` packages build, typecheck, test and lint |
-| Spikes | ✅ S1, S4, S6, S7 done (results in `spikes/results/`). 🟡 S5 partial. ⏳ S2, S3, S8 need tPOT |
+| Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks S2, S3, real deploy, all testnet txs). **Ask for ≥ ~4,000 tPOT**: deploy deposits are ≈ 433 (EVM) + ≈ 3,293 (PVM) tPOT, plus manifest/spec deposits |
+| Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM builds dry-run OK on testnet). `spec`/`core`/`client`/`cli` still empty |
+| Spikes | ✅ S1, S4, S6, S7 done (results in `spikes/results/`). 🟡 S5 partial. 🟡 S8 dry-run done, real deploy needs tPOT. ⏳ S2, S3 need tPOT |
 | DoraHacks check-in (Oct 24, 12:00 UTC) | ❌ Not submitted |
 
 ## 2. Immediate next steps & blockers
@@ -38,8 +38,8 @@ _Last updated: 2026-10-20 (M0 done; no-tPOT spikes done)._
 - Recovery-timeline spec starts at Kusama AH #17,836,634 (S7).
 
 **Next engineering steps (in order):**
-1. M3 registry contract with local Foundry tests (deploy once tPOT arrives).
-2. M2 `spec` + `core`, porting the proven spike logic (runtime map, executing-runtime decoding, delta rules, canonical NDJSON).
+1. M2 `spec` + `core`, porting the proven spike logic (runtime map, executing-runtime decoding, delta rules, canonical NDJSON).
+2. When tPOT arrives: write and run `contracts/deploy/deploy.ts`, i.e. `revive.instantiateWithCode` signed by the SS58 dev account for both EVM and PVM. Pass code as **hex**. Record addresses + tx hashes; then a real `registerSpec`/`publish` round trip to measure per-manifest deposits (S8).
 4. Prepare the **check-in package for Oct 24**: README, architecture diagram, progress notes, deployed registry address + tx hash, and a ≤3 min demo video of one core function (e.g. direct-sync history of a Portaldot account + one `transactionStorage.store`).
 
 ---
@@ -145,7 +145,7 @@ Record every result in `ARCHITECTURE.md` §0/§14 (`docs(arch): record spike S<n
   - `feat(core): add chunker with bloom and merkle root`
   - plus the matching `test(core): …` commits.
 
-### M3: `PotluckRegistry.sol`
+### M3: `PotluckRegistry.sol` (🟡 code, tests, PVM build and dry-run done; real deploy waits for tPOT)
 - Tasks: implement the interface in `ARCHITECTURE.md` §9; Foundry tests (publish, latest, flag once per address, renewal notes); deploy scripts for EVM (forge) and PVM (resolc).
 - Done when: tests pass locally, and once tPOT is available both deployments are on testnet with addresses recorded in `.env.example`/README.
 - Commits: `feat(contracts): add PotluckRegistry`, `test(contracts): …`, `build(contracts): add EVM and PVM deploy scripts`, `chore(contracts): record testnet deployment addresses`.
