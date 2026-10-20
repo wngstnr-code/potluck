@@ -1,0 +1,116 @@
+{
+  "spike": "S4",
+  "measuredAt": "2026-10-20T04:34:03.268Z",
+  "chain": "polkadot-asset-hub",
+  "reconciliation": {
+    "window": {
+      "from": 22051048,
+      "to": 22052247,
+      "blocks": 1200,
+      "specVersion": 2005000
+    },
+    "deltaRows": 811,
+    "accountsChecked": 319,
+    "accountsReconciled": 319,
+    "accountsSkippedAbsolute": 0,
+    "unknownEvents": [],
+    "failureDetails": [],
+    "rules": {
+      "Endowed": "zero",
+      "DustLost": {
+        "minus": "account",
+        "amount": "amount"
+      },
+      "Transfer": {
+        "minus": "from",
+        "plus": "to",
+        "amount": "amount"
+      },
+      "BalanceSet": {
+        "absolute": "who"
+      },
+      "Reserved": "zero",
+      "Unreserved": "zero",
+      "ReserveRepatriated": {
+        "minus": "from",
+        "plus": "to",
+        "amount": "amount"
+      },
+      "Deposit": {
+        "plus": "who",
+        "amount": "amount"
+      },
+      "Withdraw": {
+        "minus": "who",
+        "amount": "amount"
+      },
+      "Slashed": {
+        "minus": "who",
+        "amount": "amount"
+      },
+      "Minted": {
+        "plus": "who",
+        "amount": "amount"
+      },
+      "MintedCredit": "zero",
+      "Burned": {
+        "minus": "who",
+        "amount": "amount"
+      },
+      "BurnedDebt": "zero",
+      "Suspended": {
+        "minus": "who",
+        "amount": "amount"
+      },
+      "Restored": {
+        "plus": "who",
+        "amount": "amount"
+      },
+      "Upgraded": "zero",
+      "Issued": "zero",
+      "Rescinded": "zero",
+      "Locked": "zero",
+      "Unlocked": "zero",
+      "Frozen": "zero",
+      "Thawed": "zero",
+      "TotalIssuanceForced": "zero",
+      "Held": "zero",
+      "BurnedHeld": {
+        "minus": "who",
+        "amount": "amount"
+      },
+      "TransferOnHold": {
+        "minus": "source",
+        "plus": "dest",
+        "amount": "amount"
+      },
+      "TransferAndHold": {
+        "minus": "source",
+        "plus": "dest",
+        "amount": "transferred"
+      },
+      "Released": "zero"
+    }
+  },
+  "volume": {
+    "sampledWindows": 10,
+    "sampledBlocks": 1500,
+    "sampledRows": 3438,
+    "rowsByKind": {
+      "Deposit": 1781,
+      "Transfer": 1181,
+      "Withdraw": 405,
+      "Minted": 63,
+      "DustLost": 7,
+      "Burned": 1
+    },
+    "rowsPerBlock": 2.292,
+    "ndjsonBytesPerRow": 180.7,
+    "gzipRatio": 7.13,
+    "reviveWindowBlocks": 10646988,
+    "estimatedRows": 24402896,
+    "estimatedNdjsonMB": 4409.3,
+    "estimatedGzipMB": 618,
+    "estimatedChunksAt8MB": 78
+  }
+}
