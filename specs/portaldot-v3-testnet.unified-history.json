@@ -1,0 +1,199 @@
+{
+  "potluck": 1,
+  "name": "portaldot-v3-testnet.unified-history",
+  "description": "Unified dual-VM history on Portaldot V3: every native POT balance change (Balances events, reconcilable against System.Account) plus every ERC-20 and ERC-721 Transfer log from pallet-revive contracts (Revive.ContractEmitted). Native rows carry AccountId32 hex; token rows carry H160 addresses and the token contract in `asset`.",
+  "source": {
+    "kind": "substrate-events",
+    "chain": "portaldot-v3-testnet",
+    "genesisHash": "0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd",
+    "fromBlock": 1
+  },
+  "columns": ["kind", "asset", "from", "to", "amount", "tokenId"],
+  "accounts": ["from", "to"],
+  "match": [
+    {
+      "pallet": "Balances",
+      "event": "Transfer",
+      "row": {
+        "kind": "Transfer",
+        "asset": "native",
+        "from": "$from",
+        "to": "$to",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "ReserveRepatriated",
+      "row": {
+        "kind": "ReserveRepatriated",
+        "asset": "native",
+        "from": "$from",
+        "to": "$to",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "TransferOnHold",
+      "row": {
+        "kind": "TransferOnHold",
+        "asset": "native",
+        "from": "$source",
+        "to": "$dest",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "TransferAndHold",
+      "row": {
+        "kind": "TransferAndHold",
+        "asset": "native",
+        "from": "$source",
+        "to": "$dest",
+        "amount": "$transferred"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Deposit",
+      "row": {
+        "kind": "Deposit",
+        "asset": "native",
+        "to": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Minted",
+      "row": {
+        "kind": "Minted",
+        "asset": "native",
+        "to": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Restored",
+      "row": {
+        "kind": "Restored",
+        "asset": "native",
+        "to": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Withdraw",
+      "row": {
+        "kind": "Withdraw",
+        "asset": "native",
+        "from": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Slashed",
+      "row": {
+        "kind": "Slashed",
+        "asset": "native",
+        "from": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Burned",
+      "row": {
+        "kind": "Burned",
+        "asset": "native",
+        "from": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "BurnedHeld",
+      "row": {
+        "kind": "BurnedHeld",
+        "asset": "native",
+        "from": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Suspended",
+      "row": {
+        "kind": "Suspended",
+        "asset": "native",
+        "from": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "DustLost",
+      "row": {
+        "kind": "DustLost",
+        "asset": "native",
+        "from": "$account",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "BalanceSet",
+      "row": {
+        "kind": "BalanceSet",
+        "asset": "native",
+        "to": "$who",
+        "amount": "$free"
+      },
+      "absolute": true
+    },
+    {
+      "log": "Transfer(address indexed from, address indexed to, uint256 value)",
+      "row": {
+        "kind": "Erc20Transfer",
+        "asset": "$contract",
+        "from": "$from",
+        "to": "$to",
+        "amount": "$value"
+      }
+    },
+    {
+      "log": "Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+      "row": {
+        "kind": "Erc721Transfer",
+        "asset": "$contract",
+        "from": "$from",
+        "to": "$to",
+        "tokenId": "$tokenId"
+      }
+    }
+  ],
+  "reconcile": {
+    "type": "balance-delta",
+    "storage": {
+      "pallet": "System",
+      "item": "Account"
+    },
+    "sum": ["data.free", "data.reserved"],
+    "debit": "from",
+    "credit": "to",
+    "amount": "amount",
+    "when": {
+      "column": "asset",
+      "equals": "native"
+    }
+  },
+  "chunk": {
+    "maxBlocks": 200000,
+    "maxRawBytes": 32000000
+  }
+}
