@@ -22,7 +22,7 @@ Read this file fully at the start of every session, then read `docs/DEVELOPMENT.
    - Before committing, run `git status` and `git diff --staged` and confirm only intended files are staged.
 4. **Format:** Conventional Commits, `type(scope): imperative summary` (subject ≤ 72 chars, no trailing period). Add a body explaining *why* when the change is non-trivial.
    - Types: `feat`, `fix`, `refactor`, `perf`, `test`, `docs`, `build`, `ci`, `chore`.
-   - Scopes: `repo`, `spec`, `core`, `client`, `cli`, `contracts`, `specs`, `theme`, `pantry`, `wasiat`, `docs`, `spike`.
+   - Scopes: `repo`, `spec`, `core`, `client`, `cli`, `contracts`, `specs`, `theme`, `ui`, `pantry`, `wasiat`, `docs`, `spike`.
    - Examples:
      - `feat(core): add runtime-version map via binary search`
      - `test(contracts): cover flag deduplication per address`
