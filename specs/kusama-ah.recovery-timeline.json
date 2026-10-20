@@ -1,0 +1,116 @@
+{
+  "potluck": 1,
+  "name": "kusama-ah.recovery-timeline",
+  "description": "Timeline of the Recovery pallet's inheritance lifecycle on Kusama Asset Hub (friend groups, recovery attempts, approvals, cancellations, inheritance and control of inherited accounts).",
+  "source": {
+    "kind": "substrate-events",
+    "chain": "kusama-asset-hub",
+    "genesisHash": "0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a",
+    "fromBlock": 17836634
+  },
+  "columns": [
+    "kind",
+    "lost",
+    "actor",
+    "inheritor",
+    "previousInheritor",
+    "friendGroupIndex",
+    "callHash"
+  ],
+  "accounts": ["lost", "actor", "inheritor", "previousInheritor"],
+  "match": [
+    {
+      "pallet": "Recovery",
+      "event": "FriendGroupsChanged",
+      "row": {
+        "kind": "FriendGroupsChanged",
+        "lost": "$lost"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "AttemptInitiated",
+      "row": {
+        "kind": "AttemptInitiated",
+        "lost": "$lost",
+        "friendGroupIndex": "$friend_group_index",
+        "actor": "$initiator"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "AttemptApproved",
+      "row": {
+        "kind": "AttemptApproved",
+        "lost": "$lost",
+        "friendGroupIndex": "$friend_group_index",
+        "actor": "$friend"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "AttemptCanceled",
+      "row": {
+        "kind": "AttemptCanceled",
+        "lost": "$lost",
+        "friendGroupIndex": "$friend_group_index",
+        "actor": "$canceler"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "AttemptFinished",
+      "row": {
+        "kind": "AttemptFinished",
+        "lost": "$lost",
+        "friendGroupIndex": "$friend_group_index",
+        "inheritor": "$inheritor",
+        "previousInheritor": "$previous_inheritor"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "AttemptDiscarded",
+      "row": {
+        "kind": "AttemptDiscarded",
+        "lost": "$lost",
+        "friendGroupIndex": "$friend_group_index",
+        "inheritor": "$existing_inheritor"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "AttemptSlashed",
+      "row": {
+        "kind": "AttemptSlashed",
+        "lost": "$lost",
+        "friendGroupIndex": "$friend_group_index"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "InheritorRevoked",
+      "row": {
+        "kind": "InheritorRevoked",
+        "lost": "$lost"
+      }
+    },
+    {
+      "pallet": "Recovery",
+      "event": "RecoveredAccountControlled",
+      "row": {
+        "kind": "RecoveredAccountControlled",
+        "lost": "$recovered",
+        "inheritor": "$inheritor",
+        "callHash": "$call_hash"
+      }
+    }
+  ],
+  "reconcile": {
+    "type": "none"
+  },
+  "chunk": {
+    "maxBlocks": 500000,
+    "maxRawBytes": 32000000
+  }
+}
