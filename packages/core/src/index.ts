@@ -1,5 +1,13 @@
 export { SPEC_FORMAT_VERSION } from "@potluck/spec";
 export {
+  type Cell,
+  type CompiledSpec,
+  compileSpec,
+  eventsToRows,
+  type IndexedRow,
+  normalizeField,
+} from "./engine.js";
+export {
   type DecodedEvent,
   decodeEvents,
   type EventField,
