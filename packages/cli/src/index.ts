@@ -2,6 +2,7 @@
 import { parseArgs } from "node:util";
 import { runBuild } from "./build.js";
 import { runPublish } from "./publish.js";
+import { runTamper } from "./tamper.js";
 import { reportsOk, runVerify } from "./verify.js";
 
 const USAGE = `potluck <command> [options]
@@ -28,6 +29,11 @@ Commands:
     --dry-run           Build every transaction and estimate fees without submitting
     --from-address <ss58>  Account for estimates when PUBLISHER_SEED is not set
   Env: PUBLISHER_SEED (dev-only seed, never commit), PORTALDOT_WS
+
+  tamper <build-dir>  DEMO ONLY: copy a build with one debit row silently removed and all hashes
+                      recomputed, to show that verification against the source chain catches it
+    --out <dir>         Output directory (required)
+    --chunk <i>         Chunk to tamper with (default: first eligible)
 `;
 
 async function main(argv: string[]): Promise<void> {
@@ -49,6 +55,7 @@ async function main(argv: string[]): Promise<void> {
       registry: { type: "string" },
       "dry-run": { type: "boolean" },
       "from-address": { type: "string" },
+      chunk: { type: "string" },
     },
   });
   const int = (value: string | undefined) =>
@@ -99,6 +106,12 @@ async function main(argv: string[]): Promise<void> {
         fromAddress: values["from-address"],
         log,
       });
+      return;
+    }
+    case "tamper": {
+      const dir = positionals[0];
+      if (!dir || !values.out) throw new Error("tamper: usage tamper <build-dir> --out <dir>");
+      await runTamper({ dir, out: values.out, chunk: int(values.chunk), log });
       return;
     }
     default:
