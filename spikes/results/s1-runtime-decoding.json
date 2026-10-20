@@ -1,0 +1,540 @@
+{
+  "spike": "S1",
+  "measuredAt": "2026-10-20T04:20:21.705Z",
+  "chain": "polkadot-asset-hub",
+  "window": {
+    "from": 11405259,
+    "to": 22051902
+  },
+  "samples": 160,
+  "binarySearchProbes": 144,
+  "runtimeUpgrades": [
+    {
+      "block": 11896182,
+      "from": 2000005,
+      "to": 2000006
+    },
+    {
+      "block": 12319017,
+      "from": 2000006,
+      "to": 2000007
+    },
+    {
+      "block": 13733620,
+      "from": 2000007,
+      "to": 2001001
+    },
+    {
+      "block": 14857499,
+      "from": 2001001,
+      "to": 2002001
+    },
+    {
+      "block": 16946479,
+      "from": 2002001,
+      "to": 2003000
+    },
+    {
+      "block": 17297796,
+      "from": 2003000,
+      "to": 2003001
+    },
+    {
+      "block": 18731801,
+      "from": 2003001,
+      "to": 2003002
+    },
+    {
+      "block": 20135078,
+      "from": 2003002,
+      "to": 2004000
+    },
+    {
+      "block": 20485672,
+      "from": 2004000,
+      "to": 2005000
+    }
+  ],
+  "distinctSpecVersions": [
+    2000005, 2000006, 2000007, 2001001, 2002001, 2003000, 2003001, 2003002, 2004000, 2005000
+  ],
+  "checks": [
+    {
+      "block": 11896181,
+      "executingSpec": 2000005,
+      "postStateSpec": 2000005,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 8,
+      "bytes": 336,
+      "sample": [
+        "balances.Transfer",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated"
+      ]
+    },
+    {
+      "block": 11896182,
+      "executingSpec": 2000005,
+      "postStateSpec": 2000006,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 10,
+      "bytes": 356,
+      "sample": [
+        "balances.Transfer",
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "voterList.ScoreUpdated"
+      ]
+    },
+    {
+      "block": 11896183,
+      "executingSpec": 2000006,
+      "postStateSpec": 2000006,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 9,
+      "bytes": 344,
+      "sample": [
+        "balances.Transfer",
+        "polkadotXcm.VersionMigrationFinished",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated"
+      ]
+    },
+    {
+      "block": 12319016,
+      "executingSpec": 2000006,
+      "postStateSpec": 2000006,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 8,
+      "bytes": 336,
+      "sample": [
+        "balances.Transfer",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated"
+      ]
+    },
+    {
+      "block": 12319017,
+      "executingSpec": 2000006,
+      "postStateSpec": 2000007,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 22,
+      "bytes": 1028,
+      "sample": [
+        "balances.Transfer",
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "balances.Withdraw"
+      ]
+    },
+    {
+      "block": 12319018,
+      "executingSpec": 2000007,
+      "postStateSpec": 2000007,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 9,
+      "bytes": 344,
+      "sample": [
+        "balances.Transfer",
+        "polkadotXcm.VersionMigrationFinished",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated"
+      ]
+    },
+    {
+      "block": 13733619,
+      "executingSpec": 2000007,
+      "postStateSpec": 2000007,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 8,
+      "bytes": 336,
+      "sample": [
+        "balances.Transfer",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated",
+        "voterList.ScoreUpdated"
+      ]
+    },
+    {
+      "block": 13733620,
+      "executingSpec": 2000007,
+      "postStateSpec": 2001001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 10,
+      "bytes": 356,
+      "sample": [
+        "balances.Transfer",
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "voterList.ScoreUpdated"
+      ]
+    },
+    {
+      "block": 13733621,
+      "executingSpec": 2001001,
+      "postStateSpec": 2001001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 54,
+      "bytes": 1943,
+      "sample": [
+        "balances.Released",
+        "delegatedStaking.Released",
+        "multiBlockMigrations.UpgradeStarted",
+        "balances.Transfer",
+        "polkadotXcm.VersionMigrationFinished",
+        "system.ExtrinsicSuccess"
+      ]
+    },
+    {
+      "block": 14857498,
+      "executingSpec": 2001001,
+      "postStateSpec": 2001001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 3,
+      "bytes": 116,
+      "sample": ["balances.Transfer", "system.ExtrinsicSuccess", "system.ExtrinsicSuccess"]
+    },
+    {
+      "block": 14857499,
+      "executingSpec": 2001001,
+      "postStateSpec": 2002001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 5,
+      "bytes": 136,
+      "sample": [
+        "balances.Transfer",
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess"
+      ]
+    },
+    {
+      "block": 14857500,
+      "executingSpec": 2002001,
+      "postStateSpec": 2002001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 8,
+      "bytes": 168,
+      "sample": [
+        "multiBlockMigrations.UpgradeStarted",
+        "balances.Transfer",
+        "polkadotXcm.VersionMigrationFinished",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "multiBlockMigrations.MigrationSkipped"
+      ]
+    },
+    {
+      "block": 16946478,
+      "executingSpec": 2002001,
+      "postStateSpec": 2002001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 3,
+      "bytes": 116,
+      "sample": ["balances.Transfer", "system.ExtrinsicSuccess", "system.ExtrinsicSuccess"]
+    },
+    {
+      "block": 16946479,
+      "executingSpec": 2002001,
+      "postStateSpec": 2003000,
+      "executingRuleOk": true,
+      "postStateRuleOk": false,
+      "events": 34,
+      "bytes": 1671,
+      "sample": [
+        "balances.Transfer",
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "balances.Withdraw"
+      ],
+      "error": "Error: createType(Lookup19):: decodeU8aVec: failed at 0x0000c206332e5517020000010a087369… (index 3/34): {\"phase\":\"FrameSystemPhase\",\"event\":\"Event\",\"topics\":\"Vec<H256>\"}:: decodeU8aStruct: failed at 0"
+    },
+    {
+      "block": 16946480,
+      "executingSpec": 2003000,
+      "postStateSpec": 2003000,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 20,
+      "bytes": 710,
+      "sample": [
+        "balances.Minted",
+        "balances.Minted",
+        "dap.IssuanceMinted",
+        "balances.Endowed",
+        "balances.Released",
+        "system.KilledAccount"
+      ]
+    },
+    {
+      "block": 17297795,
+      "executingSpec": 2003000,
+      "postStateSpec": 2003000,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 2,
+      "bytes": 32,
+      "sample": ["system.ExtrinsicSuccess", "system.ExtrinsicSuccess"]
+    },
+    {
+      "block": 17297796,
+      "executingSpec": 2003000,
+      "postStateSpec": 2003001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 4,
+      "bytes": 84,
+      "sample": [
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess"
+      ]
+    },
+    {
+      "block": 17297797,
+      "executingSpec": 2003001,
+      "postStateSpec": 2003001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 10,
+      "bytes": 212,
+      "sample": [
+        "multiBlockMigrations.UpgradeStarted",
+        "balances.Minted",
+        "balances.Minted",
+        "dap.IssuanceMinted",
+        "polkadotXcm.VersionMigrationFinished",
+        "system.ExtrinsicSuccess"
+      ]
+    },
+    {
+      "block": 18731800,
+      "executingSpec": 2003001,
+      "postStateSpec": 2003001,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 2,
+      "bytes": 32,
+      "sample": ["system.ExtrinsicSuccess", "system.ExtrinsicSuccess"]
+    },
+    {
+      "block": 18731801,
+      "executingSpec": 2003001,
+      "postStateSpec": 2003002,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 4,
+      "bytes": 84,
+      "sample": [
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess"
+      ]
+    },
+    {
+      "block": 18731802,
+      "executingSpec": 2003002,
+      "postStateSpec": 2003002,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 7,
+      "bytes": 80,
+      "sample": [
+        "multiBlockMigrations.UpgradeStarted",
+        "polkadotXcm.VersionMigrationFinished",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "multiBlockMigrations.MigrationSkipped",
+        "multiBlockMigrations.MigrationSkipped"
+      ]
+    },
+    {
+      "block": 20135077,
+      "executingSpec": 2003002,
+      "postStateSpec": 2003002,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 2,
+      "bytes": 32,
+      "sample": ["system.ExtrinsicSuccess", "system.ExtrinsicSuccess"]
+    },
+    {
+      "block": 20135078,
+      "executingSpec": 2003002,
+      "postStateSpec": 2004000,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 4,
+      "bytes": 84,
+      "sample": [
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess"
+      ]
+    },
+    {
+      "block": 20135079,
+      "executingSpec": 2004000,
+      "postStateSpec": 2004000,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 6,
+      "bytes": 72,
+      "sample": [
+        "multiBlockMigrations.UpgradeStarted",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "multiBlockMigrations.MigrationSkipped",
+        "multiBlockMigrations.MigrationSkipped",
+        "multiBlockMigrations.UpgradeCompleted"
+      ]
+    },
+    {
+      "block": 20485671,
+      "executingSpec": 2004000,
+      "postStateSpec": 2004000,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 2,
+      "bytes": 32,
+      "sample": ["system.ExtrinsicSuccess", "system.ExtrinsicSuccess"]
+    },
+    {
+      "block": 20485672,
+      "executingSpec": 2004000,
+      "postStateSpec": 2005000,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 4,
+      "bytes": 84,
+      "sample": [
+        "system.CodeUpdated",
+        "parachainSystem.ValidationFunctionApplied",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess"
+      ]
+    },
+    {
+      "block": 20485673,
+      "executingSpec": 2005000,
+      "postStateSpec": 2005000,
+      "executingRuleOk": true,
+      "postStateRuleOk": true,
+      "events": 1888,
+      "bytes": 112929,
+      "sample": [
+        "assets.ForceCreated",
+        "multiBlockMigrations.UpgradeStarted",
+        "system.ExtrinsicSuccess",
+        "system.ExtrinsicSuccess",
+        "multiBlockMigrations.MigrationSkipped",
+        "multiBlockMigrations.MigrationSkipped"
+      ]
+    }
+  ],
+  "executingRuleAllPassed": true,
+  "postStateRuleFailures": [16946479],
+  "negativeControl": {
+    "block": 11405259,
+    "ownSpec": 2000005,
+    "newestSpec": 2005000,
+    "withOwnMetadata": {
+      "ok": true,
+      "events": 9
+    },
+    "withNewestMetadata": {
+      "ok": true,
+      "events": 9,
+      "sameNames": true
+    }
+  },
+  "metadataStats": [
+    {
+      "spec": 2000005,
+      "bytes": 561176,
+      "fetchMs": 1116
+    },
+    {
+      "spec": 2000006,
+      "bytes": 561281,
+      "fetchMs": 619
+    },
+    {
+      "spec": 2000007,
+      "bytes": 561281,
+      "fetchMs": 618
+    },
+    {
+      "spec": 2001001,
+      "bytes": 593656,
+      "fetchMs": 751
+    },
+    {
+      "spec": 2002001,
+      "bytes": 570684,
+      "fetchMs": 766
+    },
+    {
+      "spec": 2003000,
+      "bytes": 579416,
+      "fetchMs": 735
+    },
+    {
+      "spec": 2003001,
+      "bytes": 579416,
+      "fetchMs": 688
+    },
+    {
+      "spec": 2003002,
+      "bytes": 580918,
+      "fetchMs": 854
+    },
+    {
+      "spec": 2004000,
+      "bytes": 600735,
+      "fetchMs": 655
+    },
+    {
+      "spec": 2005000,
+      "bytes": 639268,
+      "fetchMs": 691
+    }
+  ]
+}

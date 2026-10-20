@@ -55,6 +55,9 @@ importers:
       '@polkadot/api':
         specifier: 17.0.2
         version: 17.0.2
+      '@polkadot/types':
+        specifier: 17.0.2
+        version: 17.0.2
       '@polkadot/util':
         specifier: 14.0.3
         version: 14.0.3
