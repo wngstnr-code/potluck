@@ -1,0 +1,45 @@
+{
+  "spike": "S8 (partial: dry-run, no tPOT needed)",
+  "measuredAt": "2026-10-20T07:48:52.871Z",
+  "endpoint": "wss://test-node-v3.portaldot.dev",
+  "runtime": "portaldot-v3 3002",
+  "origin": "5F4ZyJJ8R3QHZKRLAfDXdUuVE4w3Q7uq7tCNfAtvf2XEBfYY",
+  "results": [
+    {
+      "vm": "evm",
+      "codeBytes": 5414,
+      "ok": true,
+      "reverted": false,
+      "address": "0x285db1ddea1dbfb596a722c24614e4d3fb4efae1",
+      "weightRequired": {
+        "refTime": 2552464,
+        "proofSize": 0
+      },
+      "gasConsumed": "0x00000000000000000028fb6103d8c17a",
+      "storageDeposit": {
+        "charge": "0x00000000000000000099e8f29407d000"
+      },
+      "maxStorageDeposit": {
+        "charge": "0x00000000000000000099e8f29407d000"
+      }
+    },
+    {
+      "vm": "pvm",
+      "codeBytes": 42055,
+      "ok": true,
+      "reverted": false,
+      "address": "0x0b800cf0bea44ff33e3a46e7a329e70cc10311b6",
+      "weightRequired": {
+        "refTime": 9014130,
+        "proofSize": 0
+      },
+      "gasConsumed": "0x000000000000000001378d52689fb080",
+      "storageDeposit": {
+        "charge": "0x000000000000000004920cfc2e53c000"
+      },
+      "maxStorageDeposit": {
+        "charge": "0x000000000000000004920cfc2e53c000"
+      }
+    }
+  ]
+}

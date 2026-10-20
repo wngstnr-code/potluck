@@ -30,3 +30,6 @@ spikes/.cache/
 .idea/
 .vscode/
 *.log
+
+# PVM build output
+contracts/out-pvm/

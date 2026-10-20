@@ -1,0 +1,24 @@
+{
+  "name": "@potluck/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PotluckRegistry: Solidity source, Foundry tests, and EVM + PVM build/deploy scripts for Portaldot pallet-revive.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build:evm": "forge build",
+    "build:pvm": "tsx deploy/build-pvm.ts",
+    "test": "forge test -vv",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dry-run": "tsx deploy/dry-run.ts",
+    "deploy": "tsx deploy/deploy.ts"
+  },
+  "devDependencies": {
+    "@parity/resolc": "1.4.0",
+    "@polkadot/api": "17.0.2",
+    "@polkadot/keyring": "14.0.3",
+    "@polkadot/util": "14.0.3",
+    "@polkadot/util-crypto": "14.0.3",
+    "solc": "0.8.28"
+  }
+}
