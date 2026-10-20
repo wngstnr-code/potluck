@@ -219,40 +219,42 @@ potluck publish --network portaldot-testnet   # uses an SS58 account (seed from 
 
 ---
 
-## 9. The `PotluckRegistry.sol` contract (Revive, EVM bytecode)
+## 9. The `PotluckRegistry.sol` contract (Revive, EVM + PVM)
+
+**Source of truth:** [`contracts/src/PotluckRegistry.sol`](../contracts/src/PotluckRegistry.sol), with tests in [`contracts/test/PotluckRegistry.t.sol`](../contracts/test/PotluckRegistry.t.sol) (21 tests incl. fuzz, 100% line/branch coverage).
+
+The same source is compiled to EVM bytecode (solc 0.8.28, 5,414 B) and to PolkaVM (resolc 1.4.0, 42,055 B). Both instantiate on the live Portaldot V3 runtime (spike S8 dry-run).
+
+Interface summary:
 
 ```solidity
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+// specs: specHash = blake2b-256 of the canonical spec JSON = its TransactionStorage content digest
+function registerSpec(bytes32 specHash, uint32 tsBlock, uint32 tsIndex) external;
+function getSpec(bytes32 specHash) external view returns (Spec memory);
+function specCount() external view returns (uint256);
+function specHashAt(uint256 index) external view returns (bytes32);
 
-contract PotluckRegistry {
-    struct Spec { address author; bytes32 specCid; uint64 createdAt; }
-    struct Manifest {
-        bytes32 specHash;      bytes32 sourceGenesis;
-        uint64  fromBlock;     uint64  toBlock;      bytes32 toBlockHash;
-        bytes32 chunksRoot;    bytes32 manifestCid;  // blake2b digest → CID
-        uint32  tsBlock;       uint32  tsIndex;      // manifest location in TransactionStorage
-        address publisher;     uint64  publishedAt;  uint32  flags;
-    }
+// manifests: many per spec (progressive backfill), same range allowed from other publishers (quorum),
+// duplicate (spec, source, range, chunksRoot, publisher) rejected
+function publish(ManifestInput calldata m) external returns (uint256 id);
+function getManifest(uint256 id) external view returns (Manifest memory);
+function manifestCount() external view returns (uint256);
+function manifestCountBySpec(bytes32 specHash) external view returns (uint256);
+function manifestIdsBySpec(bytes32 specHash, uint256 offset, uint256 limit) external view returns (uint256[] memory);
+function latest(bytes32 specHash, uint256 n) external view returns (Manifest[] memory); // newest first
 
-    mapping(bytes32 => Spec) public specs;
-    Manifest[] public manifests;
-    mapping(bytes32 => uint256[]) public manifestsBySpec;
-    mapping(uint256 => mapping(address => bool)) public flaggedBy;
-
-    event SpecRegistered(bytes32 indexed specHash, address indexed author, bytes32 specCid);
-    event ManifestPublished(uint256 indexed id, bytes32 indexed specHash, address indexed publisher,
-                            uint64 toBlock, bytes32 chunksRoot);
-    event ManifestFlagged(uint256 indexed id, address indexed by, uint32 chunkIndex, uint8 reason, bytes32 evidence);
-    event Renewed(uint256 indexed id, uint32 tsBlock, uint32 tsIndex);
-
-    function registerSpec(bytes32 specHash, bytes32 specCid) external;
-    function publish(Manifest calldata m) external returns (uint256 id);
-    function flag(uint256 id, uint32 chunkIndex, uint8 reason, bytes32 evidence) external; // 1 flag per address
-    function noteRenewal(uint256 id, uint32 tsBlock, uint32 tsIndex) external;
-    function latest(bytes32 specHash, uint256 n) external view returns (Manifest[] memory);
-}
+// flags & renewals: chunkIndex == type(uint32).max (MANIFEST_BLOB) refers to the manifest blob itself
+function flag(uint256 id, uint32 chunkIndex, FlagReason reason, bytes32 evidence) external; // one per address, not by the publisher
+function hasFlagged(uint256 id, address flagger) external view returns (bool);
+function noteRenewal(uint256 id, uint32 chunkIndex, uint32 tsBlock, uint32 tsIndex) external; // manifest blob location is updated in storage; chunk renewals are events only
 ```
+
+Notes:
+- `ManifestInput` carries `specHash, sourceGenesis, fromBlock, toBlock, toBlockHash, chunksRoot, manifestDigest, tsBlock, tsIndex, chunkCount`. The stored `Manifest` adds `publisher, publishedAt, flags`.
+- `FlagReason`: `Integrity`, `RowMismatch`, `Reconciliation`, `Unavailable`.
+- Events: `SpecRegistered`, `ManifestPublished`, `ManifestFlagged`, `Renewed`. Clients can rebuild the full catalog from logs.
+- Blobs are fetched by digest via `bitswap_v1_get`, so a false renewal announcement can only point to an unusable location, never corrupt data.
+- **Storage deposits matter on Revive** (`depositPerByte` 0.06 tPOT, `depositPerItem` 0.15 tPOT). Deploy costs ≈ 433 tPOT (EVM) / ≈ 3,293 tPOT (PVM). The per-manifest cost will be measured after deployment; if it is too high, move non-essential manifest fields from storage to events.
 
 - **MVP:** no bond/slashing. A flag is only a public claim; the client verifies on its own and weighs publishers by their flag history.
 - **P1:** publisher bond + dispute window with a multisig arbiter (honestly acknowledged as temporary centralization).
@@ -353,6 +355,7 @@ Free-form JS handlers · on-chain slashing/adjudication · smoldot light client 
 | Spike | Status | Question |
 |---|---|---|
 | S1 Multi-runtime Polkadot AH event decoding in the browser | ✅ [results](../spikes/results/S1.md) | Metadata size/latency per version; correct at every version boundary? |
+| S8 resolc → PVM + EVM registry on Revive | 🟡 dry-run ✅ [results](../spikes/results/S8.md); real deploy needs tPOT | Do both variants instantiate? What deposits do they need? |
 | S2 Store 1/4/8 MB on Portaldot testnet | ⏳ (needs tPOT) | Does it pass the block limit & weight? What is the real fee? |
 | S3 `bitswap_v1_get` for MB-sized blobs over WSS | ⏳ | RPC response size limit? Latency? |
 | S4 Polkadot AH balance reconciliation | ✅ [results](../spikes/results/S4.md) | Which events change `free+reserved` (fee, reserve, dust, AHM migration)? Does it pass for 20 random accounts? |

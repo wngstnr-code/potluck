@@ -82,6 +82,8 @@ If two docs disagree: `DEVELOPMENT.md` (status) > `ARCHITECTURE.md` (design) > `
 - Take accounts from codecs via `toHex()`. `toJSON()` yields SS58 strings and silently breaks storage keys (S4).
 - Balance reconciliation is exact (319/319 accounts, S4). Balance-history volume over the Revive window is ~0.6–1 GB gzip, hence progressive backfill (decision 5).
 - Kusama AH Recovery inheritance API starts at block **17,836,634** (S7).
+- **Pass raw byte payloads to `@polkadot/api` as hex strings, never `Uint8Array`.** A `Uint8Array` for `Bytes` is treated as already SCALE-encoded and silently truncated (S8).
+- Revive storage deposits: `depositPerByte` 0.06 tPOT, `depositPerItem` 0.15 tPOT. Deploying the registry costs ≈ 433 tPOT (EVM) / ≈ 3,293 tPOT (PVM) (S8 dry-run).
 - Portaldot `recovery.securityDeposit = 0` (Kusama AH uses ~0.17 KSM).
 
 ## 8. Engineering conventions
