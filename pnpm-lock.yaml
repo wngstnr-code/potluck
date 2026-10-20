@@ -71,12 +71,18 @@ importers:
 
   packages/client:
     dependencies:
+      '@polkadot/util-crypto':
+        specifier: 14.0.3
+        version: 14.0.3(@polkadot/util@14.0.3)
       '@potluck/core':
         specifier: workspace:*
         version: link:../core
       '@potluck/spec':
         specifier: workspace:*
         version: link:../spec
+      viem:
+        specifier: 2.57.7
+        version: 2.57.7(typescript@7.0.2)(zod@4.6.7)
 
   packages/core:
     dependencies:
