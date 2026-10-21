@@ -491,11 +491,25 @@ table.rows {
 }
 
 /* Side column: the last panel stretches so the column never leaves empty space. */
+/*
+ * The side column never squeezes its panels: on short screens it scrolls on its own. The padding and
+ * matching negative margin keep the panels' shadows from being clipped by the scroll box.
+ */
 .side {
   min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 0 14px 14px;
+  margin: 0 -14px -14px;
+}
+.side > .panel {
+  flex-shrink: 0;
+}
+.side > .panel.grow {
+  flex: 1 0 auto;
 }
 .checks {
   list-style: none;
@@ -643,7 +657,7 @@ table.rows {
 
 .activity {
   flex: 1;
-  min-height: 110px;
+  min-height: 150px;
   display: flex;
   flex-direction: column;
   padding: 0 18px 14px;
