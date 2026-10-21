@@ -72,6 +72,9 @@ Git identity (already configured globally): `Wangsit Nursyahada <wangsitsada1234
 2. Copy the **SS58 address starting with `5`**, not the `0x` address.
 3. In the Portaldot Discord (https://discord.gg/G33tVtCsNW), open a **support ticket** with a screenshot of your DoraHacks Hacker House registration and your SS58 address. Alternatively DM admin `@titus242471` (Discord) or `@Stella707827` (DoraHacks).
 4. Nobody legitimate will ask for your seed phrase.
+   - Confirmed by the Discord `#dev-announcement` post of 2026-10-17: hackathon participants who entered a native address (starting with `5`) in the DoraHacks registration form get tokens in distribution batches; others open a ticket with a registration screenshot and the address.
+   - The MEE6 bot warns for any link posted in a ticket, so write repo or demo references without URLs.
+   - Ticket `#1278-wngstnr` was opened on 2026-10-21 asking for ≈ 8,000 tPOT.
 5. For the CLI publisher, put the dev seed in a local `.env` as `PUBLISHER_SEED=...`. `.env` is git-ignored; never commit or paste it.
 
 ### 3.3 Environment variables (`.env.example` to be committed; `.env` git-ignored)
