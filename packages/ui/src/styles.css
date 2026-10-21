@@ -994,6 +994,83 @@ tr.clickable {
   padding: 5px 0 4px;
   border-radius: var(--radius-sm);
 }
+/* Steps side by side in one strip (Attack demo), so the table below keeps the height. */
+.steps.across {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  padding: 0 4px 14px;
+}
+.steps.across .step {
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    "who v"
+    "text text";
+  align-content: start;
+  gap: 8px;
+  padding: 2px 14px;
+  border-top: 0;
+  border-left: 1px solid var(--line);
+}
+.steps.across .step:first-child {
+  border-left: 0;
+}
+.steps.across .who {
+  grid-area: who;
+  justify-self: start;
+  padding: 5px 8px 4px;
+}
+.steps.across .step > div {
+  grid-area: text;
+}
+.steps.across .step b {
+  font-size: 13px;
+}
+/* Results can run long; three lines keep the strip short (the full text is the tooltip). */
+.steps.across .step p {
+  font-size: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.steps.across .v {
+  grid-area: v;
+  justify-self: end;
+  padding-top: 4px;
+}
+@media (max-width: 1100px) {
+  .steps.across {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 0 18px 4px;
+  }
+  .steps.across .step {
+    grid-template-columns: 76px 1fr auto;
+    grid-template-areas: "who text v";
+    gap: 14px;
+    padding: 14px 0;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+  .steps.across .who {
+    justify-self: stretch;
+  }
+  .steps.across .step p {
+    display: block;
+    font-size: 13px;
+  }
+}
+@media (max-width: 760px) {
+  .steps.across {
+    padding: 0 14px 4px;
+  }
+  .steps.across .step {
+    grid-template-columns: 64px 1fr;
+    grid-template-areas:
+      "who text"
+      ". v";
+    gap: 10px;
+  }
+}
+
 .who.attacker {
   background: var(--red);
   color: white;

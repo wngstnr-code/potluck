@@ -151,38 +151,41 @@ export function Attack() {
         </div>
       </div>
 
+      <section className="panel">
+        <div className="ph">
+          <h2>What happens</h2>
+          <span>
+            everything here runs in this browser against {history.client ? "Portaldot V3" : "…"}
+          </span>
+        </div>
+        <ol className="steps across">
+          {STEPS.map((s, i) => {
+            const state =
+              i < stepIndex
+                ? "done"
+                : i === stepIndex && run.status === "running"
+                  ? "active"
+                  : "todo";
+            return (
+              <li key={s.id} className={`step ${state}`}>
+                <span className={`who ${s.who}`}>{s.who}</span>
+                <div>
+                  <b>{s.title}</b>
+                  <p title={stepText(s.id, result, hidden)}>{stepText(s.id, result, hidden)}</p>
+                </div>
+                <span className="v mono">
+                  {result ? formatDuration(result.ms[s.id]) : state === "active" ? "running" : ""}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </section>
+
       <div className="content">
-        <section className="panel sections">
+        <section className="panel">
           <div className="ph">
-            <h2>What happens</h2>
-            <span>
-              everything below runs in this browser against {history.client ? "Portaldot V3" : "…"}
-            </span>
-          </div>
-          <ol className="steps">
-            {STEPS.map((s, i) => {
-              const state =
-                i < stepIndex
-                  ? "done"
-                  : i === stepIndex && run.status === "running"
-                    ? "active"
-                    : "todo";
-              return (
-                <li key={s.id} className={`step ${state}`}>
-                  <span className={`who ${s.who}`}>{s.who}</span>
-                  <div>
-                    <b>{s.title}</b>
-                    <p>{stepText(s.id, result, hidden)}</p>
-                  </div>
-                  <span className="v mono">
-                    {result ? formatDuration(result.ms[s.id]) : state === "active" ? "running" : ""}
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
-          <div className="subhead">
-            <b>Victim's real history</b>
+            <h2>Victim's real history</h2>
             <span>
               {hidden
                 ? "highlighted: the payment the attacker removes"
