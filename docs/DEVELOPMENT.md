@@ -70,7 +70,7 @@ Git identity (already configured globally): `Wangsit Nursyahada <wangsitsada1234
 ### 3.2 Getting tPOT (user action)
 1. Install a Substrate wallet extension and create a **new development-only account**. Store the seed offline. Never reuse an account holding real assets.
 2. Copy the **SS58 address starting with `5`**, not the `0x` address.
-3. In the Portaldot Discord (https://discord.gg/portaldot), open a **support ticket** with a screenshot of your DoraHacks Hacker House registration and your SS58 address. Alternatively DM admin `@titus242471` (Discord) or `@Stella707827` (DoraHacks).
+3. In the Portaldot Discord (https://discord.gg/G33tVtCsNW), open a **support ticket** with a screenshot of your DoraHacks Hacker House registration and your SS58 address. Alternatively DM admin `@titus242471` (Discord) or `@Stella707827` (DoraHacks).
 4. Nobody legitimate will ask for your seed phrase.
 5. For the CLI publisher, put the dev seed in a local `.env` as `PUBLISHER_SEED=...`. `.env` is git-ignored; never commit or paste it.
 

@@ -230,7 +230,7 @@ Equilibria, PortalPot, OriginPort AI, VERITY, Auralis (arisan [rotating savings 
 - Hackathon S1: https://dorahacks.io/hackathon/portaldot-online-s1/detail
 - Docs: https://portaldot-dev.readthedocs.io/en/latest/
 - Node Console: https://node-console.portaldot.dev/
-- Discord: https://discord.gg/portaldot · X: https://x.com/PortaldotL0
+- Discord: https://discord.gg/G33tVtCsNW · X: https://x.com/PortaldotL0
 - S1 winners: https://x.com/PortaldotL0/status/2064002749008867589 · Special awards: https://x.com/PortaldotL0/status/2064334414461677950
 - Partners: https://x.com/PortaldotL0/status/2105281729439367578
 - Testnet faucet: Discord ticket with a native SS58 address (starting with `5`), not 0x
