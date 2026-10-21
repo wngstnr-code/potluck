@@ -174,6 +174,16 @@ export function eventsToRows(
     }
     const match = compiled.matches.get(matchKey(event.pallet, event.event));
     if (!match) continue;
+    if (match.where) {
+      const { field: name, equals } = match.where;
+      const field = event.fields.find((f) => f.name === name);
+      if (!field) {
+        throw new Error(
+          `block #${event.block} ${event.pallet}.${event.event}: no field "${name}" (fields: ${event.fields.map((f) => f.name).join(", ")})`,
+        );
+      }
+      if (normalizeField(field) !== equals) continue;
+    }
     const cells: Record<string, Cell> = {};
     for (const column of spec.columns) cells[column] = null;
     for (const [column, value] of Object.entries(match.row)) {

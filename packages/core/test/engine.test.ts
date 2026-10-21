@@ -118,6 +118,52 @@ describe("eventsToRows edge cases", () => {
     expect(() => eventsToRows(compileSpec(spec), recentEvents())).toThrow('no field "payer"');
   });
 
+  it("keeps only events whose field equals the where value", () => {
+    const all = eventsToRows(
+      compileSpec({
+        ...balanceSpec,
+        match: [
+          { pallet: "Balances", event: "Withdraw", row: { from: "$who", amount: "$amount" } },
+        ],
+      }),
+      recentEvents(),
+    );
+    const who = all[0]?.cells.from as string;
+    const only = (equals: string) =>
+      eventsToRows(
+        compileSpec({
+          ...balanceSpec,
+          match: [
+            {
+              pallet: "Balances",
+              event: "Withdraw",
+              where: { field: "who", equals },
+              row: { from: "$who", amount: "$amount" },
+            },
+          ],
+        }),
+        recentEvents(),
+      );
+    expect(only(who).length).toBe(all.filter((r) => r.cells.from === who).length);
+    expect(only(who).every((r) => r.cells.from === who)).toBe(true);
+    expect(only(`0x${"00".repeat(32)}`)).toEqual([]);
+  });
+
+  it("throws when a where field does not exist in the runtime", () => {
+    const spec: Spec = {
+      ...balanceSpec,
+      match: [
+        {
+          pallet: "Balances",
+          event: "Withdraw",
+          where: { field: "reason", equals: "x" },
+          row: { from: "$who" },
+        },
+      ],
+    };
+    expect(() => eventsToRows(compileSpec(spec), recentEvents())).toThrow('no field "reason"');
+  });
+
   it("matches pallet names case-insensitively", () => {
     const spec: Spec = {
       ...balanceSpec,
