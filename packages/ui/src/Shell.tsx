@@ -84,7 +84,11 @@ export function Shell({
                   className={`rb${page === p.id ? " on" : ""}`}
                   title={p.label}
                   aria-current={page === p.id ? "page" : undefined}
-                  onClick={() => onPage(p.id)}
+                  onClick={() => {
+                    onPage(p.id);
+                    // On phones the whole page scrolls; start the next page at its top.
+                    window.scrollTo({ top: 0 });
+                  }}
                 >
                   <Icon name={p.icon} size={19} />
                   <span className="label">{p.label}</span>
@@ -118,7 +122,12 @@ export function Shell({
         </button>
       </nav>
       <main className="main">
-        <div className="top">{top}</div>
+        <div className="top">
+          <div className={`logo mini ${mark}`} aria-hidden="true">
+            {mark === "wasiat" ? <WasiatMark /> : <PotluckMark />}
+          </div>
+          {top}
+        </div>
         {children}
       </main>
     </div>
