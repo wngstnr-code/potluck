@@ -9,6 +9,7 @@ Start with [`../CLAUDE.md`](../CLAUDE.md) (rules), then [`DEVELOPMENT.md`](./DEV
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Detailed design: measured constraints, components, spec/chunk/manifest formats, registry contract, client SDK, verification levels, threat model, MVP scope, spikes, decisions |
 | [POTLUCK.md](./POTLUCK.md) | Product concept after the reframe: why Portaldot, how it works, demo script, rubric mapping, business model, judge Q&A |
 | [DESIGN.md](./DESIGN.md) | UI design system: direction, design-review rules, palette, typography, components |
+| [VIDEO.md](./VIDEO.md) | Demo video script: check-in and final cuts, recording setup, timed narration |
 
 ## Reference
 | Doc | Purpose |
