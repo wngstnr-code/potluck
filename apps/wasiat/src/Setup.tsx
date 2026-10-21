@@ -141,6 +141,8 @@ export function Setup() {
     [form, ownerHex, info],
   );
   const ready = info && ownerHex && checked.problems.length === 0;
+  // Problems are only shown as errors once the user has typed something.
+  const touched = Boolean(form.friends || form.inheritor);
 
   const connect = async () => {
     setWallet({ status: "connecting" });
@@ -382,12 +384,10 @@ export function Setup() {
               <small className="mono">{fmt(checked.group.cancel_delay)} blocks</small>
             </label>
           </div>
-          <div
-            className={`proof${checked.problems.length && (form.friends || form.inheritor) ? " bad" : ""}`}
-          >
+          <div className={`proof${checked.problems.length && touched ? " bad" : ""}`}>
             <span className="t">
-              <Icon name={checked.problems.length ? "cross" : "check"} />
-              {checked.problems.length ? "Check" : "Ready"}
+              <Icon name={checked.problems.length ? (touched ? "cross" : "list") : "check"} />
+              {checked.problems.length ? (touched ? "Check" : "Start") : "Ready"}
             </span>
             <p>
               {submit.status === "included"
@@ -395,7 +395,9 @@ export function Setup() {
                 : submit.status === "error"
                   ? submit.message
                   : checked.problems.length
-                    ? `To fix: ${checked.problems.join("; ")}.`
+                    ? touched
+                      ? `To fix: ${checked.problems.join("; ")}.`
+                      : "Add the friends (one SS58 address per line) and the inheritor. The plan is checked as you type."
                     : `Friends are sorted by address as the pallet requires. ${submit.status === "estimated" ? `Estimated fee ${submit.fee} ${PORTALDOT.symbol}.` : "Estimate the fee, then sign in your wallet."}`}
             </p>
           </div>

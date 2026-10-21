@@ -101,8 +101,7 @@ export function Plans({ onOpen }: { onOpen: (account: string) => void }) {
                   <tr>
                     <th>Account</th>
                     <th>Status</th>
-                    <th className="r">Groups</th>
-                    <th>Rule</th>
+                    <th>Friends needed</th>
                     <th>Inheritor</th>
                     <th className="r">Delay</th>
                     <th>Replay</th>
@@ -144,9 +143,8 @@ export function Plans({ onOpen }: { onOpen: (account: string) => void }) {
                             {s.label}
                           </span>
                         </td>
-                        <td className="mono r">{a.plan ? a.plan.groups.length : "—"}</td>
                         <td className="mono">
-                          {g ? `${g.friendsNeeded} of ${g.friends.length} friends` : "—"}
+                          {g ? `${g.friendsNeeded} of ${g.friends.length}` : "—"}
                         </td>
                         <td className="mono">
                           {shortSs58(a.inheritor?.inheritor ?? g?.inheritor)}
@@ -194,7 +192,7 @@ export function Plans({ onOpen }: { onOpen: (account: string) => void }) {
         <aside className="side">
           <section className="panel">
             <div className="ph">
-              <h2>Where the timeline comes from</h2>
+              <h2>Timeline sources</h2>
               <span>since #{fmt(RECOVERY_FROM_BLOCK)}</span>
             </div>
             <ul className="checks">
