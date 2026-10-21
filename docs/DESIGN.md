@@ -37,6 +37,21 @@ A colorful analytics dashboard with soft depth, full screen, filled with real ch
 | `--green` / `--red` | `oklch(0.52 0.13 150)` / `oklch(0.55 0.19 25)` | + credit / − debit, pass / fail |
 | `--series-1…9` | blue, yellow, navy, coral, teal, violet, orange, green, slate | row kinds; tags use the same color as their chart series |
 
+### Per-app palettes
+
+Pantry uses the palette above. **Wasiat-lite** overrides the same tokens in `apps/wasiat/src/wasiat.css` ("midnight teal + coral", chosen with the user on 2026-10-21 from three options rendered on the real screen), so the two apps are told apart at a glance:
+
+| Token | Wasiat-lite value | Role there |
+|---|---|---|
+| `--navy` / `--navy-light` | `oklch(0.27 0.05 225)` / `oklch(0.37 0.07 220)` | slate-teal rail, primary button, proof bar |
+| `--page` | `oklch(0.962 0.012 200)` | cool mint page |
+| `--blue` (`--series-1`) | `oklch(0.52 0.1 205)` | teal tile, "Planned" tag |
+| `--yellow` | `oklch(0.83 0.1 50)` | peach-coral tile |
+| `--ink` / `--muted` | `oklch(0.23 0.035 225)` / `oklch(0.5 0.025 220)` | text |
+
+- Lowest text contrast: white on the tile highlight, 4.78:1.
+- Shared code must use tokens, never color literals, so a palette override restyles everything. Tile, glow and button partners are tokens too: `--navy-hi`, `--blue-hi` / `--blue-lo`, `--yellow-hi`, `--yellow-wash`, `--on-yellow-muted`, `--page-glow`.
+
 Kind tags: solid `--series-N` fill, text `--on-series-N`. Text colors were picked by measured contrast; all pairs are ≥ 4.5:1 (lowest: violet/white 4.55, blue/white 4.94).
 
 ## 4. Typography
