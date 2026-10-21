@@ -1,7 +1,7 @@
 {
   "potluck": 1,
   "name": "portaldot-v3-testnet.unified-history",
-  "description": "Unified dual-VM history on Portaldot V3: every native POT balance change (Balances events, reconcilable against System.Account) plus every ERC-20 and ERC-721 Transfer log from pallet-revive contracts (Revive.ContractEmitted). Native rows carry AccountId32 hex; token rows carry H160 addresses and the token contract in `asset`.",
+  "description": "Unified dual-VM history on Portaldot V3: every native POT balance change (Balances events, plus the TransactionStorage byte fee that is held and then burned without naming the account, reconcilable against System.Account) plus every ERC-20 and ERC-721 Transfer log from pallet-revive contracts (Revive.ContractEmitted). Native rows carry AccountId32 hex; token rows carry H160 addresses and the token contract in `asset`.",
   "source": {
     "kind": "substrate-events",
     "chain": "portaldot-v3-testnet",
@@ -120,6 +120,20 @@
       "event": "BurnedHeld",
       "row": {
         "kind": "BurnedHeld",
+        "asset": "native",
+        "from": "$who",
+        "amount": "$amount"
+      }
+    },
+    {
+      "pallet": "Balances",
+      "event": "Held",
+      "where": {
+        "field": "reason",
+        "equals": "{\"transactionStorage\":\"StorageFeeHold\"}"
+      },
+      "row": {
+        "kind": "StorageFee",
         "asset": "native",
         "from": "$who",
         "amount": "$amount"
