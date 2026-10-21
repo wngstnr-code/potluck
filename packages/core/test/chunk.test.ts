@@ -179,6 +179,21 @@ describe("ChunkAccumulator", () => {
     expect(rest).toEqual(full.slice(1));
   });
 
+  it("restored mid-chunk from its pending rows yields the same chunks as an uninterrupted run", () => {
+    const full = planChunks(spec, rowsAt(blocks), { fromBlock: 8, toBlock: 22 });
+    for (let crashAfter = 8; crashAfter < 22; crashAfter++) {
+      const first = new ChunkAccumulator(spec, 8);
+      const out = [];
+      for (let b = 8; b <= crashAfter; b++)
+        out.push(...first.push(b, blocks.includes(b) ? rowsOfBlock(b) : []));
+      const resumed = ChunkAccumulator.restore(spec, first.start, first.pending, crashAfter);
+      for (let b = crashAfter + 1; b <= 22; b++)
+        out.push(...resumed.push(b, blocks.includes(b) ? rowsOfBlock(b) : []));
+      out.push(resumed.finish(22));
+      expect(out).toEqual(full);
+    }
+  });
+
   it("rejects out-of-order blocks and mislabeled rows", () => {
     const acc = new ChunkAccumulator(spec, 1);
     acc.push(5, []);

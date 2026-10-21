@@ -41,6 +41,37 @@ export class ChunkAccumulator {
     return this.#start;
   }
 
+  /** Rows of the chunk currently being filled (not yet closed). */
+  get pending(): readonly IndexedRow[] {
+    return this.#current;
+  }
+
+  /**
+   * Rebuilds an accumulator whose open chunk starts at `fromBlock`, holds `rows` and has seen every
+   * block up to `scannedTo`, so a build can resume mid-chunk. Re-pushing the rows in order recreates
+   * the exact state: they were accepted into one chunk before, so they cannot close it now.
+   */
+  static restore(
+    spec: Spec,
+    fromBlock: number,
+    rows: readonly IndexedRow[],
+    scannedTo: number,
+  ): ChunkAccumulator {
+    const accumulator = new ChunkAccumulator(spec, fromBlock);
+    for (let i = 0; i < rows.length; ) {
+      const block = (rows[i] as IndexedRow).block;
+      const group: IndexedRow[] = [];
+      while (i < rows.length && (rows[i] as IndexedRow).block === block)
+        group.push(rows[i++] as IndexedRow);
+      if (accumulator.push(block, group).length > 0) {
+        throw new Error("restored rows do not belong to one open chunk");
+      }
+    }
+    if (scannedTo < accumulator.#lastBlock) throw new Error("scannedTo precedes the restored rows");
+    accumulator.#lastBlock = scannedTo;
+    return accumulator;
+  }
+
   /** Adds the rows of `block` (all with that block number; may be empty). */
   push(block: number, rows: readonly IndexedRow[]): ChunkPlan[] {
     if (block <= this.#lastBlock) throw new Error(`block #${block} pushed out of order`);
