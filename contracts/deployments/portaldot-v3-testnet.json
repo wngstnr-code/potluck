@@ -1,0 +1,12 @@
+{
+  "evm": {
+    "address": "0xef9305561eb0c34d205dfa0d9099a105f44282eb",
+    "txHash": "0x3abb9058e1eb48628791a029de71ef11b510ebc7a5cfa81677425773ce0bc352",
+    "blockHash": "0xbbd1b6841c0824bcb496545437c9343e2f00a3f2512f736097120b9163d5071f",
+    "blockNumber": 129014,
+    "deployer": "5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM",
+    "codeBytes": 5414,
+    "runtime": "portaldot-v3 3002",
+    "deployedAt": "2026-10-21T08:07:24.516Z"
+  }
+}
