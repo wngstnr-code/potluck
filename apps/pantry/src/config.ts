@@ -15,6 +15,18 @@ export const PORTALDOT = {
   registry: "0xef9305561eb0c34d205dfa0d9099a105f44282eb" as `0x${string}` | null,
 };
 
+/** Polkadot Asset Hub: the heavy source chain whose newest window is published on Portaldot. */
+export const POLKADOT_AH = {
+  name: "Polkadot Asset Hub",
+  ws: "wss://polkadot-asset-hub-rpc.polkadot.io",
+  symbol: "DOT",
+  decimals: 10,
+  ss58: 0,
+};
+
+export const AH_SPEC = parseSpec(balanceHistory);
+export const AH_SPEC_NAME = "polkadot-ah.balance-history";
+
 export const UNIFIED_SPEC = parseSpec(unifiedHistory);
 export const UNIFIED_SPEC_NAME = "portaldot-v3-testnet.unified-history";
 
@@ -27,7 +39,7 @@ export const SPECS = [
   },
   {
     file: "polkadot-ah.balance-history",
-    spec: parseSpec(balanceHistory),
+    spec: AH_SPEC,
     chainLabel: "Polkadot Asset Hub",
   },
   {

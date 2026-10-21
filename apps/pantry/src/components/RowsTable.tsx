@@ -1,5 +1,5 @@
 import type { IndexedRow } from "@potluck/core";
-import { direction, fmt, formatAmount, shortHex } from "@potluck/ui/format";
+import { direction, fmt, formatAmount, isNative, shortHex } from "@potluck/ui/format";
 import { Identicon } from "@potluck/ui/Identicon";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useEffect, useMemo, useRef } from "react";
@@ -24,6 +24,8 @@ export function RowsTable({
   filter,
   perspective,
   highlight,
+  unit = { symbol: "tPOT", decimals: 14 },
+  label = shortHex,
 }: {
   rows: readonly IndexedRow[];
   filter: string | null;
@@ -31,6 +33,10 @@ export function RowsTable({
   highlight?: IndexedRow;
   /** Address forms of the account being viewed: signs become relative to it. */
   perspective?: ReadonlySet<string>;
+  /** The source chain's native currency. */
+  unit?: { symbol: string; decimals: number };
+  /** How an account is shown (default: short hex; e.g. SS58 for a Polkadot chain). */
+  label?: (account: string) => string;
 }) {
   const visible = useMemo(() => {
     const out: IndexedRow[] = [];
@@ -78,7 +84,7 @@ export function RowsTable({
             const from = row.cells.from ?? undefined;
             const to = row.cells.to ?? undefined;
             const kind = row.cells.kind ?? "?";
-            const asset = row.cells.asset ?? undefined;
+
             const sign = direction(row, perspective);
             // In an account view, show the other side of the row; otherwise the first party.
             const mine = (a: string | undefined) => !!a && !!perspective?.has(a);
@@ -94,7 +100,7 @@ export function RowsTable({
                     ? "sent to"
                     : "received from"
               : from && to
-                ? `→ ${shortHex(to)}`
+                ? `→ ${label(to)}`
                 : to
                   ? "credited"
                   : "debited";
@@ -110,7 +116,7 @@ export function RowsTable({
                     <div>
                       {perspective && party && <small>{note}</small>}
                       {party ? (
-                        <b className="mono">{shortHex(party)}</b>
+                        <b className="mono">{label(party)}</b>
                       ) : (
                         <b>{note.charAt(0).toUpperCase() + note.slice(1)}</b>
                       )}
@@ -123,10 +129,12 @@ export function RowsTable({
                 <td>
                   <KindTag kind={kind} series={seriesOf(kind)} />
                 </td>
-                <td className="mono muted">{asset === "native" ? "tPOT" : shortHex(asset)}</td>
+                <td className="mono muted">
+                  {isNative(row) ? unit.symbol : shortHex(row.cells.asset ?? undefined)}
+                </td>
                 <td className={`mono r amt ${sign === "+" ? "pos" : sign === "−" ? "neg" : ""}`}>
                   {sign}
-                  {formatAmount(row)}
+                  {formatAmount(row, unit.decimals)}
                 </td>
               </tr>
             );
