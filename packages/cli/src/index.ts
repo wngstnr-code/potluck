@@ -3,6 +3,7 @@ import { parseArgs } from "node:util";
 import { runBuild } from "./build.js";
 import { runPublish } from "./publish.js";
 import { DEFAULT_RENEW_WITHIN, runRenew } from "./renew.js";
+import { runSync } from "./sync.js";
 import { runTamper } from "./tamper.js";
 import { reportsOk, runVerify } from "./verify.js";
 
@@ -39,6 +40,16 @@ Commands:
     --dry-run           Check every entry and estimate fees without submitting
     --from-address <ss58>  Account for estimates when PUBLISHER_SEED is not set
 
+  sync <spec.json>    Keep a spec current: build blocks finalized since the newest build, verify,
+                      publish every unpublished build, then renew what is about to expire
+    --registry <h160>   PotluckRegistry address (required unless --dry-run)
+    --dry-run           Build and verify locally, estimate publish and renew fees, submit nothing
+    --min-blocks <n>    Skip building with fewer new blocks than this (default: 1000)
+    --budget <tPOT>     Abort before spending if publishing would cost more than this
+    --no-verify         Publish a new build without the reconciliation check
+    --within, --restore, --from-address, --endpoint, --out, --concurrency, --segment, --strategy
+                        As for renew and build
+
   tamper <build-dir>  DEMO ONLY: copy a build with one debit row silently removed and all hashes
                       recomputed, to show that verification against the source chain catches it
     --out <dir>         Output directory (required)
@@ -68,6 +79,9 @@ async function main(argv: string[]): Promise<void> {
       chunk: { type: "string" },
       within: { type: "string" },
       restore: { type: "boolean" },
+      "min-blocks": { type: "string" },
+      budget: { type: "string" },
+      "no-verify": { type: "boolean" },
     },
   });
   const int = (value: string | undefined) =>
@@ -136,6 +150,29 @@ async function main(argv: string[]): Promise<void> {
       if (result.expired > 0) process.exitCode = 2;
       return;
     }
+    case "sync": {
+      const specPath = positionals[0];
+      if (!specPath) throw new Error("sync: missing <spec.json>");
+      const result = await runSync({
+        specPath,
+        out: values.out ?? "builds",
+        endpoint: values.endpoint,
+        registry: values.registry,
+        dryRun: values["dry-run"] ?? false,
+        fromAddress: values["from-address"],
+        minBlocks: int(values["min-blocks"]) ?? 1000,
+        budget: values.budget === undefined ? undefined : parseTpot(values.budget),
+        verify: !(values["no-verify"] ?? false),
+        within: int(values.within) ?? DEFAULT_RENEW_WITHIN,
+        restore: values.restore ?? false,
+        concurrency: int(values.concurrency) ?? 64,
+        segment: int(values.segment) ?? 2000,
+        strategy: values.strategy === "per-block" ? "per-block" : "auto",
+        log,
+      });
+      if (result.expired > 0) process.exitCode = 2;
+      return;
+    }
     case "tamper": {
       const dir = positionals[0];
       if (!dir || !values.out) throw new Error("tamper: usage tamper <build-dir> --out <dir>");
@@ -146,6 +183,13 @@ async function main(argv: string[]): Promise<void> {
       console.log(USAGE);
       if (command && command !== "help") process.exitCode = 1;
   }
+}
+
+/** Parses a tPOT amount such as "500" or "12.5" into planck (14 decimals). */
+function parseTpot(value: string): bigint {
+  const match = /^(\d+)(?:\.(\d{1,14}))?$/.exec(value.trim());
+  if (!match) throw new Error(`invalid tPOT amount "${value}"`);
+  return BigInt(match[1] as string) * 10n ** 14n + BigInt((match[2] ?? "").padEnd(14, "0"));
 }
 
 main(process.argv.slice(2)).catch((error: unknown) => {
