@@ -17,6 +17,7 @@ A colorful analytics dashboard with soft depth, full screen, filled with real ch
 
 | Rule | Instead |
 |---|---|
+| Dark or mid-tone fills with dark text (requested 2026-10-21) | White text on every dark or mid-tone fill; ink only on light fills (yellow, page tints, white) |
 | No tinted pills (pale background + same-hue text, e.g. light-blue chip with blue text). Applies to tags, icon wells, table headers, list icons | Solid fills with contrast-picked text, or plain text |
 | No decorative dots (status dots, dot legends, dot bullets) | Text labels, solid tags, bars |
 | No outer "app card" frame | Full-screen shell: rail + main fill the viewport |
@@ -52,7 +53,7 @@ Pantry uses the palette above. **Wasiat-lite** overrides the same tokens in `app
 - Lowest text contrast: white on the tile highlight, 4.78:1.
 - Shared code must use tokens, never color literals, so a palette override restyles everything. Tile, glow and button partners are tokens too: `--navy-hi`, `--blue-hi` / `--blue-lo`, `--yellow-hi`, `--yellow-wash`, `--on-yellow-muted`, `--page-glow`.
 
-Kind tags: solid `--series-N` fill, text `--on-series-N`. Text colors were picked by measured contrast; all pairs are ≥ 4.5:1 (lowest: violet/white 4.55, blue/white 4.94).
+Kind tags: solid `--series-N` fill, text `--on-series-N`. Every fill except yellow is dark enough for white text, and all pairs are ≥ 4.5:1 (lowest: violet 4.56, coral 4.65, teal 4.67, orange 4.85, blue 4.94). Coral, teal and orange were darkened for this on 2026-10-21. The logo keeps its original lighter coral and teal (`--mark-coral`, `--mark-teal`).
 
 ## 4. Typography
 

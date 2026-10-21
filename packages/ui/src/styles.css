@@ -85,9 +85,9 @@ button {
     inset 0 1px 0 oklch(1 0 0 / 0.6);
 }
 .logo.wasiat {
-  background: var(--series-5);
+  background: var(--mark-teal);
   box-shadow:
-    0 6px 16px oklch(from var(--series-5) l c h / 0.35),
+    0 6px 16px oklch(from var(--mark-teal) l c h / 0.35),
     inset 0 1px 0 oklch(1 0 0 / 0.5);
 }
 .logo svg {
