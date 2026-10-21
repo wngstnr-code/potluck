@@ -94,6 +94,15 @@ Three marks, chosen with the user on 2026-10-21. Files in [`brand/`](./brand/).
   - rail collapse 260 ms;
   - hover lifts of 1–2 px;
   - no bounce.
+- **Responsive** (checked at 390 px and 820 px wide, 2026-10-21):
+  - **Above 1100 px:** full-screen dashboard locked to the viewport; only tables scroll.
+  - **1100 px and below:** two tile columns, one content column; the page scrolls, and tables keep their cells on one line, scrolling sideways inside their panel (min width 640 px, 760 px for Wasiat-lite plans).
+  - **760 px and below (phones):**
+    - the rail becomes a bottom tab bar (icons + labels, safe-area aware);
+    - the brand and collapse toggle are hidden, and a 32 px logo sits in the top bar;
+    - the endpoint line is dropped, the Wasiat timeline's date column narrows, and forms go to one column;
+    - switching page or opening a timeline scrolls back to the top.
+  - Grid tracks are `minmax(0, 1fr)`, so a wide table can never push the page wider than the screen.
 
 ## 7. References
 
