@@ -13,7 +13,12 @@ const PAGES: ShellPage[] = [
 
 export function App() {
   const [page, setPage] = useState("plans");
-  const [account, setAccount] = useState<string | null>(null);
+  const [account, setAccountState] = useState<string | null>(null);
+  // On phones the whole page scrolls; open a timeline (or go back) at the top.
+  const setAccount = (next: string | null) => {
+    setAccountState(next);
+    window.scrollTo({ top: 0 });
+  };
   return (
     <Shell
       links={[{ label: "Pantry", href: "../pantry/", icon: "home" }]}
