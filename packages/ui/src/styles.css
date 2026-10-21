@@ -1148,7 +1148,7 @@ tr.clickable {
 }
 .state.off {
   background: var(--series-9);
-  color: var(--ink);
+  color: var(--on-series-9);
 }
 .state.on {
   background: var(--green);

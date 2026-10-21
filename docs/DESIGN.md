@@ -35,7 +35,7 @@ A colorful analytics dashboard with soft depth, full screen, filled with real ch
 | `--blue` | `oklch(0.55 0.17 258)` | blue tile, charts |
 | `--yellow` | `oklch(0.93 0.16 108)` | logo, "ready" tile, proof button |
 | `--green` / `--red` | `oklch(0.52 0.13 150)` / `oklch(0.55 0.19 25)` | + credit / − debit, pass / fail |
-| `--series-1…9` | blue, yellow, navy, coral, teal, violet, orange, green, slate | row kinds; tags use the same color as their chart series |
+| `--series-1…9` | blue, yellow, navy, coral, teal, violet, orange, green, slate | row kinds; tags use the same color as their chart series. Slate (`--series-9`, also the neutral "pending" / "not published" / "carried over" chip) is `oklch(0.52 0.03 260)` so its text can be white (5.5:1) |
 
 ### Per-app palettes
 

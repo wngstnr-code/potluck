@@ -144,7 +144,7 @@ h1.serif {
 }
 .origin.carried-over {
   background: var(--series-9);
-  color: var(--ink);
+  color: var(--on-series-9);
 }
 
 .groups {
