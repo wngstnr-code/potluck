@@ -135,11 +135,11 @@ export function Catalog() {
                     onClick={() => setSelected(s.file)}
                     style={{ height: 60 }}
                   >
-                    <td>
+                    <td className="wrap">
                       <b className="mono">{s.file}</b>
                       <small className="block muted mono">{shortHex(hashes[s.file])}</small>
                     </td>
-                    <td>{s.chainLabel}</td>
+                    <td className="wrap">{s.chainLabel}</td>
                     <td className="mono r">#{fmt(s.spec.source.fromBlock)}</td>
                     <td className="mono r">{s.spec.match.length}</td>
                     <td>
@@ -171,7 +171,10 @@ export function Catalog() {
                 return (
                   <li key={`${"pallet" in m ? `${m.pallet}.${m.event}` : m.log}`}>
                     <KindTag kind={kind} series={seriesOf(kind)} />
-                    <span className="mono">
+                    <span
+                      className="mono"
+                      title={"pallet" in m ? `${m.pallet}.${m.event}` : `EVM log ${m.log}`}
+                    >
                       {"pallet" in m ? `${m.pallet}.${m.event}` : `EVM log ${m.log.split("(")[0]}`}
                     </span>
                     {"effect" in m && m.effect && <em>{m.effect}</em>}

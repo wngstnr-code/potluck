@@ -101,7 +101,7 @@ export function Attack() {
           onClick={start}
           disabled={!ready || !chosen || run.status === "running"}
         >
-          <Icon name="cross" />
+          <Icon name="bolt" />
           {run.status === "running" ? "Attacking…" : "Run the attack"}
         </button>
       </div>
@@ -152,7 +152,7 @@ export function Attack() {
       </div>
 
       <div className="content">
-        <section className="panel">
+        <section className="panel sections">
           <div className="ph">
             <h2>What happens</h2>
             <span>
