@@ -73,6 +73,9 @@ export function buildDir(out: string, spec: Spec, fromBlock: number, toBlock: nu
   return join(out, spec.name, `${fromBlock}-${toBlock}`);
 }
 
+/** Attempts per segment; public archive nodes sometimes stall for minutes, longer than one call's retries. */
+const SEGMENT_ATTEMPTS = 5;
+
 export async function runBuild(options: BuildOptions): Promise<BuildResult> {
   const started = performance.now();
   const spec = await loadSpec(options.specPath);
@@ -135,6 +138,23 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       );
     };
 
+    // A stalled endpoint must not throw away the open chunk: retry the segment (scans are
+    // idempotent) after a growing pause before giving up.
+    const scanSegment = async <T>(scan: () => Promise<T>): Promise<T> => {
+      for (let attempt = 1; ; attempt++) {
+        try {
+          return await scan();
+        } catch (error) {
+          if (attempt >= SEGMENT_ATTEMPTS) throw error;
+          const pause = 30_000 * attempt;
+          options.log(
+            `segment failed (${error instanceof Error ? error.message : String(error)}); retry ${attempt}/${SEGMENT_ATTEMPTS - 1} in ${pause / 1000} s`,
+          );
+          await new Promise((resolve) => setTimeout(resolve, pause));
+        }
+      }
+    };
+
     let strategy: "auto" | "per-block" = options.strategy ?? "auto";
     let rows = state.chunks.reduce((n, c) => n + c.rows, 0);
     const total = toBlock - state.nextBlock + 1;
@@ -142,10 +162,9 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     let lastReport = performance.now();
     for (let start = state.nextBlock; start <= toBlock; start += options.segment) {
       const end = Math.min(start + options.segment - 1, toBlock);
-      const scan = await scanRawEvents(client, start, end, {
-        concurrency: options.concurrency,
-        strategy,
-      });
+      const scan = await scanSegment(() =>
+        scanRawEvents(client, start, end, { concurrency: options.concurrency, strategy }),
+      );
       if (scan.strategy === "per-block") strategy = "per-block";
       for (const block of scan.blocks) knownHashes.set(block.block, block.hash);
       for (const { block, raw } of scan.blocks) {
