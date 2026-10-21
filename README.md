@@ -115,6 +115,12 @@ node packages/cli/dist/index.js verify builds/portaldot-v3-testnet.unified-histo
 # Estimate publishing fees on Portaldot (no funds needed); drop --dry-run to publish
 node packages/cli/dist/index.js publish builds/... --dry-run --from-address <ss58>
 
+# Keep it current: index new blocks, verify, publish, renew what expires within a day
+node packages/cli/dist/index.js sync specs/portaldot-v3-testnet.unified-history.json --registry <h160>
+
+# Renew only (TransactionStorage keeps data ~7 days; a renewal costs ≈ 0.012 tPOT per blob)
+node packages/cli/dist/index.js renew builds/... --registry <h160>
+
 # Demo: forge a build that passes integrity checks, then watch verify catch it
 node packages/cli/dist/index.js tamper builds/... --out /tmp/forged
 node packages/cli/dist/index.js verify /tmp/forged --rebuild
@@ -135,7 +141,7 @@ pnpm test:contracts             # Foundry tests for PotluckRegistry
 | `packages/spec` | Spec schema (zod), validation, canonical hash |
 | `packages/core` | RPC, runtime-aware decoding, rows, chunks, manifests, L1/L2/L3 verification |
 | `packages/client` | Browser SDK: snapshot + direct sync, account history, live tail, registry/bitswap source |
-| `packages/cli` | Publisher CLI: build, verify, publish, tamper |
+| `packages/cli` | Publisher CLI: build, verify, publish, renew, sync, tamper |
 | `packages/theme`, `packages/ui` | Design tokens, fonts, shared React shell |
 | `apps/pantry` | Catalog, overview, verify account, attack demo |
 | `apps/wasiat` | Wasiat-lite: Recovery-pallet inheritance plans and timelines |

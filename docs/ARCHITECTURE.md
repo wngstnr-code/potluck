@@ -13,7 +13,8 @@
 | Browser direct sync of Portaldot V3 (Pantry, Chrome) | 118,991 blocks → 2,248 rows in 2 min 25 s; L3 905 / 905 account checks in 22.7 s | Direct sync is fine for Portaldot today; snapshots are what make heavy chains load in seconds |
 | Portaldot block length limit | normal 14,942,208 bytes | One 8 MB chunk fits per block, so **max chunk size is 8 MB** and 1 store per tx |
 | `TransactionStorage.maxTransactionSize` | 8,388,608 bytes | Same |
-| Retention | 100,800 blocks (~7 days) | The manifest stores `(tsBlock, tsIndex)` for each chunk for `renew` |
+| Retention | 100,800 blocks (~7 days, `TransactionStorage.RetentionPeriod`); a block's entries are dropped at `block + 100,801`, so a renewal must land by `block + 100,800` | The manifest stores `(tsBlock, tsIndex)` for each chunk for `renew` |
+| Renewal cost (`paymentInfo`, 2026-10-21) | **≈ 0.0117 tPOT per `renew(block, index)`, whatever the blob size**, vs ≈ 104.9 tPOT to `store` 1 MB. `Renewed { index, content_hash }` gives the new location | Keeping data alive is almost free; only the first store and a re-store after expiry cost per byte. `potluck renew` runs daily with a one-day window |
 | Storage cost (S2, `paymentInfo`) | **≈ 0.0001 tPOT per byte ≈ 100 tPOT per MB**, linear up to 7.8 MB; `byteFee`/`entryFee` (10/1000 planck) are negligible next to the transaction length fee | Bytes are the cost driver. Measured: the newest 1.5 M Polkadot AH blocks are **62 MB gz** (≈ 6,200 tPOT), not the ~19 MB first estimated. Encoding efficiency (dictionary/columnar) is a P1 cost lever. *(Corrects an earlier "25 MB ≈ 0.0000025 POT" estimate.)* |
 | Blob upload over WSS (S2) | 7.8 MB accepted; travels as hex (2×), ~28 s from the developer's link | Request timeout ≥ 90 s; keep chunk blobs ≲ 4.5 MB |
 | `bitswap_v1_get` | Works on public nodes (tested at 16 KB) | Chunk download path from the browser. MB-sized blobs need a spike |
@@ -225,6 +226,8 @@ potluck/
 potluck build   <spec.json> [--last N | --from A --to B] [--concurrency 64]   # resumable
 potluck verify  <build-dir> [--rebuild] [--no-reconcile] [--chunks i,j]
 potluck publish <build-dir> --registry <h160> [--dry-run --from-address <ss58>]
+potluck renew   <build-dir> [--registry <h160>] [--within 14400] [--restore] [--dry-run]
+potluck sync    <spec.json> --registry <h160> [--dry-run] [--min-blocks 1000] [--budget <tPOT>]
 potluck tamper  <build-dir> --out <dir>                                       # demo only
 ```
 
@@ -245,7 +248,18 @@ potluck tamper  <build-dir> --out <dir>                                       # 
   - Steps 4 and 5 are two transactions, not one atomic batch: the manifest entry must carry its own blob location, which is only known after inclusion.
   - `--dry-run` builds the same transactions and estimates fees with `paymentInfo`, without funds.
 - **tamper** (demo): copies a build with one debit row removed and all hashes recomputed. It passes L1 alone; `verify --rebuild` reports a mismatch and L3 points at the victim account.
-- **renew**: not built yet (P1). It will re-store chunks nearing the 100,800-block retention and call `noteRenewal`.
+- **renew**:
+  - Reads the locations in `publish-state.json` (spec, chunks, manifest) and checks each on chain: `TransactionStorage.Transactions(block)[index]` must still hold the expected content hash.
+  - Entries whose last renewable block is within `--within` blocks (default 14,400, about a day) get `transactionStorage.renew`. The new location from `Renewed` is saved and, with `--registry`, announced with `noteRenewal` (chunk index, or `MANIFEST_BLOB` for the manifest).
+  - Expired entries cannot be renewed. `--restore` stores them again from the local build (full store fee); otherwise they are reported and the exit code is 2.
+  - Clients fetch blobs by digest over bitswap, so locations matter only to renewers, including third parties renewing someone else's data.
+- **sync** (what a publisher runs periodically, by hand or from their own scheduler):
+  1. Builds the blocks finalized since the newest complete build of the spec (or resumes an unfinished build that continues it). It skips when fewer than `--min-blocks` are new and refuses to start without a first build.
+  2. Verifies the new build (L1 + reconciliation) before anything is spent.
+  3. Publishes every complete build that is not registered yet, each as its own manifest (clients merge manifests). `--budget` aborts first if the estimated store fees are higher.
+  4. Renews every published build.
+  - Measured (2026-10-21, dry run): Portaldot #116,550..#128,267 built, verified (53 / 53 accounts) and estimated in 15 s; publishing both Portaldot builds would cost ≈ 8.2 tPOT.
+  - Each sync adds a manifest, and the client reads the newest 32 per spec by default. Consolidating old manifests is P1.
 
 ---
 
