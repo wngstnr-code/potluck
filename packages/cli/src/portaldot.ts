@@ -3,9 +3,10 @@ import type { SubmittableExtrinsic } from "@polkadot/api/types";
 import { Keyring } from "@polkadot/keyring";
 import type { KeyringPair } from "@polkadot/keyring/types";
 import { u8aToHex } from "@polkadot/util";
+import { REGISTRY_ABI } from "@potluck/core";
 import { type Abi, decodeFunctionResult, encodeFunctionData, type Hex } from "viem";
 
-export { REGISTRY_ABI } from "@potluck/core";
+export { REGISTRY_ABI };
 
 export type ManifestInput = {
   specHash: Hex;
@@ -107,6 +108,31 @@ export async function readContract<T>(
   return decodeFunctionResult({ abi, functionName, data: estimate.returnData } as never) as T;
 }
 
+/** Registry id of the manifest with this digest from this publisher, or null if it is not there. */
+export async function findManifestId(
+  api: ApiPromise,
+  origin: string,
+  registry: string,
+  specHash: string,
+  manifestDigest: string,
+  publisher: string,
+): Promise<number | null> {
+  const read = <T>(functionName: string, args: readonly unknown[]) =>
+    readContract<T>(api, origin, registry, REGISTRY_ABI, functionName, args);
+  const count = await read<bigint>("manifestCountBySpec", [specHash]);
+  const ids = await read<readonly bigint[]>("manifestIdsBySpec", [specHash, 0n, count]);
+  for (const id of [...ids].reverse()) {
+    const m = await read<{ manifestDigest: string; publisher: string }>("getManifest", [id]);
+    if (
+      m.manifestDigest.toLowerCase() === manifestDigest.toLowerCase() &&
+      m.publisher.toLowerCase() === publisher.toLowerCase()
+    ) {
+      return Number(id);
+    }
+  }
+  return null;
+}
+
 /** A `revive.call` extrinsic with limits from a dry run plus 20% headroom. */
 export function contractCallTx(
   api: ApiPromise,
@@ -136,6 +162,8 @@ export function storeTx(api: ApiPromise, bytes: Uint8Array): SubmittableExtrinsi
 export interface Inclusion {
   blockHash: string;
   blockNumber: number;
+  /** Fee actually paid (`TransactionPayment.TransactionFeePaid`), 0 if the event is missing. */
+  fee: bigint;
   events: { section: string; method: string; data: { toJSON(): unknown }[] }[];
 }
 
@@ -159,9 +187,14 @@ export function submit(
       if (result.status.isInBlock) {
         const blockHash = result.status.asInBlock.toHex();
         const header = await api.rpc.chain.getHeader(blockHash);
+        const paid = result.events.find(
+          ({ event }) =>
+            event.section === "transactionPayment" && event.method === "TransactionFeePaid",
+        );
         resolve({
           blockHash,
           blockNumber: header.number.toNumber(),
+          fee: paid ? BigInt(paid.event.data[1]?.toString() ?? 0) : 0n,
           events: result.events.map(({ event }) => ({
             section: event.section,
             method: event.method,
@@ -173,16 +206,53 @@ export function submit(
   });
 }
 
-/** TransactionStorage location and content hash from a store inclusion. */
-export function storedLocation(inclusion: Inclusion): {
+/** `transactionStorage.renew` of the entry stored (or last renewed) at `block`/`index`. */
+export function renewTx(
+  api: ApiPromise,
+  block: number,
+  index: number,
+): SubmittableExtrinsic<"promise"> {
+  const renew = api.tx.transactionStorage?.renew;
+  if (!renew) throw new Error("runtime has no transactionStorage.renew");
+  return renew(block, index);
+}
+
+/** Blocks a stored entry stays renewable (`TransactionStorage.RetentionPeriod`). */
+export async function retentionPeriod(api: ApiPromise): Promise<number> {
+  const query = api.query.transactionStorage?.retentionPeriod;
+  if (!query) throw new Error("runtime has no TransactionStorage.RetentionPeriod");
+  return Number((await query()).toString());
+}
+
+/**
+ * Content hash of the entry at `block`/`index`, or null once it is gone. The pallet drops a
+ * block's entries after the retention period, after which the data can only be stored again.
+ */
+export async function storedContentHash(
+  api: ApiPromise,
+  block: number,
+  index: number,
+): Promise<string | null> {
+  const query = api.query.transactionStorage?.transactions;
+  if (!query) throw new Error("runtime has no TransactionStorage.Transactions");
+  const entries = (await query(block)).toJSON() as { contentHash: string }[] | null;
+  const entry = entries?.[index];
+  return entry ? entry.contentHash.toLowerCase() : null;
+}
+
+/** TransactionStorage location and content hash from a store or renew inclusion. */
+export function storedLocation(
+  inclusion: Inclusion,
+  method: "Stored" | "Renewed" = "Stored",
+): {
   block: number;
   index: number;
   contentHash: string;
 } {
   const stored = inclusion.events.find(
-    (e) => e.section === "transactionStorage" && e.method === "Stored",
+    (e) => e.section === "transactionStorage" && e.method === method,
   );
-  if (!stored) throw new Error("no TransactionStorage.Stored event");
+  if (!stored) throw new Error(`no TransactionStorage.${method} event`);
   const [index, contentHash] = stored.data.map((d) => d.toJSON());
   return {
     block: inclusion.blockNumber,

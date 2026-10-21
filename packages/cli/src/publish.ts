@@ -16,6 +16,7 @@ import {
   connectPortaldot,
   contractCallTx,
   estimateCall,
+  findManifestId,
   type ManifestInput,
   REGISTRY_ABI,
   readContract,
@@ -37,19 +38,29 @@ export interface PublishOptions {
   log: (line: string) => void;
 }
 
-interface PublishState {
+export interface PublishState {
   manifestDraftDigest: string;
   spec?: { block: number; index: number };
   specRegistered?: boolean;
   chunks: ({ block: number; index: number } | null)[];
   manifest?: { block: number; index: number; digest: string };
   published?: { blockHash: string };
+  /** Registry id of the published manifest, needed to announce renewals. */
+  manifestId?: number;
+}
+
+export interface PublishResult {
+  /** Bytes stored (dry run: bytes that would be stored). */
+  bytes: number;
+  /** Store fees paid or, in a dry run, estimated (planck). */
+  fee: bigint;
+  manifestId?: number;
 }
 
 const TPOT = 10n ** 14n;
-const formatTpot = (planck: bigint) => `${(Number(planck) / Number(TPOT)).toFixed(4)} tPOT`;
+export const formatTpot = (planck: bigint) => `${(Number(planck) / Number(TPOT)).toFixed(4)} tPOT`;
 
-export async function runPublish(options: PublishOptions): Promise<void> {
+export async function runPublish(options: PublishOptions): Promise<PublishResult> {
   const specBytes = new Uint8Array(await readFile(join(options.dir, "spec.json")));
   const spec = parseSpec(JSON.parse(new TextDecoder().decode(specBytes)));
   const hash = specHash(spec);
@@ -117,6 +128,8 @@ export async function runPublish(options: PublishOptions): Promise<void> {
     const store = async (label: string, bytes: Uint8Array, digest: string) => {
       if (options.dryRun || !signer) return estimateStore(label, bytes);
       const inclusion = await submit(api, storeTx(api, bytes), signer);
+      totalFee += inclusion.fee;
+      totalBytes += bytes.length;
       const location = storedLocation(inclusion);
       if (location.contentHash !== digest) {
         throw new Error(`${label}: stored content hash ${location.contentHash} != ${digest}`);
@@ -209,6 +222,21 @@ export async function runPublish(options: PublishOptions): Promise<void> {
         options.log(`manifest published in block ${inclusion.blockHash}`);
       }
     }
+    if (registry && state.published && state.manifest && state.manifestId === undefined) {
+      const id = await findManifestId(
+        api,
+        account,
+        registry,
+        hash,
+        state.manifest.digest,
+        publisher,
+      );
+      if (id !== null) {
+        state.manifestId = id;
+        await save();
+        options.log(`registry manifest id ${id}`);
+      }
+    }
 
     if (options.dryRun) {
       options.log(
@@ -218,6 +246,7 @@ export async function runPublish(options: PublishOptions): Promise<void> {
     } else {
       options.log(`published ${final.chunks.length} chunk(s); manifest digest ${finalDigest}`);
     }
+    return { bytes: totalBytes, fee: totalFee, manifestId: state.manifestId };
   } finally {
     await api.disconnect();
   }
