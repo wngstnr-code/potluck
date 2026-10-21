@@ -43,7 +43,7 @@ _Last updated: 2026-10-21 (M0, M2, M4, M5 done; M3 done except real deployment; 
 2. With the remaining tPOT (≈ 908):
    - ~~deploy the EVM registry, set `PORTALDOT.registry`, publish the Portaldot history, measure the snapshot load~~ done 2026-10-21;
    - ~~publish a small newest Polkadot AH range and run S3~~ done 2026-10-21 (manifest 3);
-   - load Polkadot AH account history from that snapshot in Pantry (the heavy-chain demo);
+   - ~~load Polkadot AH from that snapshot in Pantry~~ done 2026-10-21 ("Polkadot AH" page: 5.6–6.4 s vs ≈ 11 min direct, per-account L2 + L3);
    - publish the Kusama AH timeline when its build finishes;
    - with a second batch: the PVM deploy and more AH chunks.
 3. ~~Static hosting~~ Done 2026-10-20: GitHub Pages via Actions (approved by the user).

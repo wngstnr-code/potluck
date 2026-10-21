@@ -73,6 +73,7 @@ flowchart TB
 |---|---|
 | Portaldot V3 unified history (native + EVM/PVM tokens), CLI | 116,549 blocks → 2,176 rows in 158 s; `verify --rebuild` reconciles 899 / 899 accounts |
 | Same history in the browser (Pantry) | 2,248 rows / 912 accounts loaded by direct sync in 2 min 25 s; 905 / 905 account checks reconciled in 22.7 s; live tail follows new blocks |
+| Polkadot AH from its snapshot (Pantry) | Newest 80,000 Asset Hub blocks: 114,460 rows / 23,268 accounts loaded from Portaldot in **5.6–6.4 s**; direct sync measured in the same browser at 117 blocks/s ≈ 11 min 23 s (events only). One account: 147 / 147 rows re-derived (L2) and its balance reconciled exactly (L3) against Polkadot Asset Hub |
 | Fetch a published chunk (bitswap) | 2.5 MB Polkadot AH chunk from the public Portaldot node in ≈ 4 s; indexing the same 80,000 blocks takes 316 s |
 | Load from the registry (Pantry) | Portaldot history #1–#129,069 from its published snapshot + a direct-synced tail in **3.0 s** (1 min 9 s by direct sync); 938 / 938 account checks reconciled |
 | Verify one account (Pantry) | 183 rows re-derived from 94 blocks (L2) + balance reconciled (L3) in 1.8 s |
