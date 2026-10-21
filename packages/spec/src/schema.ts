@@ -23,6 +23,15 @@ const substrateEventMatch = z
     pallet: z.string().regex(IDENT),
     /** Event variant name as in metadata, e.g. "Transfer". */
     event: z.string().regex(IDENT),
+    /**
+     * Only events whose `field` equals `equals` produce a row. The comparison uses the field's
+     * canonical cell: integers as decimal strings, accounts as AccountId32 hex, enums and other
+     * values as canonical JSON (e.g. `{"transactionStorage":"StorageFeeHold"}`).
+     */
+    where: z
+      .object({ field: z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*$/), equals: z.string() })
+      .strict()
+      .optional(),
     /** Column → value. Columns not set here are null for rows from this match. */
     row: z.record(z.string().regex(COLUMN), rowValue),
     /**
