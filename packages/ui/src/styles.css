@@ -402,6 +402,17 @@ table.rows {
   padding: 8px 18px;
   border-bottom: 1px solid var(--line);
 }
+.rows thead th {
+  white-space: nowrap;
+}
+/* Long names (spec files, chain names) may wrap; values, chips and amounts never do. */
+.rows td.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.rows thead th.r {
+  text-align: right;
+}
 .rows td {
   padding: 0 18px;
   border-bottom: 1px solid var(--line);
@@ -426,7 +437,10 @@ table.rows {
   font-size: 12px;
 }
 .who b,
-.who small {
+.who small,
+.rows td,
+.tag,
+.state {
   white-space: nowrap;
 }
 .idn {
@@ -717,10 +731,6 @@ table.rows {
   /* Wide tables scroll sideways inside their panel instead of squeezing their columns. */
   table.rows {
     min-width: 640px;
-  }
-  .rows td,
-  .tag {
-    white-space: nowrap;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1131,7 +1141,12 @@ tr.clickable {
   border-radius: 4px;
 }
 .rules li {
-  grid-template-columns: 150px 1fr auto;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+}
+.rules li > .mono {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .rules .tag {
   justify-self: start;
@@ -1321,4 +1336,18 @@ a.rb {
   .rules li > :first-child {
     grid-column: 1 / -1;
   }
+}
+
+/*
+ * A panel whose sections stack (steps, then a table): on short screens the whole panel scrolls; the
+ * table keeps at least 300 px and grows into any spare height on tall screens.
+ */
+.panel.sections {
+  overflow-y: auto;
+}
+.panel.sections > * {
+  flex-shrink: 0;
+}
+.panel.sections > .scroll {
+  flex: 1 0 300px;
 }
