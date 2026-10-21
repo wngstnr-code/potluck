@@ -49,7 +49,21 @@ Kind tags: solid `--series-N` fill, text `--on-series-N`. Text colors were picke
 
 Scale: 11 (tags, axis) · 12 (meta) · 13 (table) · 14 (body) · 16 (panel titles) · 26 (page title) · 32 (tile numbers). Three weights: 400, 500, 600.
 
-## 5. Components
+## 5. Logo
+
+Two marks, chosen with the user on 2026-10-21. Files in [`brand/`](./brand/).
+
+| Mark | File | Use |
+|---|---|---|
+| **p monogram**: a navy lowercase p whose bowl holds four chunks (blue, coral, teal, and one in tile yellow) | `brand/potluck-mark.svg` | favicon, app rail (`PotluckMark` in `packages/ui`), anywhere at 48 px or smaller |
+| **Pot of chunks**: a navy pot holding chunks with one more dropping in ("everyone brings a chunk") | `brand/potluck-pot.svg` | large placements: README header, pitch deck, video title and closing cards |
+
+- Both sit on the yellow `--yellow` tile with corner radius ≈ 31% of the side (20 / 64; the rail tile is 14 / 44).
+- Colors are the theme tokens: navy `--navy`, chunks `--blue`, `--series-4` (coral), `--series-5` (teal).
+- The wordmark is "potluck" in lowercase IBM Plex Sans 600, set as live text next to the mark, never outlined into the files.
+- Do not recolor the tile, add gradients or outlines, or use the pot below 48 px (its chunks blur).
+
+## 6. Components
 
 - **Tile:** label (13, muted) → big mono number (32) → sub line or mini chart, bottom-aligned.
 - **Panel:** title row (16/600 + muted hint right) and content.
@@ -65,7 +79,7 @@ Scale: 11 (tags, axis) · 12 (meta) · 13 (table) · 14 (body) · 16 (panel titl
   - hover lifts of 1–2 px;
   - no bounce.
 
-## 6. References
+## 7. References
 
 - **Layout reference:** a soft colorful clinical dashboard supplied by the user (rail with active highlight, colored KPI tiles, queue table, gauge, summary bar).
 - **Earlier explorations (rejected):** "evidence ledger" paper (receipts, CAD title blocks) and a flat neutral dashboard. The user preferred a colorful dashboard.

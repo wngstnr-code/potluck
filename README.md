@@ -1,3 +1,5 @@
+<img src="docs/brand/potluck-pot.svg" alt="Potluck logo: a pot of colored chunks" width="96">
+
 # Potluck
 
 > **Everyone brings a chunk. Every dApp gets the history.**
