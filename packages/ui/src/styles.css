@@ -81,13 +81,13 @@ button {
   display: grid;
   place-items: center;
   box-shadow:
-    0 6px 16px oklch(0.85 0.16 108 / 0.35),
+    0 6px 16px oklch(from var(--yellow) calc(l - 0.08) c h / 0.35),
     inset 0 1px 0 oklch(1 0 0 / 0.6);
 }
 .logo.wasiat {
   background: var(--series-5);
   box-shadow:
-    0 6px 16px oklch(0.68 0.11 195 / 0.35),
+    0 6px 16px oklch(from var(--series-5) l c h / 0.35),
     inset 0 1px 0 oklch(1 0 0 / 0.5);
 }
 .logo svg {
@@ -140,7 +140,7 @@ button {
 .rb.on {
   background: white;
   color: var(--navy);
-  box-shadow: 0 6px 16px oklch(0.15 0.08 264 / 0.35);
+  box-shadow: 0 6px 16px oklch(from var(--navy) calc(l - 0.16) c h / 0.35);
 }
 .rb:focus-visible,
 .kind-row:focus-visible,
@@ -175,7 +175,11 @@ button {
   gap: 16px;
   padding: 18px 24px 20px;
   background:
-    radial-gradient(1200px 500px at 70% -10%, oklch(0.9 0.05 250 / 0.8), transparent 70%),
+    radial-gradient(
+      1200px 500px at 70% -10%,
+      oklch(from var(--page-glow) l c h / 0.8),
+      transparent 70%
+    ),
     var(--page);
 }
 .top {
@@ -280,15 +284,15 @@ h1 {
   opacity: 0.55;
 }
 .tile.yellow {
-  background: linear-gradient(155deg, oklch(0.96 0.12 108), var(--yellow));
+  background: linear-gradient(155deg, var(--yellow-hi), var(--yellow));
   box-shadow:
-    0 10px 26px oklch(0.85 0.16 108 / 0.4),
+    0 10px 26px oklch(from var(--yellow) calc(l - 0.08) c h / 0.4),
     var(--highlight);
 }
 .tile.yellow .lbl,
 .tile.yellow .sub,
 .tile.yellow .big small {
-  color: oklch(0.36 0.06 110);
+  color: var(--on-yellow-muted);
 }
 .meter {
   align-self: end;
@@ -298,7 +302,7 @@ h1 {
 .meter .track {
   height: 8px;
   border-radius: 4px;
-  background: oklch(0.22 0.05 262 / 0.14);
+  background: oklch(from var(--ink) l c h / 0.14);
   overflow: hidden;
 }
 .meter .track i {
@@ -309,10 +313,10 @@ h1 {
   transition: width var(--duration-in) var(--ease-out);
 }
 .tile.blue {
-  background: linear-gradient(155deg, oklch(0.56 0.16 258), oklch(0.46 0.15 263));
+  background: linear-gradient(155deg, var(--blue-hi), var(--blue-lo));
   color: white;
   box-shadow:
-    0 12px 28px oklch(0.5 0.15 262 / 0.4),
+    0 12px 28px oklch(from var(--blue-lo) l c h / 0.4),
     inset 0 1px 0 oklch(1 0 0 / 0.25);
 }
 .tile.blue .lbl,
@@ -460,7 +464,7 @@ table.rows {
   gap: 16px;
   padding: 14px 18px;
   color: white;
-  background: linear-gradient(90deg, var(--navy), oklch(0.46 0.15 262));
+  background: linear-gradient(90deg, var(--navy), var(--blue-lo));
 }
 .proof.bad {
   background: linear-gradient(90deg, oklch(0.4 0.15 25), var(--red));
@@ -739,10 +743,10 @@ table.rows {
   opacity: 0.7;
 }
 .btn.primary {
-  background: linear-gradient(180deg, oklch(0.4 0.13 262), var(--navy));
+  background: linear-gradient(180deg, var(--navy-hi), var(--navy));
   color: white;
   box-shadow:
-    0 8px 18px oklch(0.31 0.11 264 / 0.3),
+    0 8px 18px oklch(from var(--navy) l c h / 0.3),
     inset 0 1px 0 oklch(1 0 0 / 0.18);
 }
 .btn.plain {
@@ -963,7 +967,7 @@ tr.clickable {
   color: white;
 }
 .step.active .who {
-  box-shadow: 0 0 0 3px oklch(0.93 0.16 108);
+  box-shadow: 0 0 0 3px var(--yellow);
 }
 
 .victim {
@@ -1001,7 +1005,7 @@ tr.clickable {
   color: var(--muted);
 }
 .rows tr.hl td {
-  background: oklch(0.96 0.1 108);
+  background: var(--yellow-wash);
 }
 .rows tr.hl td:first-child {
   box-shadow: inset 4px 0 0 var(--red);

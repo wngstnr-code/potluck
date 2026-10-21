@@ -21,6 +21,14 @@
   --navy: oklch(0.31 0.11 264);
   --navy-light: oklch(0.42 0.15 260);
   --yellow: oklch(0.93 0.16 108);
+  /* Partners of the brand colors: tile gradients, washes and text on the yellow tile */
+  --page-glow: oklch(0.9 0.05 250);
+  --navy-hi: oklch(0.4 0.13 262);
+  --blue-hi: oklch(0.56 0.16 258);
+  --blue-lo: oklch(0.46 0.15 263);
+  --yellow-hi: oklch(0.96 0.12 108);
+  --yellow-wash: oklch(0.96 0.1 108);
+  --on-yellow-muted: oklch(0.36 0.06 110);
   --on-dark: oklch(0.92 0.03 255);
 
   /* Semantics: direction and verification state */

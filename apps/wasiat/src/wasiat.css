@@ -206,7 +206,7 @@ h1.serif {
 .field textarea:focus,
 .field select:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 2px oklch(0.55 0.17 258 / 0.25);
+  box-shadow: 0 0 0 2px oklch(from var(--blue) l c h / 0.25);
 }
 .inline {
   display: flex;
