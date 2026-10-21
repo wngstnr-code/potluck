@@ -1414,17 +1414,3 @@ a.rb {
     grid-column: 1 / -1;
   }
 }
-
-/*
- * A panel whose sections stack (steps, then a table): on short screens the whole panel scrolls; the
- * table keeps at least 300 px and grows into any spare height on tall screens.
- */
-.panel.sections {
-  overflow-y: auto;
-}
-.panel.sections > * {
-  flex-shrink: 0;
-}
-.panel.sections > .scroll {
-  flex: 1 0 300px;
-}
