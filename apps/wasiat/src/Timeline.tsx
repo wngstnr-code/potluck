@@ -2,7 +2,7 @@ import { fmt } from "@potluck/ui/format";
 import { Icon } from "@potluck/ui/Icon";
 import { Identicon } from "@potluck/ui/Identicon";
 import { KUSAMA_AH } from "./config";
-import { useRecovery } from "./lib/RecoveryContext";
+import { type AccountState, useRecovery } from "./lib/RecoveryContext";
 import { blocksToDuration, describe, formatDate, formatToken, shortSs58, ss58 } from "./lib/text";
 import { statusOf } from "./Plans";
 
@@ -151,7 +151,7 @@ export function Timeline({ account, onBack }: { account: string; onBack: () => v
           )}
         </section>
         <aside className="side">
-          <section className="panel grow">
+          <section className="panel">
             <div className="ph">
               <h2>Current plan</h2>
               <span>Recovery.FriendGroups</span>
@@ -195,8 +195,75 @@ export function Timeline({ account, onBack }: { account: string; onBack: () => v
               )}
             </div>
           </section>
+          <section className="panel grow">
+            <div className="ph">
+              <h2>Recovery state</h2>
+              <span>Recovery.Attempt · Recovery.Inheritor</span>
+            </div>
+            <RecoveryState account={a} />
+          </section>
         </aside>
       </div>
     </div>
+  );
+}
+
+/** What storage says about recovery right now: the inheritor, each open attempt, or what would happen next. */
+function RecoveryState({ account: a }: { account: AccountState }) {
+  if (a.inheritor) {
+    return (
+      <ol className="explain">
+        <li>
+          <b>Inherited through group {a.inheritor.groupIndex + 1}</b>
+          <span>
+            {shortSs58(a.inheritor.inheritor)} is stored as the inheritor and can act as this
+            account.
+          </span>
+        </li>
+      </ol>
+    );
+  }
+  if (a.attempts.length > 0) {
+    return a.attempts.map((t) => {
+      const g = a.plan?.groups[t.groupIndex];
+      return (
+        <dl key={t.groupIndex} className="ledger mono">
+          <dt>friend group</dt>
+          <dd>{t.groupIndex + 1}</dd>
+          <dt>approvals</dt>
+          <dd>{g ? `${t.approvals} of ${g.friendsNeeded} needed` : t.approvals}</dd>
+          <dt>started by</dt>
+          <dd>{shortSs58(t.initiator)}</dd>
+          <dt>started (relay block)</dt>
+          <dd>#{fmt(t.initBlock)}</dd>
+          <dt>attempt deposit</dt>
+          <dd>
+            {formatToken(t.deposit, KUSAMA_AH.decimals)} {KUSAMA_AH.symbol}
+          </dd>
+        </dl>
+      );
+    });
+  }
+  const g = a.plan?.groups[0];
+  return (
+    <ol className="explain">
+      <li>
+        <b>No recovery started</b>
+        <span>Nobody has opened a recovery attempt for this account.</span>
+      </li>
+      {g && (
+        <li>
+          <b>If someone does</b>
+          <span>
+            {g.friendsNeeded} of {g.friends.length} friend(s) in group 1 must vouch, then{" "}
+            <span className="mono">{shortSs58(g.inheritor)}</span> can take over{" "}
+            {g.inheritanceDelay === 0
+              ? "right away"
+              : `after ${blocksToDuration(g.inheritanceDelay)}`}
+            .
+          </span>
+        </li>
+      )}
+    </ol>
   );
 }
