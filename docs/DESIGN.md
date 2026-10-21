@@ -51,14 +51,15 @@ Scale: 11 (tags, axis) · 12 (meta) · 13 (table) · 14 (body) · 16 (panel titl
 
 ## 5. Logo
 
-Two marks, chosen with the user on 2026-10-21. Files in [`brand/`](./brand/).
+Three marks, chosen with the user on 2026-10-21. Files in [`brand/`](./brand/).
 
 | Mark | File | Use |
 |---|---|---|
 | **p monogram**: a navy lowercase p whose bowl holds four chunks (blue, coral, teal, and one in tile yellow) | `brand/potluck-mark.svg` | favicon, app rail (`PotluckMark` in `packages/ui`), anywhere at 48 px or smaller |
 | **Pot of chunks**: a navy pot holding chunks with one more dropping in ("everyone brings a chunk") | `brand/potluck-pot.svg` | large placements: README header, pitch deck, video title and closing cards |
+| **Wasiat-lite key**: a navy key whose bow holds four friend chunks (the p's chunk grid); the key is the account control that passes to the inheritor | `brand/wasiat-mark.svg` | Wasiat-lite favicon and rail (`WasiatMark`, `mark="wasiat"` on `Shell`) |
 
-- Both sit on the yellow `--yellow` tile with corner radius ≈ 31% of the side (20 / 64; the rail tile is 14 / 44).
+- Potluck marks sit on the yellow `--yellow` tile, the Wasiat-lite key on the teal `--series-5` tile so the two favicons differ in a tab bar. Corner radius ≈ 31% of the side (20 / 64; the rail tile is 14 / 44).
 - Colors are the theme tokens: navy `--navy`, chunks `--blue`, `--series-4` (coral), `--series-5` (teal).
 - The wordmark is "potluck" in lowercase IBM Plex Sans 600, set as live text next to the mark, never outlined into the files.
 - Do not recolor the tile, add gradients or outlines, or use the pot below 48 px (its chunks blur).

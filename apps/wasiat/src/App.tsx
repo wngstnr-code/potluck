@@ -18,6 +18,7 @@ export function App() {
     <Shell
       links={[{ label: "Pantry", href: "../pantry/", icon: "home" }]}
       brand="wasiat"
+      mark="wasiat"
       pages={PAGES}
       page={page}
       onPage={(id) => {

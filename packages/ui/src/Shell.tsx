@@ -1,6 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { Icon, type IconName } from "./Icon";
-import { PotluckMark } from "./Logo";
+import { PotluckMark, WasiatMark } from "./Logo";
 
 /** A link to a sibling app, shown in the rail's "Apps" section. */
 export interface ShellLink {
@@ -32,6 +32,7 @@ function readCollapsed(): boolean {
  */
 export function Shell({
   brand,
+  mark = "potluck",
   pages,
   page,
   onPage,
@@ -40,6 +41,8 @@ export function Shell({
   children,
 }: {
   brand: string;
+  /** Which app mark the rail shows (docs/DESIGN.md §5). */
+  mark?: "potluck" | "wasiat";
   links?: readonly ShellLink[];
   pages: readonly ShellPage[];
   page: string;
@@ -64,8 +67,8 @@ export function Shell({
     <div className={`app${collapsed ? " collapsed" : ""}`}>
       <nav className="rail" aria-label="Main">
         <div className="brandrow">
-          <div className="logo">
-            <PotluckMark />
+          <div className={`logo ${mark}`}>
+            {mark === "wasiat" ? <WasiatMark /> : <PotluckMark />}
           </div>
           <b className="label">{brand}</b>
         </div>
