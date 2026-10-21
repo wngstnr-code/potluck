@@ -14,6 +14,7 @@ import {
   getBlockHashes,
   getFinalizedHead,
   getGenesisHash,
+  type IndexedRow,
   type ManifestChunk,
   manifestBytes,
   manifestChunk,
@@ -54,6 +55,11 @@ interface BuildState {
   /** Next block to process; everything before it is in closed chunks. */
   nextBlock: number;
   chunks: ManifestChunk[];
+  /**
+   * The chunk still being filled, saved periodically so a crash does not lose a long stretch of
+   * blocks: it starts at `nextBlock`, holds `rows`, and every block up to `scannedTo` was scanned.
+   */
+  open?: { fromBlock: number; scannedTo: number; rows: IndexedRow[] };
 }
 
 export interface BuildResult {
@@ -124,7 +130,20 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       new FileMetadataStore(join(".cache", "potluck", "metadata", genesis)),
     );
     const compiled = compileSpec(spec);
-    const accumulator = new ChunkAccumulator(spec, state.nextBlock);
+    const open = state.open?.fromBlock === state.nextBlock ? state.open : undefined;
+    const resumeFrom = open ? open.scannedTo + 1 : state.nextBlock;
+    const accumulator = open
+      ? ChunkAccumulator.restore(spec, open.fromBlock, open.rows, open.scannedTo)
+      : new ChunkAccumulator(spec, state.nextBlock);
+    if (open) {
+      options.log(`resuming the open chunk at #${resumeFrom} with ${open.rows.length} row(s)`);
+    }
+    let savedAt = performance.now();
+    const saveOpen = async (scannedTo: number) => {
+      state.open = { fromBlock: accumulator.start, scannedTo, rows: [...accumulator.pending] };
+      await writeFile(statePath, JSON.stringify(state, null, 2));
+      savedAt = performance.now();
+    };
 
     const writeChunk = async (plan: ChunkPlan) => {
       const built = await buildChunk(spec, plan);
@@ -132,6 +151,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       await writeFile(join(chunksDir, `${index}.ndjson.gz`), built.blob);
       state.chunks.push(manifestChunk(built));
       state.nextBlock = plan.toBlock + 1;
+      state.open = undefined;
       await writeFile(statePath, JSON.stringify(state, null, 2));
       options.log(
         `chunk ${index}: #${plan.fromBlock}..#${plan.toBlock}, ${built.rows} rows, ${built.accounts} accounts, ${(built.blob.length / 1024).toFixed(1)} KiB gz`,
@@ -156,11 +176,11 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     };
 
     let strategy: "auto" | "per-block" = options.strategy ?? "auto";
-    let rows = state.chunks.reduce((n, c) => n + c.rows, 0);
-    const total = toBlock - state.nextBlock + 1;
+    let rows = state.chunks.reduce((n, c) => n + c.rows, 0) + (open?.rows.length ?? 0);
+    const total = toBlock - resumeFrom + 1;
     let processed = 0;
     let lastReport = performance.now();
-    for (let start = state.nextBlock; start <= toBlock; start += options.segment) {
+    for (let start = resumeFrom; start <= toBlock; start += options.segment) {
       const end = Math.min(start + options.segment - 1, toBlock);
       const scan = await scanSegment(() =>
         scanRawEvents(client, start, end, { concurrency: options.concurrency, strategy }),
@@ -177,6 +197,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
         for (const plan of accumulator.push(block, blockRows)) await writeChunk(plan);
       }
       for (let b = start - 1; b < end - 1; b++) knownHashes.delete(b); // keep memory bounded
+      if (performance.now() - savedAt > 60_000) await saveOpen(end);
       processed += end - start + 1;
       if (performance.now() - lastReport > 5000 || end === toBlock) {
         const seconds = (performance.now() - started) / 1000;
@@ -188,6 +209,8 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       }
     }
     await writeChunk(accumulator.finish(toBlock));
+    state.open = undefined;
+    await writeFile(statePath, JSON.stringify(state, null, 2));
 
     const toBlockHash = await hashOf(toBlock);
     const manifest = buildManifest({
