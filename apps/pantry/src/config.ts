@@ -8,8 +8,11 @@ export const PORTALDOT = {
   name: "Portaldot V3 testnet",
   ws: "wss://test-node-v3.portaldot.dev",
   evmRpc: "https://test-evm-rpc-v3.portaldot.dev",
-  /** PotluckRegistry address; null until the registry is deployed (needs tPOT). */
-  registry: null as `0x${string}` | null,
+  /**
+   * PotluckRegistry (EVM build), deployed 2026-10-21 at block #129,014
+   * (contracts/deployments/portaldot-v3-testnet.json).
+   */
+  registry: "0xef9305561eb0c34d205dfa0d9099a105f44282eb" as `0x${string}` | null,
 };
 
 export const UNIFIED_SPEC = parseSpec(unifiedHistory);

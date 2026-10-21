@@ -22,6 +22,7 @@ const KIND_SERIES: Record<string, number> = {
   Burned: 4,
   BurnedHeld: 4,
   Slashed: 4,
+  StorageFee: 4,
   Minted: 5,
   Restored: 5,
   Erc20Transfer: 6,
