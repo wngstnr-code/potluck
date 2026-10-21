@@ -78,13 +78,15 @@ button {
   height: 44px;
   border-radius: 14px;
   background: var(--yellow);
-  color: var(--navy);
   display: grid;
   place-items: center;
-  font: 700 18px var(--font-mono);
   box-shadow:
     0 6px 16px oklch(0.85 0.16 108 / 0.35),
     inset 0 1px 0 oklch(1 0 0 / 0.6);
+}
+.logo svg {
+  width: 100%;
+  height: 100%;
 }
 .brandrow b {
   color: white;

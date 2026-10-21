@@ -1,5 +1,6 @@
 import { type ReactNode, useState } from "react";
 import { Icon, type IconName } from "./Icon";
+import { PotluckMark } from "./Logo";
 
 /** A link to a sibling app, shown in the rail's "Apps" section. */
 export interface ShellLink {
@@ -63,7 +64,9 @@ export function Shell({
     <div className={`app${collapsed ? " collapsed" : ""}`}>
       <nav className="rail" aria-label="Main">
         <div className="brandrow">
-          <div className="logo">p</div>
+          <div className="logo">
+            <PotluckMark />
+          </div>
           <b className="label">{brand}</b>
         </div>
         {sections.map((section) => (
