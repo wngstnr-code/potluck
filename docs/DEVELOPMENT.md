@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-20 (M0, M2, M4, M5 done; M3 done except real deployment; M6 done (Pantry + Wasiat-lite); S2 fees measured)._
+_Last updated: 2026-10-21 (M0, M2, M4, M5 done; M3 done except real deployment; M6 done (Pantry + Wasiat-lite); S2 fees measured; DoraHacks registration and dev account done)._
 
 | Area | Status |
 |---|---|
@@ -17,7 +17,7 @@ _Last updated: 2026-10-20 (M0, M2, M4, M5 done; M3 done except real deployment; 
 | Concept & architecture | ✅ `POTLUCK.md`, `ARCHITECTURE.md` |
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
 | Git repository | ✅ Public: https://github.com/wngstnr-code/potluck (`main`); sole contributor `wngstnr-code` |
-| Dev wallet / tPOT | ❌ No SS58 dev account and no tPOT yet (blocks real deploy, real publish, S3). **Ask for ≈ 6,000–8,000 tPOT** (≈ 12,000 to publish the whole AH build): deploy deposits ≈ 433 (EVM) + ≈ 3,293 (PVM); storing data ≈ 100 tPOT/MB. The measured Polkadot AH build (newest 1.5 M blocks) is 62 MB gz ≈ 6,200 tPOT, so publish its newest chunks first |
+| Dev wallet / tPOT | 🟡 Dev account created 2026-10-21 (sr25519): `5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM`, Revive H160 `0xd00d195095e69b479e681f6ac359ce96f47eb790`; its seed is the local, git-ignored `PUBLISHER_SEED`. Balance 0: tPOT not received yet (blocks real deploy, real publish, S3). **Ask for ≈ 6,000–8,000 tPOT** (≈ 12,000 to publish the whole AH build): deploy deposits ≈ 433 (EVM) + ≈ 3,293 (PVM); storing data ≈ 100 tPOT/MB. The measured Polkadot AH build (newest 1.5 M blocks) is 62 MB gz ≈ 6,200 tPOT, so publish its newest chunks first |
 | Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK). `spec` done (23 tests). `core` done: Substrate + Revive EVM logs, range scan, reconciliation (65 offline tests on recorded real data + 5 live tests: Polkadot AH window and Portaldot genesis → head, 894/894 accounts reconcile). `cli` done: build (resumable, deterministic), verify (L1 + re-index + L3), publish (dry run tested; submission awaits tPOT), tamper (demo). `client` done: verified account history (coverage planning, bloom-filtered snapshot loading, L1/L2/L3, direct-sync gaps), registry/bitswap source, reconnect-proof live tail; bundles for browsers; `specHistory`/`reconcileHistory` for whole-spec loads. `theme` done (docs/DESIGN.md). `pantry` overview done: in-browser direct sync of Portaldot V3 from genesis (2,248 rows in 2 min 25 s) + L3 905/905 in 22.7 s + live tail. Verify account (L2 183/183 + L3 in 1.8 s), attack demo (forged chunk passes L1/L2, L3 catches 903/904 with the exact hidden amount) and catalog pages done. `wasiat` done: Kusama AH plans (121) / open attempts (14) / inheritors (13) from storage, per-account timelines rebuilt from the blocks their storage changed in (relay-chain block numbers mapped via `ParachainSystem.LastRelayChainBlockNumber`), state replay 133 / 133, and a `set_friend_groups` setup page for Portaldot signed by the user's wallet (fee estimate 0.0223 tPOT; Portaldot has 0 plans, `SecurityDeposit` 0). `ui` holds the shared shell. Both apps are hosted on GitHub Pages (https://wngstnr-code.github.io/potluck/pantry/ and /wasiat/, deployed by `.github/workflows/pages.yml` on every push). Missing: real deploy/publish (tPOT), submission package |
 | Spikes | ✅ S1, S4, S6, S7 done; S2 fees measured (results in `spikes/results/`). 🟡 S5 partial. 🟡 S8 dry-run done, real deploy needs tPOT. ⏳ S3 (bitswap MB fetch) needs a stored blob |
 | DoraHacks check-in (Oct 24, 12:00 UTC) | ❌ Not submitted |
@@ -25,9 +25,9 @@ _Last updated: 2026-10-20 (M0, M2, M4, M5 done; M3 done except real deployment; 
 ## 2. Immediate next steps & blockers
 
 **Blockers (user actions):**
-1. **Create an SS58 dev account and request tPOT.** Steps in §3.2. Needed before Oct 24 check-in, which requires a contract address + tx hash.
+1. **Request tPOT** for the dev account `5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM` (created 2026-10-21) via a Discord support ticket. Steps in §3.2. Needed before Oct 24 check-in, which requires a contract address + tx hash.
 2. ~~Create a public GitHub repo~~ Done 2026-10-20: https://github.com/wngstnr-code/potluck. Claude pushes only when the user asks.
-3. Confirm the DoraHacks registration for the Hacker House is complete. A screenshot is needed for the faucet ticket.
+3. ~~Confirm the DoraHacks registration~~ Done 2026-10-21 (wallet address submitted in the organizer questions). Its screenshot goes with the faucet ticket.
 
 **Decided:** publish scope = progressive backfill (newest ~1.5 M blocks first, older ranges later; `ARCHITECTURE.md` §15 decision 5).
 
