@@ -10,6 +10,7 @@ const PATHS = {
   check: <path d="M3.5 8.5l3 3 6-6.5" />,
   bolt: <path d="M9 1.5L3.5 9H8l-1 5.5L12.5 7H8z" />,
   list: <path d="M3 4h10M3 8h10M3 12h10" />,
+  layers: <path d="M8 2l6 3-6 3-6-3zM2 8l6 3 6-3M2 11l6 3 6-3" />,
   user: (
     <>
       <circle cx="8" cy="5" r="2.5" />

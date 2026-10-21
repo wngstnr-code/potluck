@@ -1414,3 +1414,24 @@ a.rb {
     grid-column: 1 / -1;
   }
 }
+
+/* A short explanatory paragraph inside a side panel (no list or ledger to show yet). */
+.side-note {
+  margin: 0;
+  padding: 0 18px 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.side-note.neg {
+  color: var(--red);
+}
+/* A text button on a dark tile. */
+.link.on-dark {
+  color: white;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.link.on-dark:disabled {
+  cursor: default;
+  opacity: 0.7;
+}

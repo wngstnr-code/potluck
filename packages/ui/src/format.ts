@@ -15,29 +15,30 @@ export function formatDuration(ms: number): string {
 /** Native tPOT has 14 decimals. Token decimals are not part of the event, so tokens show base units. */
 const NATIVE_DECIMALS = 14;
 
-/** A native amount in planck as tPOT with up to 4 decimals (more when the value is tiny). */
-export function formatNative(v: bigint): string {
+/**
+ * A native amount in planck with up to 4 decimals (more when the value is tiny). Defaults to tPOT;
+ * pass the chain's decimals for other chains (DOT has 10).
+ */
+export function formatNative(v: bigint, decimals = NATIVE_DECIMALS): string {
   const negative = v < 0n;
   const abs = negative ? -v : v;
-  const scale = 10n ** BigInt(NATIVE_DECIMALS);
+  const scale = 10n ** BigInt(decimals);
   const whole = abs / scale;
-  const digits = (abs % scale).toString().padStart(NATIVE_DECIMALS, "0");
+  const digits = (abs % scale).toString().padStart(decimals, "0");
   const first = digits.search(/[1-9]/);
-  const keep = whole === 0n && first >= 4 ? Math.min(NATIVE_DECIMALS, first + 2) : 4;
+  const keep = whole === 0n && first >= 4 ? Math.min(decimals, first + 2) : 4;
   return `${negative ? "−" : ""}${whole.toLocaleString("en-US")}.${digits.slice(0, keep)}`;
 }
 
-export function formatAmount(row: IndexedRow): string {
+/** True for native-currency rows: `asset` is "native", or the spec has no asset column. */
+export const isNative = (row: IndexedRow) =>
+  row.cells.asset === "native" || row.cells.asset === undefined;
+
+export function formatAmount(row: IndexedRow, decimals = NATIVE_DECIMALS): string {
   if (row.cells.tokenId) return `#${row.cells.tokenId}`;
   const raw = row.cells.amount ?? "0";
-  if (row.cells.asset !== "native") return BigInt(raw).toLocaleString("en-US");
-  const v = BigInt(raw);
-  const scale = 10n ** BigInt(NATIVE_DECIMALS);
-  const whole = v / scale;
-  const digits = (v % scale).toString().padStart(NATIVE_DECIMALS, "0");
-  const first = digits.search(/[1-9]/);
-  const keep = whole === 0n && first >= 4 ? Math.min(NATIVE_DECIMALS, first + 2) : 4;
-  return `${whole.toLocaleString("en-US")}.${digits.slice(0, keep)}`;
+  if (!isNative(row)) return BigInt(raw).toLocaleString("en-US");
+  return formatNative(BigInt(raw), decimals);
 }
 
 /**
