@@ -73,6 +73,7 @@ flowchart TB
 |---|---|
 | Portaldot V3 unified history (native + EVM/PVM tokens), CLI | 116,549 blocks → 2,176 rows in 158 s; `verify --rebuild` reconciles 899 / 899 accounts |
 | Same history in the browser (Pantry) | 2,248 rows / 912 accounts loaded by direct sync in 2 min 25 s; 905 / 905 account checks reconciled in 22.7 s; live tail follows new blocks |
+| Fetch a published chunk (bitswap) | 2.5 MB Polkadot AH chunk from the public Portaldot node in ≈ 4 s; indexing the same 80,000 blocks takes 316 s |
 | Load from the registry (Pantry) | Portaldot history #1–#129,069 from its published snapshot + a direct-synced tail in **3.0 s** (1 min 9 s by direct sync); 938 / 938 account checks reconciled |
 | Verify one account (Pantry) | 183 rows re-derived from 94 blocks (L2) + balance reconciled (L3) in 1.8 s |
 | Attack demo (Pantry) | Forged chunk with every hash recomputed passes L1 and L2. L3 catches it (903 / 904) with the exact hidden amount as the difference |
@@ -86,7 +87,7 @@ flowchart TB
 | `PotluckRegistry` (EVM) | [`0xef9305561eb0c34d205dfa0d9099a105f44282eb`](https://node-console.portaldot.dev/#/explorer/query/129014), block #129,014, tx `0x3abb9058e1eb48628791a029de71ef11b510ebc7a5cfa81677425773ce0bc352` (deposit 433.2 tPOT) |
 | Portaldot unified history | manifest 2: blocks #1–#129,069, 1 chunk; spec, chunk and manifest stored in TransactionStorage at #129,092, #129,094 and #129,095 |
 | `PotluckRegistry` (PVM) | pending: needs ≈ 3,293 tPOT (measured by dry run); the first faucet batch was 1,500 |
-| Polkadot AH backfill | pending: newest 1.5 M blocks built locally (62 MB gz ≈ 6,200 tPOT); a small newest range goes first |
+| Polkadot AH balance history | manifest 3: newest 80,000 blocks (#22,021,128–#22,101,127), 114,460 rows in 2 chunks (3.2 MB), every account reconciled before publishing; chunks stored at #129,230 and #129,232 |
 
 Every address and hash is also in [`contracts/deployments/portaldot-v3-testnet.json`](contracts/deployments/portaldot-v3-testnet.json).
 
