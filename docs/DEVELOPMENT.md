@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-27 (1.5 M-block Polkadot AH build verified 30/30 after a reconcile fix; Kusama AH recovery timeline published as manifest 4; Pantry deep links; landing page committed)._
+_Last updated: 2026-10-27 (1.5 M-block Polkadot AH build verified 30/30 after a reconcile fix; Kusama AH recovery timeline published as manifest 4; Pantry deep links; landing page live)._
 
 | Area | Status |
 |---|---|
@@ -47,7 +47,7 @@ _Last updated: 2026-10-27 (1.5 M-block Polkadot AH build verified 30/30 after a 
    - ~~publish the Kusama AH timeline~~ done 2026-10-27 (manifest 4);
    - with a second batch: the PVM deploy and more AH chunks.
 3. ~~Static hosting~~ Done 2026-10-20: GitHub Pages via Actions (approved by the user).
-4. Landing page (`apps/landing`, Next.js, static): hero with a live verify trace, demo video, how it works, capabilities, use cases, proof charts and on-chain deployment facts, in the Potluck midnight palette (WCAG AA). Committed 2026-10-27; not deployed yet, because the Pages workflow still serves only Pantry, Wasiat-lite and the root redirect (`site/index.html`). Next: static export with the `/potluck` base path and add it to `.github/workflows/pages.yml`.
+4. Landing page (`apps/landing`, Next.js, static): hero with a live verify trace, demo video, how it works, capabilities, use cases, proof charts and on-chain deployment facts, in the Potluck midnight palette (WCAG AA). Live at https://wngstnr-code.github.io/potluck/ since 2026-10-27: the Pages workflow exports it with the `/potluck` base path and serves it at the site root, next to /pantry/ and /wasiat/.
 5. Check-in package for Oct 24: README (done, deployment rows pending), architecture diagram (README), progress notes, deployment info, a ≤ 3 min video of one core function.
 6. Report to the Portaldot team: held funds can vanish on `System.KilledAccount` without a Balances event (TransactionStorage hold, block #89,388). Re-check it against the StorageFee finding (`ARCHITECTURE.md` §0) before reporting: the TransactionStorage fee is held and burned through `BurnedDebt`, which names no account.
 7. P1: consolidate many small sync manifests, persistent browser cache of loaded histories, old-pallet Recovery events (Kusama AH #11,135,052–#17,836,634) for richer Wasiat timelines.
