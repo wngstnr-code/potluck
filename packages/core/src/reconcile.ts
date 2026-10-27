@@ -30,15 +30,18 @@ export interface Deltas {
 /**
  * Folds the rows (those passing the rule's `when` filter) into per-account expectations:
  * expected(end) = (last reset value, or the value before the window) + deltas after that reset.
- * A reset applies at the end of its block, so the account's other rows in that block are part of
- * it (System.KilledAccount is emitted before the Transfer that empties the account).
+ * A reset applies at its event position. System.KilledAccount is emitted before the Transfer that
+ * empties the account, so in the reset's block the account's debits before its next credit are
+ * part of the reset (an emptied account cannot be debited until it is credited again). Its later
+ * rows in that block count: an account can be reaped and recreated in one block (e.g. paying an
+ * asset fee through a swap reaps it, then the swap's Deposit recreates it).
  */
 export function balanceDeltas(spec: Spec, rows: readonly IndexedRow[]): Deltas {
   const rule = balanceRule(spec);
   const when = rule.when;
   const relevant = when ? rows.filter((r) => r.cells[when.column] === when.equals) : rows;
   const opaque = new Set<string>();
-  const lastReset = new Map<string, { block: number; value: bigint }>();
+  const lastReset = new Map<string, { block: number; eventIndex: number; value: bigint }>();
   for (const row of relevant) {
     if (row.effect === "opaque") {
       for (const column of spec.accounts) {
@@ -48,27 +51,43 @@ export function balanceDeltas(spec: Spec, rows: readonly IndexedRow[]): Deltas {
     } else if (row.effect === "reset") {
       const account = row.cells[rule.credit];
       if (account) {
-        lastReset.set(account, { block: row.block, value: BigInt(row.cells[rule.amount] ?? "0") });
+        lastReset.set(account, {
+          block: row.block,
+          eventIndex: row.eventIndex,
+          value: BigInt(row.cells[rule.amount] ?? "0"),
+        });
       }
     }
   }
   const expectations = new Map<string, Expectation>();
-  for (const [account, reset] of lastReset) expectations.set(account, { reset, delta: 0n });
-  const bump = (account: string | null | undefined, block: number, value: bigint) => {
+  // Accounts credited again inside their reset block, after the reset.
+  const refilled = new Set<string>();
+  for (const [account, { block, value }] of lastReset)
+    expectations.set(account, { reset: { block, value }, delta: 0n });
+  const bump = (account: string | null | undefined, row: IndexedRow, value: bigint) => {
     if (!account) return;
     let expectation = expectations.get(account);
     if (!expectation) {
       expectation = { delta: 0n };
       expectations.set(account, expectation);
     }
-    if (expectation.reset && block <= expectation.reset.block) return;
+    const reset = lastReset.get(account);
+    if (reset && row.block <= reset.block) {
+      if (row.block < reset.block || row.eventIndex <= reset.eventIndex) return;
+      if (value > 0n) refilled.add(account);
+      else if (!refilled.has(account)) return;
+    }
     expectation.delta += value;
   };
   for (const row of relevant) {
     if (row.effect !== "delta") continue;
+    const debit = row.cells[rule.debit];
+    const credit = row.cells[rule.credit];
+    // A self-transfer nets to zero.
+    if (debit && debit === credit) continue;
     const amount = BigInt(row.cells[rule.amount] ?? "0");
-    bump(row.cells[rule.debit], row.block, -amount);
-    bump(row.cells[rule.credit], row.block, amount);
+    bump(debit, row, -amount);
+    bump(credit, row, amount);
   }
   return { expectations, opaque };
 }

@@ -74,7 +74,7 @@ describe("reset rows (System.KilledAccount)", () => {
     effect,
   });
 
-  it("resets at the end of its block: same-block rows are part of the reset, later rows count", () => {
+  it("treats the emptying debit after a reset as part of it, and counts later blocks", () => {
     const { expectations } = balanceDeltas(spec, [
       r(10, 0, { to: A, amount: "500" }),
       // Recorded Portaldot order: KilledAccount is emitted before the emptying Transfer.
@@ -84,6 +84,31 @@ describe("reset rows (System.KilledAccount)", () => {
     ]);
     expect(expectations.get(A)).toEqual({ reset: { block: 11, value: 0n }, delta: 7n });
     expect(expectations.get(B)).toEqual({ delta: 460n });
+  });
+
+  it("counts rows after an account is reaped and recreated in the same block", () => {
+    // Shape of Polkadot AH #21,352,408: an asset-fee swap reaps the account, then the swap's
+    // Deposit recreates it and a batched Transfer spends from it.
+    const { expectations } = balanceDeltas(spec, [
+      r(20, 0, { to: A, amount: "50" }),
+      r(21, 4, { from: A, amount: "50" }),
+      r(21, 8, { to: A, amount: "0" }, "reset"),
+      r(21, 14, { to: A, amount: "16329691974" }),
+      r(21, 17, { from: A, to: B, amount: "137632505" }),
+    ]);
+    expect(expectations.get(A)).toEqual({
+      reset: { block: 21, value: 0n },
+      delta: 16192059469n,
+    });
+    expect(expectations.get(B)).toEqual({ delta: 137632505n });
+  });
+
+  it("ignores rows before the reset in its block", () => {
+    const { expectations } = balanceDeltas(spec, [
+      r(30, 1, { to: A, amount: "40" }),
+      r(30, 2, { to: A, amount: "0" }, "reset"),
+    ]);
+    expect(expectations.get(A)).toEqual({ reset: { block: 30, value: 0n }, delta: 0n });
   });
 
   it("uses only the last reset", () => {
