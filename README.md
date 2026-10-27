@@ -89,6 +89,7 @@ flowchart TB
 | Portaldot unified history | manifest 2: blocks #1–#129,069, 1 chunk; spec, chunk and manifest stored in TransactionStorage at #129,092, #129,094 and #129,095 |
 | `PotluckRegistry` (PVM) | pending: needs ≈ 3,293 tPOT (measured by dry run); the first faucet batch was 1,500 |
 | Polkadot AH balance history | manifest 3: newest 80,000 blocks (#22,021,128–#22,101,127), 114,460 rows in 2 chunks (3.2 MB), every account reconciled before publishing; chunks stored at #129,230 and #129,232 |
+| Kusama AH recovery timeline | manifest 4: blocks #17,836,634–#22,802,789 (the Recovery inheritance API onward), 7 rows in 2 chunks (643 B); spec, chunks and manifest stored at #218,503–#218,507 |
 
 Every address and hash is also in [`contracts/deployments/portaldot-v3-testnet.json`](contracts/deployments/portaldot-v3-testnet.json).
 
