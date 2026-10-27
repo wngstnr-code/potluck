@@ -8,7 +8,7 @@
 
 ## 1. Current status
 
-_Last updated: 2026-10-21 (M0, M2, M4, M5 done; M3 done except real deployment; M6 done (Pantry + Wasiat-lite); S2 fees measured; DoraHacks registration and dev account done)._
+_Last updated: 2026-10-27 (1.5 M-block Polkadot AH build verified 30/30 after a reconcile fix; Kusama AH recovery timeline published as manifest 4; Pantry deep links; landing page in progress)._
 
 | Area | Status |
 |---|---|
@@ -17,10 +17,10 @@ _Last updated: 2026-10-21 (M0, M2, M4, M5 done; M3 done except real deployment; 
 | Concept & architecture | ✅ `POTLUCK.md`, `ARCHITECTURE.md` |
 | Claude Code config | ✅ `CLAUDE.md`; commit/PR attribution disabled in `.claude/settings.json` |
 | Git repository | ✅ Public: https://github.com/wngstnr-code/potluck (`main`); sole contributor `wngstnr-code` |
-| Dev wallet / tPOT | 🟡 Dev account created 2026-10-21 (sr25519): `5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM`, Revive H160 `0xd00d195095e69b479e681f6ac359ce96f47eb790`; its seed is the local, git-ignored `PUBLISHER_SEED`. Received 1,500 tPOT on 2026-10-21 (the first faucet batch is capped at 1,500). After the EVM deploy and the Portaldot publishes: 907.99 tPOT. PVM deploy (≈ 3,293) and the full AH build (≈ 6,200) need a later batch |
+| Dev wallet / tPOT | 🟡 Dev account created 2026-10-21 (sr25519): `5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM`, Revive H160 `0xd00d195095e69b479e681f6ac359ce96f47eb790`; its seed is the local, git-ignored `PUBLISHER_SEED`. Received 1,500 tPOT on 2026-10-21 (the first faucet batch is capped at 1,500). After the EVM deploy and the Portaldot publishes: 907.99 tPOT; 484.80 tPOT on 2026-10-27 after manifests 3 and 4. PVM deploy (≈ 3,293) and the full AH build (≈ 6,200) need a later batch |
 | Code | 🟡 `PotluckRegistry.sol` done (21 tests, 100% coverage; EVM + PVM dry-run OK). `spec` done (23 tests). `core` done: Substrate + Revive EVM logs, range scan, reconciliation (65 offline tests on recorded real data + 5 live tests: Polkadot AH window and Portaldot genesis → head, 894/894 accounts reconcile). `cli` done: build (resumable, deterministic), verify (L1 + re-index + L3), publish (dry run tested; submission awaits tPOT), renew (dry run tested against a live stored blob: keep / renew ≈ 0.0117 tPOT / expired / restore), sync (build new blocks → verify → publish unpublished builds → renew; dry run tested on Portaldot), tamper (demo). `client` done: verified account history (coverage planning, bloom-filtered snapshot loading, L1/L2/L3, direct-sync gaps), registry/bitswap source, reconnect-proof live tail; bundles for browsers; `specHistory`/`reconcileHistory` for whole-spec loads. `theme` done (docs/DESIGN.md). `pantry` overview done: in-browser direct sync of Portaldot V3 from genesis (2,248 rows in 2 min 25 s) + L3 905/905 in 22.7 s + live tail. Verify account (L2 183/183 + L3 in 1.8 s), attack demo (forged chunk passes L1/L2, L3 catches 903/904 with the exact hidden amount) and catalog pages done. `wasiat` done: Kusama AH plans (121) / open attempts (14) / inheritors (13) from storage, per-account timelines rebuilt from the blocks their storage changed in (relay-chain block numbers mapped via `ParachainSystem.LastRelayChainBlockNumber`), state replay 133 / 133, and a `set_friend_groups` setup page for Portaldot signed by the user's wallet (fee estimate 0.0223 tPOT; Portaldot has 0 plans, `SecurityDeposit` 0). `ui` holds the shared shell. Both apps are hosted on GitHub Pages (https://wngstnr-code.github.io/potluck/pantry/ and /wasiat/, deployed by `.github/workflows/pages.yml` on every push). Missing: real deploy/publish (tPOT), submission package |
 | Spikes | ✅ S1, S3, S4, S6, S7, S8 (EVM) done; S2 fees measured (results in `spikes/results/`). 🟡 S5 partial |
-| Testnet deployment | ✅ `PotluckRegistry` (EVM) `0xef9305561eb0c34d205dfa0d9099a105f44282eb`, block #129,014, tx `0x3abb9058e1eb48628791a029de71ef11b510ebc7a5cfa81677425773ce0bc352` (`contracts/deployments/portaldot-v3-testnet.json`). Portaldot unified history published as manifest 2 (#1–#129,069; manifests 0–1 belong to the previous spec version). Pantry reads it: 3.0 s mixed sync, L3 938 / 938. Polkadot AH newest 80,000 blocks (#22,021,128–#22,101,127, 114,460 rows, 2 chunks, 3.2 MB) verified (21,384 / 21,384 and 6,916 / 6,916 accounts) and published as manifest 3 for 372.64 tPOT; S3 done (2.5 MB over bitswap in ≈ 4 s). Balance left: 535.35 tPOT. ⏳ PVM build awaits tPOT |
+| Testnet deployment | ✅ `PotluckRegistry` (EVM) `0xef9305561eb0c34d205dfa0d9099a105f44282eb`, block #129,014, tx `0x3abb9058e1eb48628791a029de71ef11b510ebc7a5cfa81677425773ce0bc352` (`contracts/deployments/portaldot-v3-testnet.json`). Portaldot unified history published as manifest 2 (#1–#129,069; manifests 0–1 belong to the previous spec version). Pantry reads it: 3.0 s mixed sync, L3 938 / 938. Polkadot AH newest 80,000 blocks (#22,021,128–#22,101,127, 114,460 rows, 2 chunks, 3.2 MB) verified (21,384 / 21,384 and 6,916 / 6,916 accounts) and published as manifest 3 for 372.64 tPOT; S3 done (2.5 MB over bitswap in ≈ 4 s). Kusama AH recovery timeline (#17,836,634–#22,802,789, 7 rows, 2 chunks, 643 B) published as manifest 4 on 2026-10-27 (spec, chunks, manifest at #218,503–#218,507; store fees ≈ 0.44 tPOT by dry run, the balance fell ≈ 50 tPOT in total, most likely Revive storage deposits for the new spec and manifest). Balance: 484.80 tPOT. ⏳ PVM build awaits tPOT |
 | DoraHacks check-in (Oct 24, 12:00 UTC) | ❌ Not submitted |
 
 ## 2. Immediate next steps & blockers
@@ -39,17 +39,18 @@ _Last updated: 2026-10-21 (M0, M2, M4, M5 done; M3 done except real deployment; 
 - Recovery-timeline spec starts at Kusama AH #17,836,634 (S7).
 
 **Next engineering steps (in order):**
-1. Finish the background builds kept in `builds/` (git-ignored): newest 1.5 M Polkadot AH blocks (#20,572,285–#22,072,284) and the Kusama AH recovery timeline (#17,836,634–#22,802,789, `--strategy per-block`).
+1. ~~Finish the background builds~~ Done 2026-10-27. The newest 1.5 M Polkadot AH blocks (#20,572,285–#22,072,284, 30 chunks, 2,173,842 rows, 62 MB gzip) pass L1 and L3 in all 30 chunks (617,190 account checks) after the reconcile fix for same-block reap and recreate (`ARCHITECTURE.md` §0); publishing it needs ≈ 6,200 tPOT. The Kusama AH recovery timeline is published (manifest 4).
 2. With the remaining tPOT (≈ 908):
    - ~~deploy the EVM registry, set `PORTALDOT.registry`, publish the Portaldot history, measure the snapshot load~~ done 2026-10-21;
    - ~~publish a small newest Polkadot AH range and run S3~~ done 2026-10-21 (manifest 3);
    - ~~load Polkadot AH from that snapshot in Pantry~~ done 2026-10-21 ("Polkadot AH" page: 5.6–6.4 s vs ≈ 11 min direct, per-account L2 + L3);
-   - publish the Kusama AH timeline when its build finishes;
+   - ~~publish the Kusama AH timeline~~ done 2026-10-27 (manifest 4);
    - with a second batch: the PVM deploy and more AH chunks.
 3. ~~Static hosting~~ Done 2026-10-20: GitHub Pages via Actions (approved by the user).
-4. Check-in package for Oct 24: README (done, deployment rows pending), architecture diagram (README), progress notes, deployment info, a ≤ 3 min video of one core function.
-5. Report to the Portaldot team: held funds can vanish on `System.KilledAccount` without a Balances event (TransactionStorage hold, block #89,388). Re-check it against the StorageFee finding (`ARCHITECTURE.md` §0) before reporting: the TransactionStorage fee is held and burned through `BurnedDebt`, which names no account.
-6. P1: consolidate many small sync manifests, persistent browser cache of loaded histories, old-pallet Recovery events (Kusama AH #11,135,052–#17,836,634) for richer Wasiat timelines.
+4. Landing page (`apps/landing`, in progress, not committed yet): hero, demo video, how it works, capabilities, use cases, proof and deployment facts, in the Potluck midnight palette. Its structure started from another site's code, so the remaining cloned parts must be rewritten before it is committed.
+5. Check-in package for Oct 24: README (done, deployment rows pending), architecture diagram (README), progress notes, deployment info, a ≤ 3 min video of one core function.
+6. Report to the Portaldot team: held funds can vanish on `System.KilledAccount` without a Balances event (TransactionStorage hold, block #89,388). Re-check it against the StorageFee finding (`ARCHITECTURE.md` §0) before reporting: the TransactionStorage fee is held and burned through `BurnedDebt`, which names no account.
+7. P1: consolidate many small sync manifests, persistent browser cache of loaded histories, old-pallet Recovery events (Kusama AH #11,135,052–#17,836,634) for richer Wasiat timelines.
 
 ---
 
