@@ -1,5 +1,5 @@
 import { Shell, type ShellPage } from "@potluck/ui/Shell";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Attack } from "./Attack";
 import { Catalog } from "./Catalog";
 import { AH_SPEC_NAME, POLKADOT_AH, PORTALDOT, UNIFIED_SPEC_NAME } from "./config";
@@ -16,8 +16,23 @@ const PAGES: ShellPage[] = [
   { id: "polkadot", label: "Polkadot AH", icon: "layers", section: "Pantry" },
 ];
 
+/** The page named by the URL hash (`#verify`), so other sites can link straight to a page. */
+function pageFromHash(): string {
+  const id = window.location.hash.slice(1);
+  return PAGES.some((p) => p.id === id) ? id : "overview";
+}
+
 export function App() {
-  const [page, setPage] = useState("overview");
+  const [page, setPageState] = useState(pageFromHash);
+  useEffect(() => {
+    const onHash = () => setPageState(pageFromHash());
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+  const setPage = (id: string) => {
+    setPageState(id);
+    history.replaceState(null, "", `#${id}`);
+  };
   return (
     <Shell
       links={[{ label: "Wasiat-lite", href: "../wasiat/", icon: "user" }]}
