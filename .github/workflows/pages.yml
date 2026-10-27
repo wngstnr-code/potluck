@@ -1,5 +1,5 @@
-# Builds the static apps (Pantry, Wasiat-lite) and publishes them to GitHub Pages.
-# The apps are plain files: everything they show is read from the chains in the visitor's browser.
+# Builds the landing page and the static apps (Pantry, Wasiat-lite) and publishes them to GitHub Pages.
+# Everything is plain files: the apps read what they show from the chains in the visitor's browser.
 name: Pages
 
 on:
@@ -9,7 +9,6 @@ on:
       - "apps/**"
       - "packages/**"
       - "specs/**"
-      - "site/**"
       - "pnpm-lock.yaml"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -36,12 +35,16 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Build both apps and the packages they use
         run: pnpm --filter "@potluck/pantry..." --filter "@potluck/wasiat..." build
+      - name: Export the landing page for the /potluck/ base path
+        run: pnpm --filter @potluck/landing build
+        env:
+          NEXT_BASE_PATH: /potluck
       - name: Assemble the site
         run: |
           mkdir -p _site
+          cp -r apps/landing/out/. _site/
           cp -r apps/pantry/dist _site/pantry
           cp -r apps/wasiat/dist _site/wasiat
-          cp site/index.html _site/index.html
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
