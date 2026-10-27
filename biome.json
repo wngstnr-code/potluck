@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/dist", "!contracts", "!**/*.md"]
+    "includes": ["**", "!**/dist", "!contracts", "!**/*.md", "!apps/landing/public"]
   },
   "formatter": {
     "enabled": true,

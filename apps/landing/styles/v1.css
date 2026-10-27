@@ -1,0 +1,455 @@
+/*
+ * v1 redesign tokens.
+ *
+ * Imported only from v1 page entry points (components/v1/pages/*),
+ * never from app/globals.css — keeps v1 styles off legacy pages.
+ *
+ * Tokens declared at :root with --color-v1-* prefixes so they are
+ * accessible from anywhere on a v1 page (including React-portaled
+ * content like modals, tooltips, dropdowns) while remaining clearly
+ * namespaced.
+ *
+ * Source: the Potluck midnight palette (docs/DESIGN.md hues).
+ * Color values are space-separated RGB triplets to support Tailwind's
+ * `rgb(var(--color-v1-*) / <alpha-value>)` pattern (matches existing
+ * carbon/matcha/breeze namespaces in app/globals.css).
+ *
+ * Typography utilities are registered as Tailwind components by the
+ * v1TypographyPlugin in tailwind.config.js, sourced from
+ * utils/v1/type-tokens.json. Re-run `node scripts/generate-typography-css.mjs`
+ * after editing utils/v1/type-spec.mjs to refresh that token map.
+ */
+
+:root {
+  /* ── Primitives ───────────────────────────────────────────────────
+   * Internal palette. Mapped onto semantic tokens below; not exposed
+   * as Tailwind utilities. Direct use should be avoided in components.
+   * ───────────────────────────────────────────────────────────────── */
+
+  /* Potluck midnight palette (docs/DESIGN.md hues). The primitive names
+   * are kept from the cloned design system so every token consumer keeps
+   * working: "carbon" is the navy-tinted neutral ramp, "salmon" carries
+   * the logo yellow accent, "blue" is Potluck blue, "green" Potluck green. */
+  /* Carbon (gray scale) */
+  --color-v1-carbon-0: 255 255 255;
+  --color-v1-carbon-50: 243 246 251;
+  --color-v1-carbon-100: 228 234 244;
+  --color-v1-carbon-200: 192 203 223;
+  --color-v1-carbon-300: 128 146 178;
+  --color-v1-carbon-400: 19 35 74;
+  --color-v1-carbon-500: 6 13 31;
+
+  /* Salmon (brand accent ramp) */
+  --color-v1-salmon-100: 247 244 150;
+  --color-v1-salmon-200: 242 239 99;
+  --color-v1-salmon-300: 214 208 58;
+  --color-v1-salmon-gradient: 242 239 99;
+
+  /* Blue (gradient / highlight) */
+  --color-v1-blue-200: 39 110 210;
+  --color-v1-blue-gradient: 33 96 190;
+
+  /* Green (primary ramp) */
+  --color-v1-green-200: 76 195 138;
+
+  /* Amber (decorative). Same value as the site's existing honey-300 in
+     globals.css, so the two design systems agree on one amber. */
+  --color-v1-amber-200: 252 196 63;
+
+  /* Slate (utility) */
+  --color-v1-slate-300: 203 213 225;
+  --color-v1-slate-500: 100 116 139;
+
+  /* Base */
+  --color-v1-frost: 243 246 251;
+  --color-v1-jet-black: 6 13 31;
+  --color-v1-steel: 128 146 178;
+
+  /* ── Semantic tokens ──────────────────────────────────────────────
+   * Exposed in Tailwind. Use these from components.
+   * ───────────────────────────────────────────────────────────────── */
+
+  /* Text */
+  --color-v1-text-basis: 243 246 251;
+  --color-v1-text-subtle: 200 210 228;
+  --color-v1-text-muted: 169 182 207;
+  --color-v1-text-light: 128 146 178;
+  --color-v1-text-always-white: 255 255 255;
+
+  /* Background */
+  --color-v1-bg-canvas-base: 11 22 48;
+  --color-v1-bg-canvas-subtle: 15 29 61;
+  --color-v1-bg-canvas-muted: 24 42 82;
+  --color-v1-bg-surface-base: 7 15 34;
+  --color-v1-bg-surface-elevated: 19 35 74;
+  --color-v1-bg-surface-muted: 36 56 100;
+  --color-v1-bg-surface-overlay: 6 13 31;
+  --color-v1-bg-code-editor: 9 18 40;
+
+  /* Border */
+  --color-v1-border-subtle: 30 48 88;
+  --color-v1-border-muted: 44 66 112;
+  --color-v1-border-strong: 128 146 178;
+  --color-v1-border-contrast: 192 203 223;
+  --color-v1-border-active: 39 110 210;
+
+  /* Primary (green ramp — buttons, status, success) */
+  --color-v1-primary-intense: 120 214 168;
+  --color-v1-primary-moderate: 76 195 138;
+  --color-v1-primary-subtle: 30 140 90;
+  --color-v1-primary-2x-subtle: 18 90 58;
+  --color-v1-primary-3x-subtle: 14 70 46;
+
+  /* Brand accents — Salmon (orange/red highlights, CTAs) */
+  --color-v1-accent-salmon: var(--color-v1-salmon-200);
+  --color-v1-accent-salmon-light: var(--color-v1-salmon-100);
+  --color-v1-accent-salmon-dark: var(--color-v1-salmon-300);
+  --color-v1-accent-salmon-gradient: var(--color-v1-salmon-gradient);
+
+  /* Brand accents — Blue (gradients, active states) */
+  --color-v1-accent-blue: var(--color-v1-blue-200);
+  --color-v1-accent-blue-gradient: var(--color-v1-blue-gradient);
+
+  /* Brand accents — Green (decorative, distinct from primary ramp) */
+  --color-v1-accent-green: var(--color-v1-green-200);
+
+  /* Brand accents — Amber (decorative; waiting / paused states) */
+  --color-v1-accent-amber: var(--color-v1-amber-200);
+
+  /* Button — primary */
+  --color-v1-btn-primary-bg: 30 140 90;
+  --color-v1-btn-primary-text: 76 195 138;
+
+  /* Status */
+  --color-v1-status-completed: 30 140 90;
+  --color-v1-status-completed-text: 120 214 168;
+
+  /* Codeblock */
+  --color-v1-code-comment: 128 146 178;
+  --color-v1-code-string: 120 214 168;
+  --color-v1-code-bracket: 200 210 228;
+  --color-v1-code-keyword: 150 160 240;
+
+  /* Text bleed — the cool off-white base colour used by BleedLabel
+   * (background-clip: text) and the secondary Button bleed fill. Not
+   * v1-frost (which is pure white); intentionally a touch muted so
+   * the salmon paint reads against it. Override via --v1-bleed-base
+   * on any ancestor (e.g. Footer swaps in blue for the dot sphere). */
+  --color-v1-bleed-base: 228 234 244;
+
+  /* ── Shadow tokens ───────────────────────────────────────────────
+   * Composite box-shadow stacks too complex to express as Tailwind
+   * shadow utilities. Tokenised so the same value can't drift across
+   * card families (FeatureCards / Primitives) by copy-paste. Use via
+   * Tailwind arbitrary value: `shadow-[var(--v1-shadow-card-hover)]`.
+   * ───────────────────────────────────────────────────────────────── */
+
+  /* Card hover shadow — depth + ambient + salmon glow + 1 px salmon
+   * ring. Composed entirely from semantic colour tokens so a tint
+   * adjustment lands by editing one token, not 4 rgba strings. */
+  --v1-shadow-card-hover:
+    0 28px 72px -20px rgb(var(--color-v1-jet-black) / 0.7),
+    0 12px 32px -14px rgb(var(--color-v1-jet-black) / 0.5),
+    0 30px 80px -28px rgb(var(--color-v1-salmon-200) / 0.4),
+    0 0 0 1px rgb(var(--color-v1-salmon-200) / 0.18);
+}
+
+/*
+ * Page-wide background: the midnight canvas colour, a soft Potluck-blue
+ * glow at the top, and the cloned grain tile blended in with soft-light
+ * so it adds texture without pulling the navy towards grey. The tile is
+ * stretched to viewport width and repeated `repeat-y`.
+ */
+/*
+ * Body copy in the dark v1 marketing theme reads as #a9b6cf — a touch
+ * dimmer than the near-white headings, for clearer hierarchy/contrast
+ * against the dark canvas. Targets the body typography tokens (not
+ * elements) so heading-styled <p> stay white; the `.v1-page` ancestor
+ * gives this (0,2,0) specificity, overriding the `text-v1-frost`
+ * utility these spans/paragraphs set.
+ */
+.v1-page
+:is(
+  .text-v1-body-lg,
+  .text-v1-body-lg-loose,
+  .text-v1-body-md,
+  .text-v1-body-sm,
+  .text-v1-body-sm-loose,
+  .text-v1-body-xs
+) {
+  color: #a9b6cf;
+}
+
+/*
+ * When a pricing plan card floods with the accent (hover / active),
+ * its body copy reads white instead of the muted #a9b6cf. The descendant chain gives this
+ * (0,4,0) specificity, beating the (0,2,0) global body-copy rule above.
+ */
+.v1-page
+  .pricing-plan-card:is(:hover, [data-active])
+  :is(
+    .text-v1-body-lg,
+    .text-v1-body-lg-loose,
+    .text-v1-body-md,
+    .text-v1-body-sm,
+    .text-v1-body-sm-loose,
+    .text-v1-body-xs
+  ) {
+  color: #fff;
+}
+
+.v1-page-bg {
+  background-color: rgb(var(--color-v1-bg-canvas-base));
+  background-image:
+    radial-gradient(1400px 900px at 18% 0%, rgb(var(--color-v1-blue-200) / 0.22), transparent 65%),
+    url("/assets/v1/page/.compressed/grain-bg.webp");
+  background-size:
+    100% auto,
+    100% auto;
+  background-position:
+    top center,
+    top center;
+  background-repeat: no-repeat, repeat-y;
+  background-blend-mode: normal, soft-light;
+}
+
+/*
+ * Shared "textured surface" treatment — adds a soft-light gradient +
+ * grain overlay on top of any background colour, matching the Figma
+ * design system's recurring sheen treatment (salmon CTAs, feature
+ * cards, etc.). One shared WebP, no extra DOM nodes.
+ *
+ * Usage: add the class alongside a colored background utility, e.g.
+ *   <div class="v1-textured bg-v1-accent-salmon-gradient">…</div>
+ *
+ * Implementation notes:
+ *   - `isolation: isolate` confines the soft-light blend to the
+ *     element's own stacking context so it doesn't bleed into ancestors
+ *   - `::before` carries the texture; foreground children paint above
+ *     it naturally because the pseudo-element renders before them in
+ *     paint order (no z-index gymnastics needed, no override of
+ *     children's existing `position` styles)
+ *   - `background-position` is exposed via the `--v1-textured-pos`
+ *     custom property so adjacent elements can crop different regions
+ *     of the master tile (Figma's authoring pattern) for visual variety
+ */
+.v1-textured {
+  position: relative;
+  isolation: isolate;
+}
+/*
+ * Testimonials carousel progress timer — the active slide's progress
+ * fill scales from 0 → 100% across the rail over the auto-advance
+ * duration. Defined here (not in tailwind.config.js keyframes) because
+ * the animation is applied via an inline `animation` shorthand with a
+ * JS-driven duration, and Tailwind only emits registered keyframes
+ * when a matching `animate-*` utility is present in the build.
+ */
+@keyframes v1-carousel-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/*
+ * AI Agents flow-diagram arrow march — the active connector's
+ * dashed stroke shifts leftward (negative dashoffset) so dashes
+ * appear to travel toward the arrowhead. Pairs with
+ * `stroke-dasharray: 1.5 4` (period = 5.5px); an 11px shift is
+ * exactly two periods, so the loop closes seamlessly with no
+ * visible jump.
+ */
+@keyframes v1-agents-march {
+  to {
+    stroke-dashoffset: -11;
+  }
+}
+
+/*
+ * Honor OS-level motion preferences. We can't gate the SVG animation
+ * with Tailwind's `motion-safe:` because it's applied via inline
+ * `animation` style; overriding the keyframe itself to a no-op is the
+ * cleanest way to disable the march for reduced-motion users without
+ * touching the component.
+ */
+@media (prefers-reduced-motion: reduce) {
+  @keyframes v1-agents-march {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+/*
+ * Chat bots typing indicator — the three dots fade in and out with a
+ * staggered delay applied inline per dot, evoking an "AI is replying"
+ * affordance. Reduced motion holds the dots fully opaque.
+ */
+@keyframes v1-typing-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  @keyframes v1-typing-pulse {
+    from,
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+.v1-textured::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/v1/textures/sheen.webp");
+  /* Master tile is a 3×4 grid of soft gradient panels (Figma's
+   * `Greydient4A_texture2`). Sizing it 300%×400% means one cell fills
+   * the host element; `--v1-textured-pos` then pans to a different cell
+   * per surface for variety, the same authoring trick Figma uses. */
+  background-size: 300% 400%;
+  background-position: var(--v1-textured-pos, 50% 33%);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+}
+
+/*
+ * v1 Pricing — range slider track + thumb. Native input[type=range]
+ * styled to match the salmon/frost palette. --pct is set inline per
+ * input so the filled portion of the track tracks the value.
+ */
+.v1-pricing-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: linear-gradient(
+    to right,
+    rgb(var(--color-v1-accent-salmon)) 0%,
+    rgb(var(--color-v1-accent-salmon)) var(--pct, 0%),
+    rgb(var(--color-v1-carbon-500)) var(--pct, 0%),
+    rgb(var(--color-v1-carbon-500)) 100%
+  );
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+.v1-pricing-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(var(--color-v1-accent-salmon));
+  border: 0;
+  cursor: pointer;
+}
+.v1-pricing-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgb(var(--color-v1-accent-salmon));
+  border: 0;
+  cursor: pointer;
+}
+.v1-pricing-slider:focus-visible::-webkit-slider-thumb {
+  box-shadow: 0 0 0 4px rgba(var(--color-v1-accent-salmon), 0.3);
+}
+
+/* Ink-nav header — pages with a light/ivory hero (e.g.
+   /compare-to-temporal-redesign). When the transparent header sits over
+   the ivory band, recolor the frost nav items + logo + sign-in to ink.
+   md+ only: the mobile header is always a solid black band, so its
+   items must stay frost. The hover wipe stays the default salmon, so
+   nav items still flood orange on hover. Reverts automatically once the
+   header collapses to its dark compact pill (the attribute is dropped). */
+@media (min-width: 768px) {
+  header[data-ink-nav] .text-v1-frost {
+    color: #0f1d3d;
+  }
+  /* Nav labels paint via background-clip:text (WipeLabel), so `color`
+     never touches the glyphs — recolour the resting base layer to ink
+     via its variable. The salmon hover-wipe (1st layer) is untouched,
+     so items still flood orange on hover. */
+  header[data-ink-nav] {
+    --v1-wipe-base: #0f1d3d;
+  }
+  /* "Start free" pill: white-on-ivory has no contrast, so invert it to
+     a solid ink button with frost label (hover still floods salmon). */
+  header[data-ink-nav] .bg-v1-frost:not(:hover) {
+    background-color: #0f1d3d;
+    color: #f3f6fb;
+  }
+  /* The mega-menu panel renders inside the header but on a dark carbon
+     surface — the ink recolour above targets the transparent nav bar
+     over the ivory hero only, so revert it for the dropdown's items. */
+  header[data-ink-nav] #v1-nav-megamenu {
+    --v1-wipe-base: rgb(var(--color-v1-bleed-base));
+  }
+  header[data-ink-nav] #v1-nav-megamenu .text-v1-frost {
+    color: rgb(var(--color-v1-frost));
+  }
+}
+
+/* ── Cap-height trim utility ───────────────────────────────────────
+ * Trim is selective (titles, buttons, special cases) — NOT global; body
+ * copy stays untrimmed. Most trimmed text uses the `text-v1-*` tokens
+ * (which carry trim per the spec's `trim: "cap"` flag). `.v1-trim` is for
+ * trimmed text that can't use a token's baked trim — chiefly inline-flex
+ * labels (e.g. the card's "Register" cue), where the token's
+ * ::before/::after fallback would become flex items. Native
+ * `text-box-trim` is exact at any size and valid on flex; browsers
+ * without it (e.g. Firefox) render those labels untrimmed (negligible
+ * for fixed-height mono labels).
+ */
+.v1-trim {
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+}
+
+/* Outlined ("hollow") display text: stroke only, no fill. Stroke width is
+ * em-based so it keeps the same optical weight as a clamped headline
+ * scales, and `currentColor` means it follows the surrounding text
+ * colour. Display sizes only — the stroke closes up on small text. */
+.v1-hollow {
+  -webkit-text-stroke: 0.022em currentColor;
+  -webkit-text-fill-color: transparent;
+}
+
+.v1-hollow-1px {
+  -webkit-text-stroke: 1px currentColor;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Cap-trim for custom-sized block titles that can't use a `text-v1-*`
+ * token (e.g. 58px Inktrap — no matching token). Same native trim as
+ * `.v1-trim`, PLUS the Capsize ::before/::after fallback so Firefox
+ * (no `text-box-trim`) still trims. The margins are em-based, so it's
+ * exact at any font-size; override `--v1-cap-trim` per family if needed
+ * (default suits the Whyte Inktrap display face). Block-level only —
+ * the pseudo-elements would become flex items on a flex container, so
+ * flex titles use `.v1-trim` (native, Firefox degrades to untrimmed). */
+.v1-cap-trim {
+  text-box-trim: trim-both;
+  text-box-edge: cap alphabetic;
+}
+@supports not (text-box-trim: trim-both) {
+  .v1-cap-trim::before,
+  .v1-cap-trim::after {
+    content: "";
+    display: table;
+  }
+  .v1-cap-trim::before {
+    margin-bottom: var(--v1-cap-trim, -0.275em);
+  }
+  .v1-cap-trim::after {
+    margin-top: var(--v1-cap-trim, -0.275em);
+  }
+}

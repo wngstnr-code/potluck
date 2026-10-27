@@ -41,3 +41,6 @@ builds/
 .brand-preview/
 
 promo/
+# Next.js build output (apps/landing)
+.next/
+next-env.d.ts
