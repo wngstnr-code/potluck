@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { withBase } from "@/utils/basePath";
 import { useIsDesktop } from "@/utils/v1/hooks/useIsDesktop";
 
 const ParticleLogoCanvas = dynamic(
@@ -20,7 +21,7 @@ const ParticleLogoCanvas = dynamic(
 
 const LOCKUP_W = 708;
 const LOCKUP_H = 216;
-const LOCKUP_SRC = "/assets/v1/logo-marquee/lockup.png";
+const LOCKUP_SRC = withBase("/assets/v1/logo-marquee/lockup.png");
 const LOCKUP_TOP_MOBILE = 40;
 const LOCKUP_TOP_DESKTOP = 92;
 const MOBILE_GUTTER_PX = 30;

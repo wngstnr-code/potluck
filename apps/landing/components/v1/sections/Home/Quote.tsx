@@ -5,14 +5,15 @@ import { useEffect, useRef } from "react";
 import GradientFrame from "@/components/v1/sections/shared/GradientFrame";
 import Section from "@/components/v1/sections/shared/Section";
 import { HOME_SECTION_TITLE } from "@/components/v1/sections/shared/sectionTitle";
+import { withBase } from "@/utils/basePath";
 import { cn } from "@/utils/v1/cn";
 import { reveals } from "@/utils/v1/reveals";
 
 // The 2-minute product demo (voice-over with burned-in captions),
 // re-encoded for the web with faststart so it streams before it finishes
 // downloading. The source lives in promo/out/.
-const DEMO_VIDEO = "/assets/home/potluck-demo.mp4";
-const DEMO_POSTER = "/assets/home/potluck-demo-poster.jpg";
+const DEMO_VIDEO = withBase("/assets/home/potluck-demo.mp4");
+const DEMO_POSTER = withBase("/assets/home/potluck-demo-poster.jpg");
 
 /**
  * Product demo — the first section after the hero, and the one

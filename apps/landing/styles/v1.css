@@ -202,7 +202,7 @@
   background-color: rgb(var(--color-v1-bg-canvas-base));
   background-image:
     radial-gradient(1400px 900px at 18% 0%, rgb(var(--color-v1-blue-200) / 0.22), transparent 65%),
-    url("/assets/v1/page/.compressed/grain-bg.webp");
+    url("./assets/grain-bg.webp");
   background-size:
     100% auto,
     100% auto;
@@ -310,7 +310,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/assets/v1/textures/sheen.webp");
+  background-image: url("./assets/sheen.webp");
   /* Master tile is a 3×4 grid of soft gradient panels (Figma's
    * `Greydient4A_texture2`). Sizing it 300%×400% means one cell fills
    * the host element; `--v1-textured-pos` then pans to a different cell

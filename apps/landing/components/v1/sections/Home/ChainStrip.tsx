@@ -13,6 +13,7 @@
  */
 
 import Image from "next/image";
+import { withBase } from "@/utils/basePath";
 
 interface SourceChain {
   name: string;
@@ -20,9 +21,9 @@ interface SourceChain {
 }
 
 const CHAINS: SourceChain[] = [
-  { name: "Polkadot Asset Hub", logo: "/assets/chains/assethub-polkadot.svg" },
-  { name: "Kusama Asset Hub", logo: "/assets/chains/assethub-kusama.svg" },
-  { name: "Portaldot V3", logo: "/assets/chains/portaldot.png" },
+  { name: "Polkadot Asset Hub", logo: withBase("/assets/chains/assethub-polkadot.svg") },
+  { name: "Kusama Asset Hub", logo: withBase("/assets/chains/assethub-kusama.svg") },
+  { name: "Portaldot V3", logo: withBase("/assets/chains/portaldot.png") },
 ];
 
 const REPEAT = 4;
