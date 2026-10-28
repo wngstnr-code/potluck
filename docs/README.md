@@ -10,6 +10,7 @@ Start with [`../CLAUDE.md`](../CLAUDE.md) (rules), then [`DEVELOPMENT.md`](./DEV
 | [POTLUCK.md](./POTLUCK.md) | Product concept after the reframe: why Portaldot, how it works, demo script, rubric mapping, business model, judge Q&A |
 | [DESIGN.md](./DESIGN.md) | UI design system: direction, design-review rules, palette, typography, components |
 | [VIDEO.md](./VIDEO.md) | Demo video script: check-in and final cuts, recording setup, timed narration |
+| [pitch/potluck-pitch.pdf](./pitch/potluck-pitch.pdf) | Submission pitch deck (13 slides); edit [`potluck-pitch.html`](./pitch/potluck-pitch.html) and re-export the PDF with headless Chrome `--print-to-pdf` |
 
 ## Reference
 | Doc | Purpose |
