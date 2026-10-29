@@ -8,5 +8,15 @@
     "codeBytes": 5414,
     "runtime": "portaldot-v3 3002",
     "deployedAt": "2026-10-21T08:07:24.516Z"
+  },
+  "pvm": {
+    "address": "0x528fc6d14a8b1cf4474d2999313f74533cf083b4",
+    "txHash": "0x5c4b897dd32d210b2370458c5ff21e90475643bd21d9e3dfe5258c4491b4d705",
+    "blockHash": "0x8f5893d93915b14cfe5dd99d9c6ded2a3728391c6486a9c32fa76ca1944d1070",
+    "blockNumber": 236926,
+    "deployer": "5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM",
+    "codeBytes": 42055,
+    "runtime": "portaldot-v3 3002",
+    "deployedAt": "2026-10-29T10:18:06.364Z"
   }
 }

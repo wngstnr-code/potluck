@@ -87,7 +87,7 @@ flowchart TB
 |---|---|
 | `PotluckRegistry` (EVM) | [`0xef9305561eb0c34d205dfa0d9099a105f44282eb`](https://node-console.portaldot.dev/#/explorer/query/129014), block #129,014, tx `0x3abb9058e1eb48628791a029de71ef11b510ebc7a5cfa81677425773ce0bc352` (deposit 433.2 tPOT) |
 | Portaldot unified history | manifest 2: blocks #1–#129,069, 1 chunk; spec, chunk and manifest stored in TransactionStorage at #129,092, #129,094 and #129,095 |
-| `PotluckRegistry` (PVM) | pending: needs ≈ 3,293 tPOT (measured by dry run); the first faucet batch was 1,500 |
+| `PotluckRegistry` (PVM) | [`0x528fc6d14a8b1cf4474d2999313f74533cf083b4`](https://node-console.portaldot.dev/#/explorer/query/236926), block #236,926, tx `0x5c4b897dd32d210b2370458c5ff21e90475643bd21d9e3dfe5258c4491b4d705` (resolc 1.4.0, 42,055 B; deposit 3,293.4 tPOT) |
 | Polkadot AH balance history | manifest 3: newest 80,000 blocks (#22,021,128–#22,101,127), 114,460 rows in 2 chunks (3.2 MB), every account reconciled before publishing; chunks stored at #129,230 and #129,232 |
 | Kusama AH recovery timeline | manifest 4: blocks #17,836,634–#22,802,789 (the Recovery inheritance API onward), 7 rows in 2 chunks (643 B); spec, chunks and manifest stored at #218,503–#218,507 |
 
