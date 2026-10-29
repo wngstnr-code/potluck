@@ -9,11 +9,11 @@ import { withBase } from "@/utils/basePath";
 import { cn } from "@/utils/v1/cn";
 import { reveals } from "@/utils/v1/reveals";
 
-// The 2-minute product demo (voice-over with burned-in captions),
-// re-encoded for the web with faststart so it streams before it finishes
-// downloading. The source lives in promo/out/.
-const DEMO_VIDEO = withBase("/assets/home/potluck-demo.mp4");
-const DEMO_POSTER = withBase("/assets/home/potluck-demo-poster.jpg");
+// The 1-minute Potluck ad (potluck-ad-v2), re-encoded for the web with
+// faststart so it streams before it finishes downloading. The source
+// lives in promo/out/.
+const DEMO_VIDEO = withBase("/assets/home/potluck-ad.mp4");
+const DEMO_POSTER = withBase("/assets/home/potluck-ad-poster.jpg");
 
 /**
  * Product demo — the first section after the hero, and the one
@@ -97,7 +97,7 @@ function DemoVideo() {
       playsInline
       preload="metadata"
       className="absolute inset-0 block h-full w-full bg-black object-cover"
-      aria-label="Potluck demo video, 2 minutes, with captions"
+      aria-label="Potluck video, 1 minute"
     />
   );
 }
