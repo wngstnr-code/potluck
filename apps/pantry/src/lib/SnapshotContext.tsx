@@ -16,6 +16,7 @@ import {
   useState,
 } from "react";
 import { AH_SPEC, POLKADOT_AH, PORTALDOT } from "../config";
+import { BLOB_CACHE } from "./blobCache";
 import { useSharedHistory } from "./HistoryContext";
 
 export interface SnapshotState {
@@ -28,8 +29,10 @@ export interface SnapshotState {
   history: SpecHistory | null;
   /** Connection to Polkadot Asset Hub (the source chain every check runs against). */
   source: RpcClient | null;
-  /** Blob bytes fetched from Portaldot over bitswap, and how many chunks. */
+  /** Blob bytes loaded (over bitswap or from this browser's cache), and how many chunks. */
   bytes: number;
+  /** Blobs read back from this browser's cache instead of bitswap (hash-checked again). */
+  fromCache: number;
   chunks: { done: number; total: number } | null;
   startedAt: number;
   /** Time from the first registry read to every chunk checked (L1). */
@@ -44,6 +47,7 @@ const idle: SnapshotState = {
   history: null,
   source: null,
   bytes: 0,
+  fromCache: 0,
   chunks: null,
   startedAt: 0,
   ms: null,
@@ -74,6 +78,7 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
         portaldot,
         evmRpcUrl: PORTALDOT.evmRpc,
         registries: PORTALDOT.registries,
+        cache: BLOB_CACHE,
       });
       let bytes = 0;
       const manifests = {
@@ -81,7 +86,7 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
         blob: async (digest: string) => {
           const blob = await registrySource.blob(digest);
           bytes += blob.length;
-          patch({ bytes });
+          patch({ bytes, fromCache: registrySource.stats.cached });
           return blob;
         },
       };

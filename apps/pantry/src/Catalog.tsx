@@ -5,6 +5,7 @@ import { Icon } from "@potluck/ui/Icon";
 import { useEffect, useMemo, useState } from "react";
 import { KindTag } from "./components/RowsTable";
 import { PORTALDOT, SPECS, UNIFIED_SPEC } from "./config";
+import { BLOB_CACHE } from "./lib/blobCache";
 import { useSharedHistory } from "./lib/HistoryContext";
 import { seriesOf } from "./lib/kinds";
 
@@ -31,6 +32,7 @@ function usePublished(): Record<string, Published> {
       portaldot: client,
       evmRpcUrl: PORTALDOT.evmRpc,
       registries: PORTALDOT.registries,
+      cache: BLOB_CACHE,
     });
     for (const { file, spec } of SPECS) {
       source.list(spec).then(

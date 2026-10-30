@@ -134,7 +134,7 @@ export function Heavy() {
           </span>
           <span className="sub">
             {state.chunks
-              ? `${(state.bytes / 1024 / 1024).toFixed(1)} MB in ${state.chunks.done} of ${state.chunks.total} chunks · L1 ${state.history ? (state.history.integrityOk ? "ok" : "failed") : "…"}`
+              ? `${(state.bytes / 1024 / 1024).toFixed(1)} MB in ${state.chunks.done} of ${state.chunks.total} chunks${state.fromCache > 0 ? ` (${state.fromCache} blobs from this browser's cache)` : ""} · L1 ${state.history ? (state.history.integrityOk ? "ok" : "failed") : "…"}`
               : "registry + bitswap, no server"}
           </span>
         </div>

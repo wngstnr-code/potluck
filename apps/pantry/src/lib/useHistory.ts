@@ -12,6 +12,7 @@ import type { Spec } from "@potluck/spec";
 import { IndexedDbMetadataStore } from "@potluck/ui/metadataStore";
 import { useEffect, useState } from "react";
 import { PORTALDOT } from "../config";
+import { BLOB_CACHE } from "./blobCache";
 
 export type Phase = "connecting" | "loading" | "verifying" | "live" | "error";
 
@@ -78,6 +79,7 @@ export function useHistory(spec: Spec): HistoryState {
               portaldot: client,
               evmRpcUrl: PORTALDOT.evmRpc,
               registries: PORTALDOT.registries,
+              cache: BLOB_CACHE,
             })
           : undefined;
       patch({ phase: "loading", startedAt: Date.now(), client });
