@@ -11,6 +11,12 @@ export {
   type SegmentReport,
 } from "./history.js";
 export {
+  NETWORKS,
+  type NetworkName,
+  PORTALDOT_TESTNET,
+  type PotluckNetwork,
+} from "./networks.js";
+export {
   type ManifestEntry,
   type ManifestSource,
   PortaldotSource,
