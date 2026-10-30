@@ -17,6 +17,27 @@
     "deployer": "5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM",
     "codeBytes": 42055,
     "runtime": "portaldot-v3 3002",
-    "deployedAt": "2026-10-29T10:18:06.364Z"
+    "deployedAt": "2026-10-29T10:18:06.364Z",
+    "manifests": [
+      {
+        "id": 0,
+        "evmId": 2,
+        "spec": "portaldot-v3-testnet.unified-history",
+        "publishBlockHash": "0x13fc57ebbc2bb7966d79f32495f3d6aa142fefc0110903cddc3b6e22f9a61b4c"
+      },
+      {
+        "id": 1,
+        "evmId": 3,
+        "spec": "polkadot-ah.balance-history",
+        "publishBlockHash": "0x795a6d772032e402ba07ad0cc06db656636f26f9b0aae561555d4da8aa397799"
+      },
+      {
+        "id": 2,
+        "evmId": 4,
+        "spec": "kusama-ah.recovery-timeline",
+        "publishBlockHash": "0xc0a5fdad2a686283adc6cc30d58283e3d1a975acfc0bf525808a5dffa9846340"
+      }
+    ],
+    "manifestsRegisteredAt": "2026-10-30"
   }
 }

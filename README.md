@@ -87,7 +87,7 @@ flowchart TB
 |---|---|
 | `PotluckRegistry` (EVM) | [`0xef9305561eb0c34d205dfa0d9099a105f44282eb`](https://node-console.portaldot.dev/#/explorer/query/129014), block #129,014, tx `0x3abb9058e1eb48628791a029de71ef11b510ebc7a5cfa81677425773ce0bc352` (deposit 433.2 tPOT) |
 | Portaldot unified history | manifest 2: blocks #1–#129,069, 1 chunk; spec, chunk and manifest first stored in TransactionStorage at #129,092, #129,094 and #129,095, stored again after the 7-day retention at #236,974, #236,975 and #236,977 |
-| `PotluckRegistry` (PVM) | [`0x528fc6d14a8b1cf4474d2999313f74533cf083b4`](https://node-console.portaldot.dev/#/explorer/query/236926), block #236,926, tx `0x5c4b897dd32d210b2370458c5ff21e90475643bd21d9e3dfe5258c4491b4d705` (resolc 1.4.0, 42,055 B; deposit 3,293.4 tPOT) |
+| `PotluckRegistry` (PVM) | [`0x528fc6d14a8b1cf4474d2999313f74533cf083b4`](https://node-console.portaldot.dev/#/explorer/query/236926), block #236,926, tx `0x5c4b897dd32d210b2370458c5ff21e90475643bd21d9e3dfe5258c4491b4d705` (resolc 1.4.0, 42,055 B; deposit 3,293.4 tPOT). The apps read it first. Lists manifests 0–2 (EVM ids 2–4), added on 2026-10-30 with `potluck register` at their existing TransactionStorage locations (≈ 154 tPOT of Revive storage deposits) |
 | Polkadot AH balance history | manifest 3: newest 80,000 blocks (#22,021,128–#22,101,127), 114,460 rows in 2 chunks (3.2 MB), every account reconciled before publishing; chunks first stored at #129,230 and #129,232, stored again at #236,980 and #236,984 |
 | Kusama AH recovery timeline | manifest 4: blocks #17,836,634–#22,802,789 (the Recovery inheritance API onward), 7 rows in 2 chunks (643 B); spec, chunks and manifest stored at #218,503–#218,507 |
 
@@ -156,6 +156,9 @@ node packages/cli/dist/index.js publish builds/... --dry-run --from-address <ss5
 
 # Keep it current: index new blocks, verify, publish, renew what expires within a day
 node packages/cli/dist/index.js sync specs/portaldot-v3-testnet.unified-history.json --registry <h160>
+
+# Add a published build to another registry (e.g. the PVM one) without storing it again
+node packages/cli/dist/index.js register builds/... --registry <h160>
 
 # Renew only (TransactionStorage keeps data ~7 days; a renewal costs ≈ 0.012 tPOT per blob)
 node packages/cli/dist/index.js renew builds/... --registry <h160>
