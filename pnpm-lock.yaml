@@ -269,6 +269,27 @@ importers:
         specifier: 4.6.7
         version: 4.6.7
 
+  packages/sdk:
+    dependencies:
+      '@polkadot/rpc-provider':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@polkadot/types':
+        specifier: 17.0.2
+        version: 17.0.2
+      '@polkadot/util':
+        specifier: 14.0.3
+        version: 14.0.3
+      '@polkadot/util-crypto':
+        specifier: 14.0.3
+        version: 14.0.3(@polkadot/util@14.0.3)
+      viem:
+        specifier: 2.57.7
+        version: 2.57.7(typescript@7.0.2)(zod@4.6.7)
+      zod:
+        specifier: 4.6.7
+        version: 4.6.7
+
   packages/spec:
     dependencies:
       '@polkadot/util':

@@ -1,0 +1,51 @@
+{
+  "name": "potluck-sdk",
+  "version": "0.1.0",
+  "description": "Verified on-chain history for any dApp, loaded in the browser from Portaldot with no server: snapshots from TransactionStorage, checked against the source chain.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wngstnr-code/potluck.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://wngstnr-code.github.io/potluck/",
+  "bugs": "https://github.com/wngstnr-code/potluck/issues",
+  "keywords": [
+    "portaldot",
+    "polkadot",
+    "substrate",
+    "indexer",
+    "history",
+    "verifiable",
+    "transaction-storage"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "assemble": "node scripts/assemble.mjs",
+    "prepack": "node scripts/assemble.mjs"
+  },
+  "dependencies": {
+    "@polkadot/rpc-provider": "17.0.2",
+    "@polkadot/types": "17.0.2",
+    "@polkadot/util": "14.0.3",
+    "@polkadot/util-crypto": "14.0.3",
+    "viem": "2.57.7",
+    "zod": "4.6.7"
+  }
+}
