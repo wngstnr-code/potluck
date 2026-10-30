@@ -273,8 +273,8 @@ export function Attack() {
               <dd className="mono">{result ? result.flag.evidence : "—"}</dd>
               <dt>manifest id</dt>
               <dd>
-                assigned when a manifest is published; the registry is not deployed yet (needs
-                tPOT), so the flag cannot be sent from this page today.
+                none: this forged manifest exists only in this browser. A forged manifest that was
+                published would be flagged by its registry id, in the PVM and EVM registries.
               </dd>
               <dt>after flagging</dt>
               <dd>

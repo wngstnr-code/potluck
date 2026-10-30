@@ -64,9 +64,8 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
   const start = useCallback(() => setWanted(true), []);
 
   useEffect(() => {
-    if (!wanted || !portaldot || started.current || !PORTALDOT.registry) return;
+    if (!wanted || !portaldot || started.current || PORTALDOT.registries.length === 0) return;
     started.current = true;
-    const registry = PORTALDOT.registry;
     const patch = (p: Partial<SnapshotState>) => setState((s) => ({ ...s, ...p }));
     (async () => {
       patch({ phase: "connecting", startedAt: Date.now() });
@@ -74,7 +73,7 @@ export function SnapshotProvider({ children }: { children: ReactNode }) {
       const registrySource = new PortaldotSource({
         portaldot,
         evmRpcUrl: PORTALDOT.evmRpc,
-        registry,
+        registries: PORTALDOT.registries,
       });
       let bytes = 0;
       const manifests = {

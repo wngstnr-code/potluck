@@ -21,17 +21,16 @@ function usePublished(): Record<string, Published> {
     Object.fromEntries(
       SPECS.map((s) => [
         s.file,
-        { status: PORTALDOT.registry ? "loading" : "no-registry" } as Published,
+        { status: PORTALDOT.registries.length > 0 ? "loading" : "no-registry" } as Published,
       ]),
     ),
   );
   useEffect(() => {
-    const registry = PORTALDOT.registry;
-    if (!registry || !client) return;
+    if (PORTALDOT.registries.length === 0 || !client) return;
     const source = new PortaldotSource({
       portaldot: client,
       evmRpcUrl: PORTALDOT.evmRpc,
-      registry,
+      registries: PORTALDOT.registries,
     });
     for (const { file, spec } of SPECS) {
       source.list(spec).then(
@@ -95,10 +94,10 @@ export function Catalog() {
         </div>
         <div className="tile yellow">
           <span className="lbl">Manifests on Portaldot</span>
-          <span className="big mono">{PORTALDOT.registry ? fmt(manifests) : "0"}</span>
+          <span className="big mono">{PORTALDOT.registries.length > 0 ? fmt(manifests) : "0"}</span>
           <span className="sub">
-            {PORTALDOT.registry
-              ? `registry ${shortHex(PORTALDOT.registry)}`
+            {PORTALDOT.registries.length > 0
+              ? `PVM registry ${shortHex(PORTALDOT.registries[0] as string)}, EVM ${shortHex(PORTALDOT.registries[1] as string)} as fallback`
               : "registry not deployed yet (needs tPOT)"}
           </span>
         </div>

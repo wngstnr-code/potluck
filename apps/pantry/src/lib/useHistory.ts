@@ -72,13 +72,14 @@ export function useHistory(spec: Spec): HistoryState {
     (async () => {
       client = withRetry(await connectWs(PORTALDOT.ws));
       const metadataStore = new IndexedDbMetadataStore(spec.source.genesisHash);
-      const manifests: ManifestSource | undefined = PORTALDOT.registry
-        ? new PortaldotSource({
-            portaldot: client,
-            evmRpcUrl: PORTALDOT.evmRpc,
-            registry: PORTALDOT.registry,
-          })
-        : undefined;
+      const manifests: ManifestSource | undefined =
+        PORTALDOT.registries.length > 0
+          ? new PortaldotSource({
+              portaldot: client,
+              evmRpcUrl: PORTALDOT.evmRpc,
+              registries: PORTALDOT.registries,
+            })
+          : undefined;
       patch({ phase: "loading", startedAt: Date.now(), client });
 
       const history: SpecHistory = await specHistory({

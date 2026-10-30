@@ -9,10 +9,14 @@ export const PORTALDOT = {
   ws: "wss://test-node-v3.portaldot.dev",
   evmRpc: "https://test-evm-rpc-v3.portaldot.dev",
   /**
-   * PotluckRegistry (EVM build), deployed 2026-10-21 at block #129,014
+   * PotluckRegistry deployments in order of preference: the PVM build (resolc, block #236,926),
+   * then the EVM build (block #129,014) as the fallback. Both list every published manifest
    * (contracts/deployments/portaldot-v3-testnet.json).
    */
-  registry: "0xef9305561eb0c34d205dfa0d9099a105f44282eb" as `0x${string}` | null,
+  registries: [
+    "0x528fc6d14a8b1cf4474d2999313f74533cf083b4",
+    "0xef9305561eb0c34d205dfa0d9099a105f44282eb",
+  ] as readonly `0x${string}`[],
 };
 
 /** Polkadot Asset Hub: the heavy source chain whose newest window is published on Portaldot. */
