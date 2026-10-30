@@ -327,6 +327,8 @@ const result = await accountHistory({ spec, source, manifests, accounts: [accoun
 const stop = followHistory({ spec, source, accounts, afterBlock: result.head, onRows });
 ```
 
+- **Entry point (`createPotluck`):** wraps the functions above for apps. A network preset (`PORTALDOT_TESTNET`) carries the Portaldot endpoints, the registry, archive endpoints per `source.chain` and the known specs as name → spec hash. Specs resolve by preset name, hash or object; names never resolve through the registry, because `registerSpec` is permissionless. Addresses (SS58, AccountId32 or H160) become `[id32, h160]` through the source chain's `ReviveApi` (AccountId32 alone without Revive). Connections are opened once per endpoint with `withRetry` and closed by `close()`. Example: `examples/minimal`.
+- **Spec discovery:** `PortaldotSource.specs()` lists `specCount`/`specHashAt`/`getSpec` and fetches each spec blob by its hash (digest-checked, and the parsed spec must hash back to the same value).
 - **Manifests:** `PortaldotSource.list` reads `latest(specHash)` from the registry via `eth_call` and fetches each manifest via `bitswap_v1_get` (CID = raw CIDv1 of the blake2b-256 digest, `blobCid`). It keeps only manifests that hash to their registered digest and match the spec, source chain, range and chunks root.
 - **Coverage (`planCoverage`):** unflagged manifests first, reaching furthest. Gaps ≤ `maxDirectBlocks` (default 200,000) are synced directly; longer gaps are reported as `uncovered` (the UI's coverage bar).
 - **Loader:** only chunks whose bloom may contain one of the account ids are downloaded; every blob is digest-checked (`fetchBlob`).

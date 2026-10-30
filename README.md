@@ -95,6 +95,36 @@ Every address and hash is also in [`contracts/deployments/portaldot-v3-testnet.j
 
 The contracts are tested (21 Foundry tests, 100% coverage) and both bytecodes pass `ReviveApi.instantiate` dry runs on the live testnet.
 
+## Use Potluck in your dApp
+
+`@potluck/client` runs in any browser bundle. One call gives an app verified history:
+
+```ts
+import { createPotluck } from "@potluck/client";
+
+const potluck = await createPotluck(); // Portaldot V3 testnet preset: endpoints, registry, known specs
+
+const spec = "polkadot-ah.balance-history"; // preset name, 0x spec hash, or a Spec object
+const account = "15oF4uVJwmo4TdGW7VfQxNLavjCXviqxT9S1MgbjMNHr6Sp5"; // SS58, AccountId32 or H160
+
+const history = await potluck.accountHistory({ spec, account });
+history.rows;      // the account's rows, in block order
+history.verified;  // L1 + L2 + L3 against the source chain
+history.uncovered; // ranges neither published nor short enough to sync directly
+
+// Live tail: new finalized rows for the same account
+const stop = await potluck.follow({ spec, account, afterBlock: history.head, onRows: (rows) => {} });
+```
+
+- `potluck.specs()` lists every spec registered on chain, fetched from TransactionStorage and hash-checked, so an app needs no spec file of its own. Registration is permissionless, so spec names resolve only through the network preset; any other spec is used by its hash.
+- `potluck.specHistory({ spec, onRows })` loads every row of a spec (Pantry's overview).
+- Addresses are resolved through the chain's `ReviveApi`, so a Portaldot account matches both its native rows and its EVM/PVM token rows.
+- The lower-level functions (`accountHistory`, `specHistory`, `followHistory`, `PortaldotSource`, `reconcileHistory`) stay exported for full control.
+
+Published specs: `portaldot-v3-testnet.unified-history`, `polkadot-ah.balance-history` and `kusama-ah.recovery-timeline` (see `specs/`). To index something else, write a spec and publish it with the CLI below.
+
+[`examples/minimal`](examples/minimal) is the whole integration in about 60 lines of plain TypeScript: `pnpm install && pnpm build && pnpm --filter @potluck/example-minimal dev`. The packages are not on npm yet; use them from this workspace.
+
 ## Run it
 
 Requirements: Node ≥ 22, pnpm 10.
@@ -154,6 +184,7 @@ pnpm test:contracts             # Foundry tests for PotluckRegistry
 | `packages/theme`, `packages/ui` | Design tokens, fonts, shared React shell |
 | `apps/pantry` | Catalog, overview, verify account, attack demo |
 | `apps/wasiat` | Wasiat-lite: Recovery-pallet inheritance plans and timelines |
+| `examples/minimal` | The smallest app on the SDK: spec discovery, verified account history, live tail |
 | `contracts` | `PotluckRegistry.sol`, Foundry tests, PVM/EVM build and deploy scripts |
 | `specs` | Portaldot unified history, Polkadot AH balance history, Kusama AH recovery timeline |
 | `spikes` | Measurements behind the design (runtime decoding, fees, reconciliation, throughput) |
