@@ -1,0 +1,30 @@
+<!doctype html>
+<!--
+  Potluck with no install and no bundler: save this file and open it in a browser.
+  The SDK is one ES module served from GitHub Pages; everything it reads is checked against the chains.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Potluck from a URL</title>
+  </head>
+  <body>
+    <pre id="out">Loading verified history…</pre>
+    <script type="module">
+      import { createPotluck } from "https://wngstnr-code.github.io/potluck/sdk/potluck.js";
+
+      const out = document.getElementById("out");
+      const potluck = await createPotluck(); // Portaldot V3 testnet preset
+      const history = await potluck.accountHistory({
+        spec: "portaldot-v3-testnet.unified-history",
+        account: "5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM", // any SS58, AccountId32 or H160
+      });
+      out.textContent = [
+        `${history.rows.length} rows up to block #${history.head}`,
+        `verified against the chain: ${history.verified}`,
+        ...history.rows.slice(-10).map((r) => `#${r.block} ${r.cells.kind} ${r.cells.amount}`),
+      ].join("\n");
+    </script>
+  </body>
+</html>
