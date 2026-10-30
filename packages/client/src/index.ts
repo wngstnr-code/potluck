@@ -18,6 +18,15 @@ export {
   type PotluckNetwork,
 } from "./networks.js";
 export {
+  createPotluck,
+  type Potluck,
+  type PotluckAccountHistoryOptions,
+  type PotluckFollowOptions,
+  type PotluckOptions,
+  type PotluckSpecHistoryOptions,
+  type SpecRef,
+} from "./potluck.js";
+export {
   type ManifestEntry,
   type ManifestSource,
   PortaldotSource,
