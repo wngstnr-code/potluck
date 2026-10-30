@@ -1,5 +1,5 @@
 import { type Manifest, parseManifest, REGISTRY_ABI, type RpcClient } from "@potluck/core";
-import { type Spec, specHash } from "@potluck/spec";
+import { parseSpec, type Spec, specHash } from "@potluck/spec";
 import { createPublicClient, type Hex, http } from "viem";
 import { fetchBlob } from "./blobs.js";
 
@@ -13,6 +13,19 @@ export interface ManifestEntry {
   publisher: string | null;
   /** Public flags raised against the manifest in the registry. */
   flags: number;
+}
+
+/** A spec registered in PotluckRegistry. Registration is permissionless: judge it by its author. */
+export interface RegisteredSpec {
+  /** Spec hash (lower-case), which is also the digest of its TransactionStorage blob. */
+  hash: string;
+  /** H160 that registered it. */
+  author: string;
+  /** Unix seconds. */
+  registeredAt: number;
+  /** The spec, or null when its blob is unavailable (expired) or invalid; see `error`. */
+  spec: Spec | null;
+  error?: string;
 }
 
 /** Where a client finds manifests for a spec and the blobs they reference. */
@@ -83,5 +96,50 @@ export class PortaldotSource implements ManifestSource {
 
   blob(digest: string): Promise<Uint8Array> {
     return fetchBlob(this.options.portaldot, digest);
+  }
+
+  /**
+   * Fetches a spec by hash from TransactionStorage. The blob is digest-checked, then the parsed
+   * spec must hash back to the same value (a non-canonical blob would not).
+   */
+  async spec(hash: string): Promise<Spec> {
+    const bytes = await fetchBlob(this.options.portaldot, hash);
+    const spec = parseSpec(JSON.parse(new TextDecoder().decode(bytes)));
+    if (specHash(spec) !== hash.toLowerCase()) {
+      throw new Error(`spec blob ${hash} is not in canonical form`);
+    }
+    return spec;
+  }
+
+  /** Every spec registered in the registry, in registration order, each fetched and checked. */
+  async specs(): Promise<RegisteredSpec[]> {
+    const registry = { address: this.options.registry, abi: REGISTRY_ABI } as const;
+    const count = await this.#evm.readContract({ ...registry, functionName: "specCount" });
+    return Promise.all(
+      Array.from({ length: Number(count) }, async (_, i) => {
+        const hash = await this.#evm.readContract({
+          ...registry,
+          functionName: "specHashAt",
+          args: [BigInt(i)],
+        });
+        const record = await this.#evm.readContract({
+          ...registry,
+          functionName: "getSpec",
+          args: [hash],
+        });
+        const entry: RegisteredSpec = {
+          hash: hash.toLowerCase(),
+          author: record.author.toLowerCase(),
+          registeredAt: Number(record.registeredAt),
+          spec: null,
+        };
+        try {
+          entry.spec = await this.spec(entry.hash);
+        } catch (error) {
+          entry.error = String((error as Error)?.message ?? error);
+        }
+        return entry;
+      }),
+    );
   }
 }

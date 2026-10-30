@@ -22,6 +22,7 @@ export {
   type ManifestSource,
   PortaldotSource,
   type PortaldotSourceOptions,
+  type RegisteredSpec,
 } from "./source.js";
 export {
   type HistoryReconciliation,
