@@ -13,7 +13,7 @@ describe.skipIf(!LIVE)("spec discovery on Portaldot V3 testnet", () => {
     source = new PortaldotSource({
       portaldot,
       evmRpcUrl: PORTALDOT_TESTNET.portaldot.evmRpc,
-      registry: PORTALDOT_TESTNET.portaldot.registry,
+      registries: PORTALDOT_TESTNET.portaldot.registries,
     });
   });
   afterAll(async () => {

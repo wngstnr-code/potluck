@@ -95,7 +95,7 @@ export async function createPotluck(options: PotluckOptions = {}): Promise<Potlu
   const manifests = new PortaldotSource({
     portaldot: await connect(network.portaldot.ws),
     evmRpcUrl: network.portaldot.evmRpc,
-    registry: network.portaldot.registry,
+    registries: network.portaldot.registries,
   });
 
   const specCache = new Map<string, Promise<Spec>>();

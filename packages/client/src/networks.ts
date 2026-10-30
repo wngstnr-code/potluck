@@ -8,8 +8,8 @@ export interface PotluckNetwork {
     ws: string;
     /** EVM JSON-RPC endpoint (CORS-enabled), used to read the registry. */
     evmRpc: string;
-    /** PotluckRegistry address. */
-    registry: Hex;
+    /** PotluckRegistry deployments in order of preference; their listings are merged. */
+    registries: readonly Hex[];
   };
   /** Public archive endpoints per spec `source.chain`. */
   endpoints: Readonly<Record<string, string>>;
@@ -26,9 +26,12 @@ export const PORTALDOT_TESTNET: PotluckNetwork = {
   portaldot: {
     ws: "wss://test-node-v3.portaldot.dev",
     evmRpc: "https://test-evm-rpc-v3.portaldot.dev",
-    // EVM build, deployed at block #129,014. It holds every published manifest; the PVM build
-    // (0x528fc6d14a8b1cf4474d2999313f74533cf083b4) has none yet.
-    registry: "0xef9305561eb0c34d205dfa0d9099a105f44282eb",
+    // PVM build (resolc, block #236,926) first, EVM build (block #129,014) as the fallback.
+    // Both list every published manifest.
+    registries: [
+      "0x528fc6d14a8b1cf4474d2999313f74533cf083b4",
+      "0xef9305561eb0c34d205dfa0d9099a105f44282eb",
+    ],
   },
   endpoints: {
     "polkadot-asset-hub": "wss://polkadot-asset-hub-rpc.polkadot.io",

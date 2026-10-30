@@ -11,8 +11,10 @@ export interface ManifestEntry {
   id?: number;
   /** Publisher H160 as recorded by the registry (or the manifest). */
   publisher: string | null;
-  /** Public flags raised against the manifest in the registry. */
+  /** Public flags raised against the manifest (the highest count among the registries listing it). */
   flags: number;
+  /** Registry (lower-case H160) the entry was read from: the first one listing it. */
+  registry?: string;
 }
 
 /** A spec registered in PotluckRegistry. Registration is permissionless: judge it by its author. */
@@ -37,35 +39,70 @@ export interface ManifestSource {
 export interface PortaldotSourceOptions {
   /** Portaldot WSS client (bitswap_v1_get). */
   portaldot: RpcClient;
-  /** Portaldot EVM JSON-RPC URL (CORS-enabled), used to read the registry. */
+  /** Portaldot EVM JSON-RPC URL (CORS-enabled), used to read the registries. */
   evmRpcUrl: string;
-  registry: Hex;
+  /**
+   * PotluckRegistry deployments in order of preference (e.g. the PVM build, then the EVM build).
+   * Their listings are merged; a registry that cannot be read is skipped.
+   */
+  registries: readonly Hex[];
   /** How many recent manifests per spec to consider (default 32). */
   limit?: number;
 }
 
 /**
- * Reads manifests from PotluckRegistry and fetches every blob via bitswap. Nothing returned by the
- * registry or the node is trusted: each manifest must hash to its registered digest, belong to the
- * requested spec and source chain, and pass full manifest validation.
+ * Reads manifests from PotluckRegistry deployments and fetches every blob via bitswap. Nothing
+ * returned by a registry or the node is trusted: each manifest must hash to its registered digest,
+ * belong to the requested spec and source chain, and pass full manifest validation.
  */
 export class PortaldotSource implements ManifestSource {
   readonly #evm;
 
   constructor(private readonly options: PortaldotSourceOptions) {
+    if (options.registries.length === 0) throw new Error("PortaldotSource: no registry given");
     this.#evm = createPublicClient({ transport: http(options.evmRpcUrl) });
+  }
+
+  /**
+   * Runs `read` against every registry and returns the results in preference order, skipping
+   * registries that fail; throws only when none can be read.
+   */
+  async #fromEach<T>(read: (address: Hex) => Promise<T>): Promise<{ address: Hex; value: T }[]> {
+    const settled = await Promise.allSettled(this.options.registries.map(read));
+    const ok = settled.flatMap((r, i) =>
+      r.status === "fulfilled"
+        ? [{ address: this.options.registries[i] as Hex, value: r.value }]
+        : [],
+    );
+    if (ok.length === 0) throw (settled[0] as PromiseRejectedResult).reason;
+    return ok;
   }
 
   async list(spec: Spec): Promise<ManifestEntry[]> {
     const hash = specHash(spec) as Hex;
-    const records = await this.#evm.readContract({
-      address: this.options.registry,
-      abi: REGISTRY_ABI,
-      functionName: "latest",
-      args: [hash, BigInt(this.options.limit ?? 32)],
-    });
+    const listings = await this.#fromEach((address) =>
+      this.#evm.readContract({
+        address,
+        abi: REGISTRY_ABI,
+        functionName: "latest",
+        args: [hash, BigInt(this.options.limit ?? 32)],
+      }),
+    );
+    // One record per manifest digest; a flag raised in any registry counts.
+    const byDigest = new Map<
+      string,
+      { record: (typeof listings)[number]["value"][number]; registry: string; flags: number }
+    >();
+    for (const { address, value } of listings) {
+      for (const record of value) {
+        const digest = record.manifestDigest.toLowerCase();
+        const seen = byDigest.get(digest);
+        if (seen) seen.flags = Math.max(seen.flags, record.flags);
+        else byDigest.set(digest, { record, registry: address.toLowerCase(), flags: record.flags });
+      }
+    }
     const entries: ManifestEntry[] = [];
-    for (const record of records) {
+    for (const { record, registry, flags } of byDigest.values()) {
       try {
         const manifest = parseManifest(
           await fetchBlob(this.options.portaldot, record.manifestDigest),
@@ -85,7 +122,8 @@ export class PortaldotSource implements ManifestSource {
           manifest,
           digest: record.manifestDigest.toLowerCase(),
           publisher: record.publisher.toLowerCase(),
-          flags: record.flags,
+          flags,
+          registry,
         });
       } catch {
         // Unusable manifest (expired blob, mismatch): ignore it; the client falls back to direct sync.
@@ -111,24 +149,38 @@ export class PortaldotSource implements ManifestSource {
     return spec;
   }
 
-  /** Every spec registered in the registry, in registration order, each fetched and checked. */
+  /**
+   * Every spec registered in the registries, in registration order (preferred registry first,
+   * then specs only the others know), each fetched and checked.
+   */
   async specs(): Promise<RegisteredSpec[]> {
-    const registry = { address: this.options.registry, abi: REGISTRY_ABI } as const;
-    const count = await this.#evm.readContract({ ...registry, functionName: "specCount" });
+    const listings = await this.#fromEach(async (address) => {
+      const registry = { address, abi: REGISTRY_ABI } as const;
+      const count = await this.#evm.readContract({ ...registry, functionName: "specCount" });
+      return Promise.all(
+        Array.from({ length: Number(count) }, async (_, i) => {
+          const hash = await this.#evm.readContract({
+            ...registry,
+            functionName: "specHashAt",
+            args: [BigInt(i)],
+          });
+          const record = await this.#evm.readContract({
+            ...registry,
+            functionName: "getSpec",
+            args: [hash],
+          });
+          return { hash: hash.toLowerCase(), record };
+        }),
+      );
+    });
+    const unique = new Map<string, (typeof listings)[number]["value"][number]["record"]>();
+    for (const { value } of listings) {
+      for (const { hash, record } of value) if (!unique.has(hash)) unique.set(hash, record);
+    }
     return Promise.all(
-      Array.from({ length: Number(count) }, async (_, i) => {
-        const hash = await this.#evm.readContract({
-          ...registry,
-          functionName: "specHashAt",
-          args: [BigInt(i)],
-        });
-        const record = await this.#evm.readContract({
-          ...registry,
-          functionName: "getSpec",
-          args: [hash],
-        });
+      [...unique].map(async ([hash, record]) => {
         const entry: RegisteredSpec = {
-          hash: hash.toLowerCase(),
+          hash,
           author: record.author.toLowerCase(),
           registeredAt: Number(record.registeredAt),
           spec: null,
