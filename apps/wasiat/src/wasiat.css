@@ -107,6 +107,9 @@ h1.serif {
 .timeline li.carried-over .mark::after {
   background: var(--series-9);
 }
+.timeline li.potluck .mark::after {
+  background: var(--series-5);
+}
 .timeline li.now .mark::after {
   background: var(--yellow);
   box-shadow:
@@ -145,6 +148,10 @@ h1.serif {
 .origin.carried-over {
   background: var(--series-9);
   color: var(--on-series-9);
+}
+.origin.potluck {
+  background: var(--series-5);
+  color: var(--on-series-5);
 }
 
 .groups {

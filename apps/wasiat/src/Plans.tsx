@@ -33,6 +33,27 @@ export function Plans({ onOpen }: { onOpen: (account: string) => void }) {
     (n, x) => n + x.timeline.filter((e) => e.source === "carried-over").length,
     0,
   );
+  const fromSnapshot = replays.reduce(
+    (n, x) => n + x.timeline.filter((e) => e.source === "potluck").length,
+    0,
+  );
+  const confirmed = replays.reduce((n, x) => n + x.timeline.filter((e) => e.inSnapshot).length, 0);
+  const snap = r.snapshot;
+  const snapNote =
+    snap.phase === "loading"
+      ? "loading the Recovery history published on Portaldot…"
+      : snap.phase === "error"
+        ? `not loaded: ${snap.error}`
+        : [
+            `${fmt(snap.events.length)} rows to #${fmt(snap.snapshotTo ?? 0)} in ${((snap.ms ?? 0) / 1000).toFixed(1)} s, L1 ${snap.integrityOk ? "ok" : "failed"}`,
+            `${fmt(fromSnapshot)} added to timelines, ${fmt(confirmed)} confirm block events`,
+            snap.directBlocks ? `${fmt(snap.directBlocks)} newer blocks synced directly` : "",
+            snap.uncovered.length
+              ? `#${fmt(snap.uncovered[0]?.fromBlock ?? 0)} onward not published yet (storage search covers it)`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" · ");
   const loading = r.phase === "connecting" || r.phase === "loading";
 
   return (
@@ -215,6 +236,24 @@ export function Plans({ onOpen }: { onOpen: (account: string) => void }) {
                   <small>state migrated from the previous pallet</small>
                 </div>
                 <span className="v mono">{fmt(carried)}</span>
+              </li>
+              <li>
+                <span
+                  className={`ck ${snap.phase === "ready" ? (snap.integrityOk ? "ck-ok" : "ck-fail") : snap.phase === "error" ? "ck-fail" : "ck-pending"}`}
+                >
+                  {snap.phase === "loading" ? (
+                    <span className="spin" />
+                  ) : snap.phase === "ready" && snap.integrityOk ? (
+                    <Icon name="check" size={15} stroke={2.2} />
+                  ) : (
+                    <Icon name="cross" size={15} stroke={2.2} />
+                  )}
+                </span>
+                <div>
+                  <b>Potluck snapshot on Portaldot</b>
+                  <small>{snapNote}</small>
+                </div>
+                <span className="v mono">{fmt(fromSnapshot)}</span>
               </li>
             </ul>
           </section>

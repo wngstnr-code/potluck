@@ -52,7 +52,7 @@ export function Timeline({ account, onBack }: { account: string; onBack: () => v
           <span className="big mono">{rep ? rep.timeline.length : "…"}</span>
           <span className="sub">
             {rep
-              ? `${rep.timeline.filter((e) => e.source === "event").length} from block events`
+              ? `${rep.timeline.filter((e) => e.source === "event").length} from block events, ${rep.timeline.filter((e) => e.source === "potluck").length} from the Potluck snapshot`
               : "rebuilding from chain…"}
           </span>
         </div>
@@ -100,8 +100,10 @@ export function Timeline({ account, onBack }: { account: string; onBack: () => v
                         <p>{d.detail}</p>
                         <span className={`origin ${e.source}`}>
                           {e.source === "event"
-                            ? `Recovery.${e.kind} · event ${e.eventIndex}`
-                            : "state at the inheritance-API upgrade"}
+                            ? `Recovery.${e.kind} · event ${e.eventIndex}${e.inSnapshot ? " · also in the Potluck snapshot" : ""}`
+                            : e.source === "potluck"
+                              ? `Recovery.${e.kind} · event ${e.eventIndex} · from the Potluck snapshot on Portaldot (missed by the storage search)`
+                              : "state at the inheritance-API upgrade"}
                         </span>
                       </div>
                     </li>
