@@ -36,6 +36,12 @@
         "evmId": 4,
         "spec": "kusama-ah.recovery-timeline",
         "publishBlockHash": "0xc0a5fdad2a686283adc6cc30d58283e3d1a975acfc0bf525808a5dffa9846340"
+      },
+      {
+        "id": 3,
+        "evmId": 5,
+        "spec": "portaldot-v3-testnet.unified-history",
+        "publishBlockHash": "0xbafe1946e5f5dec9656c35c42770936db38bb8a8b5961a8a724539153022ec24"
       }
     ],
     "manifestsRegisteredAt": "2026-10-30"
