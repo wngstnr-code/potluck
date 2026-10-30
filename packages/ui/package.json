@@ -11,6 +11,7 @@
     "./Identicon": "./src/Identicon.tsx",
     "./format": "./src/format.ts",
     "./metadataStore": "./src/metadataStore.ts",
+    "./blobCache": "./src/blobCache.ts",
     "./styles.css": "./src/styles.css"
   },
   "scripts": {
