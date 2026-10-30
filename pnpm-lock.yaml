@@ -139,6 +139,9 @@ importers:
       '@polkadot/util-crypto':
         specifier: 14.0.3
         version: 14.0.3(@polkadot/util@14.0.3)
+      '@potluck/client':
+        specifier: workspace:*
+        version: link:../../packages/client
       '@potluck/core':
         specifier: workspace:*
         version: link:../../packages/core

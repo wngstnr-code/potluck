@@ -9,6 +9,7 @@ import {
   getFinalizedHead,
   getRuntimeVersion,
   hexToBytes,
+  type IndexedRow,
   LAST_RUNTIME_UPGRADE_KEY,
   type MetadataStore,
   mapPool,
@@ -63,8 +64,13 @@ export interface TimelineEvent {
   /**
    * "event": decoded from the block's System.Events. "carried-over": state that already existed
    * when the inheritance API was introduced (migrated from the previous Recovery pallet).
+   * "potluck": a row of the Potluck snapshot on Portaldot that the storage search missed: an
+   * event that changed no Recovery storage, or state that was undone again between the samples
+   * the search compares (an inheritor set and revoked within a few blocks).
    */
-  source: "event" | "carried-over";
+  source: "event" | "carried-over" | "potluck";
+  /** A block event that the Potluck snapshot also holds (an independent second source). */
+  inSnapshot?: boolean;
 }
 
 type AnyCodec = {
@@ -332,6 +338,15 @@ export class RecoveryChain {
     return out;
   }
 
+  /** Unix ms from Timestamp.Now at `block`, 0 when it is not set. */
+  async timeAt(block: number): Promise<number> {
+    const now = await this.client.send<string | null>("state_getStorage", [
+      TIMESTAMP_NOW,
+      await this.#hash(block),
+    ]);
+    return now ? Number(this.runtime.registry.createType("u64", hexToBytes(now)).toBigInt()) : 0;
+  }
+
   async #eventsAt(block: number): Promise<{ events: DecodedEvent[]; time: number }> {
     const hash = await this.#hash(block);
     const [raw, version, now] = await Promise.all([
@@ -354,8 +369,9 @@ export class RecoveryChain {
    * Timeline of `account` rebuilt from the blocks its Recovery storage changed in: friend-group
    * changes, inheritor changes, and for each inherited or open attempt its initiation and
    * approvals (located through the attempt's init/last-approval blocks). Every entry is decoded
-   * from the block's own events. Attempts that were canceled without ever finishing leave no
-   * trace in state; the full history comes from the Potluck snapshot.
+   * from the block's own events. Attempts that were canceled without ever finishing, and state
+   * undone between samples, leave no trace here; `mergeTimelines` adds them from the Potluck
+   * snapshot.
    */
   async accountTimeline(
     account: string,
@@ -480,6 +496,68 @@ export class RecoveryChain {
       (a, b) => a.block - b.block || a.eventIndex - b.eventIndex,
     );
   }
+}
+
+/**
+ * A row of the `kusama-ah.recovery-timeline` spec as a timeline entry, with the event's own field
+ * names (the spec stores the actor of each event in one `actor` column).
+ */
+export function rowToEvent(row: IndexedRow, time: number): TimelineEvent {
+  const c = row.cells;
+  const fields: Record<string, string | null> = {
+    lost: c.lost ?? null,
+    friend_group_index: c.friendGroupIndex ?? null,
+  };
+  switch (c.kind) {
+    case "AttemptInitiated":
+      fields.initiator = c.actor ?? null;
+      break;
+    case "AttemptApproved":
+      fields.friend = c.actor ?? null;
+      break;
+    case "AttemptCanceled":
+      fields.canceler = c.actor ?? null;
+      break;
+    case "AttemptFinished":
+      fields.inheritor = c.inheritor ?? null;
+      fields.previous_inheritor = c.previousInheritor ?? null;
+      break;
+    case "AttemptDiscarded":
+      fields.existing_inheritor = c.inheritor ?? null;
+      break;
+    case "RecoveredAccountControlled":
+      fields.recovered = c.lost ?? null;
+      fields.inheritor = c.inheritor ?? null;
+      fields.call_hash = c.callHash ?? null;
+      break;
+  }
+  return {
+    block: row.block,
+    eventIndex: row.eventIndex,
+    time,
+    kind: String(c.kind),
+    fields,
+    source: "potluck",
+  };
+}
+
+/**
+ * One account's timeline from both sources: entries found through storage changes, plus the
+ * snapshot's rows for the account that the storage search missed. An event both hold is kept
+ * once, marked as confirmed by the snapshot.
+ */
+export function mergeTimelines(
+  fromStorage: readonly TimelineEvent[],
+  fromSnapshot: readonly TimelineEvent[],
+): TimelineEvent[] {
+  const key = (e: TimelineEvent) => `${e.block}:${e.eventIndex}`;
+  const inSnapshot = new Set(fromSnapshot.map(key));
+  const merged = fromStorage.map((e) =>
+    e.source === "event" && inSnapshot.has(key(e)) ? { ...e, inSnapshot: true } : e,
+  );
+  const seen = new Set(fromStorage.map(key));
+  for (const e of fromSnapshot) if (!seen.has(key(e))) merged.push(e);
+  return merged.sort((a, b) => a.block - b.block || a.eventIndex - b.eventIndex);
 }
 
 function toGroup(g: AnyCodec): FriendGroup {

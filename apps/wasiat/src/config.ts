@@ -10,6 +10,12 @@ export const KUSAMA_AH = {
   explorerBlock: (n: number) => `https://assethub-kusama.subscan.io/block/${n}`,
 };
 
+/**
+ * The Recovery event history published on Portaldot (preset name in the Potluck SDK): every
+ * Recovery event on Kusama AH since the inheritance API, as rows of `specs/kusama-ah.recovery-timeline.json`.
+ */
+export const RECOVERY_SPEC = "kusama-ah.recovery-timeline";
+
 /** Portaldot V3 testnet: where a user can set up their own plan (CLAUDE.md §7). */
 export const PORTALDOT = {
   name: "Portaldot V3 testnet",
