@@ -1,6 +1,7 @@
 import { connectWs, type MetadataStore, type RpcClient, withRetry } from "@potluck/core";
 import type { Spec } from "@potluck/spec";
 import { resolveAccount } from "./accounts.js";
+import type { BlobCache } from "./blobs.js";
 import { accountHistory, type HistoryOptions, type HistoryResult } from "./history.js";
 import { NETWORKS, type NetworkName, type PotluckNetwork } from "./networks.js";
 import { PortaldotSource, type RegisteredSpec } from "./source.js";
@@ -17,6 +18,8 @@ export interface PotluckOptions {
   endpoints?: Record<string, string>;
   /** Shared runtime-metadata cache, so each runtime version is fetched once. */
   metadataStore?: MetadataStore;
+  /** Local copy of fetched blobs (specs, manifests, chunks), hash-checked on every read. */
+  blobCache?: BlobCache;
 }
 
 export type PotluckAccountHistoryOptions = Omit<
@@ -96,6 +99,7 @@ export async function createPotluck(options: PotluckOptions = {}): Promise<Potlu
     portaldot: await connect(network.portaldot.ws),
     evmRpcUrl: network.portaldot.evmRpc,
     registries: network.portaldot.registries,
+    cache: options.blobCache,
   });
 
   const specCache = new Map<string, Promise<Spec>>();

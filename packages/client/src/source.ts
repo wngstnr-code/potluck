@@ -1,7 +1,7 @@
 import { type Manifest, parseManifest, REGISTRY_ABI, type RpcClient } from "@potluck/core";
 import { parseSpec, type Spec, specHash } from "@potluck/spec";
 import { createPublicClient, type Hex, http } from "viem";
-import { fetchBlob } from "./blobs.js";
+import { type BlobCache, fetchCachedBlob } from "./blobs.js";
 
 export interface ManifestEntry {
   manifest: Manifest;
@@ -48,6 +48,8 @@ export interface PortaldotSourceOptions {
   registries: readonly Hex[];
   /** How many recent manifests per spec to consider (default 32). */
   limit?: number;
+  /** Local copy of blobs already fetched (hash-checked again on every read). */
+  cache?: BlobCache;
 }
 
 /**
@@ -57,6 +59,8 @@ export interface PortaldotSourceOptions {
  */
 export class PortaldotSource implements ManifestSource {
   readonly #evm;
+  /** Blobs served so far: fetched over bitswap, or read from the cache. */
+  readonly stats = { fetched: 0, cached: 0, fetchedBytes: 0, cachedBytes: 0 };
 
   constructor(private readonly options: PortaldotSourceOptions) {
     if (options.registries.length === 0) throw new Error("PortaldotSource: no registry given");
@@ -76,6 +80,22 @@ export class PortaldotSource implements ManifestSource {
     );
     if (ok.length === 0) throw (settled[0] as PromiseRejectedResult).reason;
     return ok;
+  }
+
+  async #blob(digest: string): Promise<Uint8Array> {
+    const { bytes, cached } = await fetchCachedBlob(
+      this.options.portaldot,
+      digest,
+      this.options.cache,
+    );
+    if (cached) {
+      this.stats.cached++;
+      this.stats.cachedBytes += bytes.length;
+    } else {
+      this.stats.fetched++;
+      this.stats.fetchedBytes += bytes.length;
+    }
+    return bytes;
   }
 
   async list(spec: Spec): Promise<ManifestEntry[]> {
@@ -104,9 +124,7 @@ export class PortaldotSource implements ManifestSource {
     const entries: ManifestEntry[] = [];
     for (const { record, registry, flags } of byDigest.values()) {
       try {
-        const manifest = parseManifest(
-          await fetchBlob(this.options.portaldot, record.manifestDigest),
-        );
+        const manifest = parseManifest(await this.#blob(record.manifestDigest));
         if (manifest.spec !== hash) throw new Error("manifest is for another spec");
         if (manifest.source.genesisHash !== spec.source.genesisHash)
           throw new Error("other source chain");
@@ -133,7 +151,7 @@ export class PortaldotSource implements ManifestSource {
   }
 
   blob(digest: string): Promise<Uint8Array> {
-    return fetchBlob(this.options.portaldot, digest);
+    return this.#blob(digest);
   }
 
   /**
@@ -141,7 +159,7 @@ export class PortaldotSource implements ManifestSource {
    * spec must hash back to the same value (a non-canonical blob would not).
    */
   async spec(hash: string): Promise<Spec> {
-    const bytes = await fetchBlob(this.options.portaldot, hash);
+    const bytes = await this.#blob(hash);
     const spec = parseSpec(JSON.parse(new TextDecoder().decode(bytes)));
     if (specHash(spec) !== hash.toLowerCase()) {
       throw new Error(`spec blob ${hash} is not in canonical form`);

@@ -1,5 +1,5 @@
 export { type AccountInput, parseAccount, resolveAccount } from "./accounts.js";
-export { fetchBlob } from "./blobs.js";
+export { type BlobCache, fetchBlob, fetchCachedBlob } from "./blobs.js";
 export { blobCid } from "./cid.js";
 export { type CoverageOptions, type CoverageSegment, planCoverage } from "./coverage.js";
 export {
