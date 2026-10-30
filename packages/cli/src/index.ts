@@ -2,6 +2,7 @@
 import { parseArgs } from "node:util";
 import { runBuild } from "./build.js";
 import { runPublish } from "./publish.js";
+import { runRegister } from "./register.js";
 import { DEFAULT_RENEW_WITHIN, runRenew } from "./renew.js";
 import { runSync } from "./sync.js";
 import { runTamper } from "./tamper.js";
@@ -33,8 +34,15 @@ Commands:
     --from-address <ss58>  Account for estimates when PUBLISHER_SEED is not set
   Env: PUBLISHER_SEED (dev-only seed, never commit), PORTALDOT_WS
 
+  register <build-dir>  Add a published build to another registry (e.g. the PVM one) without
+                      storing anything again: registers its spec and manifest at their locations
+    --registry <h160>   PotluckRegistry address (required)
+    --dry-run           Estimate fees and storage deposits without submitting
+    --from-address <ss58>  Account for estimates when PUBLISHER_SEED is not set
+
   renew <build-dir>   Renew a published build's TransactionStorage entries before they expire
-    --registry <h160>   Announce new locations with noteRenewal (optional)
+    --registry <h160>   Announce new locations with noteRenewal (optional; registries added with
+                        register are always announced)
     --within <n>        Renew entries expiring within n blocks (default: 14400, about a day)
     --restore           Store expired entries again from the local build (full store fee)
     --dry-run           Check every entry and estimate fees without submitting
@@ -127,6 +135,19 @@ async function main(argv: string[]): Promise<void> {
       const dir = positionals[0];
       if (!dir) throw new Error("publish: missing <build-dir>");
       await runPublish({
+        dir,
+        registry: values.registry,
+        dryRun: values["dry-run"] ?? false,
+        fromAddress: values["from-address"],
+        log,
+      });
+      return;
+    }
+    case "register": {
+      const dir = positionals[0];
+      if (!dir || !values.registry)
+        throw new Error("register: usage register <build-dir> --registry <h160>");
+      await runRegister({
         dir,
         registry: values.registry,
         dryRun: values["dry-run"] ?? false,

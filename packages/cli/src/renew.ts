@@ -174,23 +174,35 @@ export async function runRenew(options: RenewOptions): Promise<RenewResult> {
       else if (typeof key === "number") state.chunks[key] = location;
     };
 
+    // Announce to --registry and to every registry the build was added to with `register`.
+    const targets = new Map(
+      Object.entries(state.registrations ?? {}).map(([r, { manifestId }]) => [r, manifestId]),
+    );
+    if (registry && !targets.has(registry) && state.manifestId !== undefined) {
+      targets.set(registry, state.manifestId);
+    }
+
     const announce = async (blob: StoredBlob, location: { block: number; index: number }) => {
-      if (!registry || state.manifestId === undefined || blob.key === "spec") return;
-      const data = encodeFunctionData({
-        abi: REGISTRY_ABI,
-        functionName: "noteRenewal",
-        args: [
-          BigInt(state.manifestId),
-          blob.key === "manifest" ? MANIFEST_BLOB : blob.key,
-          location.block,
-          location.index,
-        ],
-      });
-      const estimate = await estimateCall(api, account, registry, data);
-      if (!estimate.ok || estimate.reverted) throw new Error(`${blob.label}: noteRenewal reverted`);
-      if (!live || !signer) return;
-      const inclusion = await submit(api, contractCallTx(api, registry, data, estimate), signer);
-      result.fee += inclusion.fee;
+      if (blob.key === "spec") return;
+      for (const [target, manifestId] of targets) {
+        const data = encodeFunctionData({
+          abi: REGISTRY_ABI,
+          functionName: "noteRenewal",
+          args: [
+            BigInt(manifestId),
+            blob.key === "manifest" ? MANIFEST_BLOB : blob.key,
+            location.block,
+            location.index,
+          ],
+        });
+        const estimate = await estimateCall(api, account, target, data);
+        if (!estimate.ok || estimate.reverted) {
+          throw new Error(`${blob.label}: noteRenewal reverted in ${target}`);
+        }
+        if (!live || !signer) continue;
+        const inclusion = await submit(api, contractCallTx(api, target, data, estimate), signer);
+        result.fee += inclusion.fee;
+      }
     };
 
     for (const blob of blobs) {

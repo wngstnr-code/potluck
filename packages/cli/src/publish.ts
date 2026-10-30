@@ -47,6 +47,8 @@ export interface PublishState {
   published?: { blockHash: string };
   /** Registry id of the published manifest, needed to announce renewals. */
   manifestId?: number;
+  /** Further registries the build was added to with `register`, by lower-case H160. */
+  registrations?: Record<string, { manifestId: number }>;
 }
 
 export interface PublishResult {
