@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Potluck minimal example</title>
+    <style>
+      body { font: 15px/1.5 system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 16px; }
+      input { width: 100%; padding: 0.5rem; font: inherit; box-sizing: border-box; }
+      table { border-collapse: collapse; width: 100%; font: 13px ui-monospace, monospace; }
+      td, th { padding: 2px 8px; text-align: left; border-bottom: 1px solid #ddd; }
+      td { max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+  </head>
+  <body>
+    <h1>Potluck minimal example</h1>
+    <p>Specs registered on Portaldot V3 testnet:</p>
+    <ul id="specs"><li>Loading…</li></ul>
+    <form id="form">
+      <label>Portaldot address (SS58, AccountId32 or H160)
+        <input id="account" value="5HHPEACGYoJvEerkxD9vW6L93jHM7VQKTwXxsp2L8331jfmM" />
+      </label>
+      <button type="submit">Load verified history</button>
+    </form>
+    <p id="status"></p>
+    <table><thead><tr><th>block</th><th>kind</th><th>from</th><th>to</th><th>amount</th></tr></thead><tbody id="rows"></tbody></table>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

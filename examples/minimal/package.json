@@ -1,0 +1,19 @@
+{
+  "name": "@potluck/example-minimal",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The smallest app on the Potluck SDK: verified account history and a live tail, with no server.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@potluck/client": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "8.3.2"
+  }
+}
